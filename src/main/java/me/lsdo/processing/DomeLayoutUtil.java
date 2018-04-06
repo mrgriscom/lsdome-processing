@@ -56,7 +56,7 @@ public class DomeLayoutUtil {
 
     // Fill a triangle using the sizing and entry/exit semantics from above, where the triangle's origin is
     // the axial UV coordinate 'entry' and rotated clockwise by angle 60deg * rot
-    public static ArrayList<DomePixel> fillTriangle(final PVector2 entry, final int rot, int n) {
+    public static ArrayList<DomePixel> fillTriangle(final PVector2 entry, final int rot, int n, PVector2 origin, double theta) {
         // TODO can these be derived from first principles?
         int[][] offsets = {{0, 0, -1}, {-1, 0, -1}, {-1, 0, 0}, {-1, -1, 0}, {0, -1, 0}, {0, -1, -1}};
 
@@ -69,7 +69,7 @@ public class DomeLayoutUtil {
 
         ArrayList<DomePixel> coords = new ArrayList<DomePixel>();
         for (TriCoord c : fillTriangle(n)) {
-            coords.add(new DomePixel(panel, c.rotate(rot)));
+            coords.add(new DomePixel(panel, c.rotate(rot), origin, theta));
         }
         return coords;
     }
@@ -79,19 +79,19 @@ public class DomeLayoutUtil {
         return axialNeighbor(entry, rot - 1);
     }
 
-    public static ArrayList<DomePixel> fillFan(int orientation, int segments, int pixels) {
-        return fillFan(orientation, segments, pixels, V(0, 0));
+    public static ArrayList<DomePixel> fillFan(int orientation, int segments, int pixels, PVector2 origin, double theta) {
+        return fillFan(orientation, segments, pixels, V(0, 0), origin, theta);
     }
 
     // Fill a fan of triangles proceeding in a clockwise fashion until a complete hexagon whose perimeter
     // intersects the origin is filled. 'segments' is the number of triangular segments to fill (up to 6).
     // 'pixels' is the fill density within each triangle. 'orientation' is the initial orientation in
     // which the long axis of the hexagon follows the angle specified by 'rot' semantics above.
-    public static ArrayList<DomePixel> fillFan(int orientation, int segments, int pixels, PVector2 entry) {
+    public static ArrayList<DomePixel> fillFan(int orientation, int segments, int pixels, PVector2 entry, PVector2 origin, double theta) {
         ArrayList<DomePixel> points = new ArrayList<DomePixel>();
         int rot = orientation;
         for (int i = 0; i < segments; i++) {
-            points.addAll(fillTriangle(entry, rot, pixels));
+            points.addAll(fillTriangle(entry, rot, pixels, origin, theta));
             entry = exitPointForFill(entry, rot);
             rot += 1;
         }
@@ -136,17 +136,6 @@ public class DomeLayoutUtil {
 
         // Fill the me.lsdo configuration with pixels
         abstract ArrayList<DomePixel> fill(int n);
-
-        // Convert the filled grid points to a mapping of grid points to their actual positions.
-        HashMap<DomePixel, PVector2> coordsToXy(ArrayList<DomePixel> coords) {
-            HashMap<DomePixel, PVector2> coordToPoint = new HashMap<DomePixel, PVector2>();
-            PVector2 offset = axialToXy(origin);
-            for (DomePixel c : coords) {
-                PVector2 p = LayoutUtil.Vrot(LayoutUtil.Vsub(coordToXy(c), offset), Math.toRadians(theta));
-                coordToPoint.put(c, p);
-            }
-            return coordToPoint;
-        }
     }
 
     // Note: this layout is off-center.
@@ -155,7 +144,7 @@ public class DomeLayoutUtil {
                                             new int[] {2},
                                             V(1/3., 1/3.), 0.) {
             ArrayList<DomePixel> fill(int n) {
-                return fillFan(0, 2, n);
+                return fillFan(0, 2, n, origin, theta);
             }
         };
 
@@ -165,8 +154,8 @@ public class DomeLayoutUtil {
                                             V(0, 0.), 0.) {
             ArrayList<DomePixel> fill(int n) {
                 ArrayList<DomePixel> points = new ArrayList<DomePixel>();
-                points.addAll(fillFan(4, 4, n, V(-1, 1)));
-                points.addAll(fillFan(5, 2, n, V(-1, 1)));
+                points.addAll(fillFan(4, 4, n, V(-1, 1), origin, theta));
+                points.addAll(fillFan(5, 2, n, V(-1, 1), origin, theta));
                 return points;
             }
         };
@@ -179,9 +168,9 @@ public class DomeLayoutUtil {
                 final PVector2[] entries = {V(1, 0), V(0, 1), V(0, 0)};
                 ArrayList<DomePixel> points = new ArrayList<DomePixel>();
                 for (int i = 0; i < 3; i++) {
-                    points.addAll(fillFan(2*i+1, 4, n, entries[i]));
+                    points.addAll(fillFan(2*i+1, 4, n, entries[i], origin, theta));
                 }
-                points.addAll(fillTriangle(V(0, 0), 0, n));
+                points.addAll(fillTriangle(V(0, 0), 0, n, origin, theta));
                 return points;
             }
         };
@@ -192,7 +181,7 @@ public class DomeLayoutUtil {
             ArrayList<DomePixel> fill(int n) {
                 ArrayList<DomePixel> points = new ArrayList<DomePixel>();
                 for (int i = 0; i < 6; i++) {
-                    points.addAll(fillFan(i, 4, n));
+                    points.addAll(fillFan(i, 4, n, origin, theta));
                 }
                 return points;
             }

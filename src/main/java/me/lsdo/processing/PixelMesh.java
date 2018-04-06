@@ -13,17 +13,12 @@ public abstract class PixelMesh<T extends LedPixel> {
     // the fadecandy).
     public ArrayList<T> coords;
 
-    // Mapping of pixel grid coordinates to xy locations (world coordinates, not screen
-    // coordinates!)
-    protected HashMap<LedPixel, PVector2> points;
-
     // Color
     protected HashMap<LedPixel, Integer> colors;
 
     public PixelMesh() {
 	opcs = new ArrayList<OPC>();
 	coords = new ArrayList<T>();
-	points = new HashMap<LedPixel, PVector2>();
 	colors = new HashMap<LedPixel, Integer>();
     }
 
@@ -42,17 +37,13 @@ public abstract class PixelMesh<T extends LedPixel> {
       colors.put(dCoord, color);
     }
 
-    public PVector2 getLocation(LedPixel dCoord){
-        return points.get(dCoord);
-    }
-
     public int getNumPoints(){
-        return points.size();
+        return coords.size();
     }
 
     // TODO figure out fate of these
     public PVector2 domeCoordToScreen(LedPixel c, int width, int height) {
-	return LayoutUtil.xyToScreen(getLocation(c),
+	return LayoutUtil.xyToScreen(c.toXY(),
 				     width, height, 2 * getRadius(), true);
     }
 
@@ -68,7 +59,7 @@ public abstract class PixelMesh<T extends LedPixel> {
         double ymin = getRadius();
         double ymax = -getRadius();
         for (LedPixel c : coords) {
-	    PVector2 p = LayoutUtil.Vrot(getLocation(c), rot);
+	    PVector2 p = LayoutUtil.Vrot(c.toXY(), rot);
             xmin = Math.min(xmin, p.x);
             xmax = Math.max(xmax, p.x);
             ymin = Math.min(ymin, p.y);

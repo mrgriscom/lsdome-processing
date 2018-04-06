@@ -22,7 +22,7 @@ public class LayoutExport {
 	    
 	    JSONArray values = new JSONArray();
 	    for (int i = 0; i < dome.coords.size(); i++) {
-		PVector2 xy = dome.getLocation(dome.coords.get(i));
+		PVector2 xy = dome.coords.get(i).toXY();
 		float[] coordinates = {xy.x, xy.y, 0f};
 		JSONObject point = new JSONObject();
 		point.setJSONArray("point", new JSONArray(new FloatList(coordinates)));

@@ -41,7 +41,7 @@ public abstract class XYAnimation extends DomeAnimation<LedPixel> {
         points_ir = new HashMap<LedPixel, ArrayList<PVector2>>();
         int total_subsamples = 0;
         for (LedPixel c : dome.coords) {
-            PVector2 p = dome.getLocation(c);
+            PVector2 p = c.toXY();
             ArrayList<PVector2> samples = new ArrayList<PVector2>();
             points_ir.put(c, samples);
 

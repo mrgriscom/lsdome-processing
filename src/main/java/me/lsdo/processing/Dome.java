@@ -38,7 +38,6 @@ public class Dome extends PixelMesh<DomePixel> {
 	DomeLayoutUtil.PanelConfig config = DomeLayoutUtil.getPanelConfig(layout);
 	
         coords.addAll(config.fill(panel_size));
-	points.putAll(config.coordsToXy(coords));
 	init();
 
 	radius = config.radius;
