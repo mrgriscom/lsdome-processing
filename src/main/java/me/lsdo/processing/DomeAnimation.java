@@ -1,26 +1,24 @@
 package me.lsdo.processing;
 
+import java.util.*;
+
 /**
  * Created by shen on 2016/06/28.
  *
  * THis forms the basis for a dome animation.
  */
-public abstract class DomeAnimation {
+public abstract class DomeAnimation<T extends LedPixel> {
 
     public static final double FRAMERATE_SMOOTHING_FACTOR = .9;  // [0, 1) -- higher == smoother
     
-    protected Dome dome;
-    protected OPC opc;
-
+    protected PixelMesh<? extends T> dome;
+    
     private boolean initialized = false;
     private double lastT = 0;
     public double frameRate = 0.;  // fps
 
-    public DomeAnimation(Dome dome, OPC opc) {
+    public DomeAnimation(PixelMesh<? extends T> dome) {
         this.dome = dome;
-        this.opc = opc;
-
-        opc.setDome(dome);
     }
 
     public void draw(double t) {
@@ -34,23 +32,20 @@ public abstract class DomeAnimation {
 	updateFramerate(deltaT);
 	
         preFrame(t, deltaT);
-        for (DomeCoord c : dome.coords){
+        for (T c : dome.coords){
             dome.setColor(c, drawPixel(c, t));
         }
         postFrame(t);
-        opc.draw();
+	// TODO: frame post-processing (global contrast adjustment, etc.?)
+	dome.dispatch();
     }
-
-    public Dome getDome(){
+    
+    public PixelMesh<? extends T> getDome(){
         return dome;
     }
 
-    public String getOpcHost(){
-        return opc.getHost();
-    }
-
     // Main method that need to be implemented.
-    protected abstract int drawPixel(DomeCoord c, double t);
+    protected abstract int drawPixel(T c, double t);
 
     /** Override this for pre-draw stuff.
      *  e.g. loadPixel, or advance animation state.

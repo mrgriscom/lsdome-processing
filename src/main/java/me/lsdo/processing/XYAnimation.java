@@ -8,7 +8,7 @@ package me.lsdo.processing;
 
 import java.util.*;
 
-public abstract class XYAnimation extends DomeAnimation {
+public abstract class XYAnimation extends DomeAnimation<LedPixel> {
 
     static final int DEFAULT_BASE_SUBSAMPLING = 1;
     static final int MAX_SUBSAMPLING = 64;
@@ -19,17 +19,17 @@ public abstract class XYAnimation extends DomeAnimation {
     // display pixel's color. Most simply the samples will be xy-coordinates near the dome pixels,
     // though they may also be transformed into some intermediate vector space (screen pixels, a
     // UV-mapped texture, etc.) for efficiency.
-    private HashMap<DomeCoord, ArrayList<PVector2>> points_ir;
+    private HashMap<LedPixel, ArrayList<PVector2>> points_ir;
 
-    public XYAnimation(Dome dome, OPC opc) {
-        this(dome, opc, Config.getSketchProperty("subsampling", DEFAULT_BASE_SUBSAMPLING));
+    public XYAnimation(PixelMesh<? extends LedPixel> dome) {
+        this(dome, Config.getSketchProperty("subsampling", DEFAULT_BASE_SUBSAMPLING));
     }
 
     // Assign each display pixel to N random samples based on the required amount of subsampling.
     // Furthermore, each subsample is converted to its intermediate representation to avoid
     // re-computing it every frame.
-    public XYAnimation(Dome dome, OPC opc, int baseSubsampling) {
-        super(dome, opc);
+    public XYAnimation(PixelMesh<? extends LedPixel> dome, int baseSubsampling) {
+        super(dome);
 	this.baseSubsampling = baseSubsampling;
     }
     
@@ -38,9 +38,9 @@ public abstract class XYAnimation extends DomeAnimation {
     // has finished.
     @Override
     protected void init() {
-        points_ir = new HashMap<DomeCoord, ArrayList<PVector2>>();
+        points_ir = new HashMap<LedPixel, ArrayList<PVector2>>();
         int total_subsamples = 0;
-        for (DomeCoord c : dome.coords) {
+        for (LedPixel c : dome.coords) {
             PVector2 p = dome.getLocation(c);
             ArrayList<PVector2> samples = new ArrayList<PVector2>();
             points_ir.put(c, samples);
@@ -51,7 +51,7 @@ public abstract class XYAnimation extends DomeAnimation {
             for (int i = 0; i < num_subsamples; i++) {
                 PVector2 offset = (jitter ?
 				   normalizePoint(LayoutUtil.polarToXy(LayoutUtil.V(
-				    Math.random() * .5*LayoutUtil.pixelSpacing(dome.getPanelSize()),
+				    Math.random() * dome.getPixelBufferRadius(),
 				    Math.random() * 2*Math.PI
                                   ))) :
                                   LayoutUtil.V(0, 0));
@@ -73,7 +73,7 @@ public abstract class XYAnimation extends DomeAnimation {
     }
 
     @Override
-    protected int drawPixel(DomeCoord c, double t) {
+    protected int drawPixel(LedPixel c, double t) {
         ArrayList<PVector2> sub = points_ir.get(c);
 
         int[] samples = new int[sub.size()];

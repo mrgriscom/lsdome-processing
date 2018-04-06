@@ -18,12 +18,9 @@ public class OPC implements Runnable {
     private String host;
     private int port;
 
-    private Dome dome;
-
     private byte[] packetData;
     private byte firmwareConfig;
     private String colorCorrection;
-    private FramePostprocessor framePostprocessor;
 
     public OPC()
     {
@@ -37,11 +34,6 @@ public class OPC implements Runnable {
 	System.out.println(String.format("OPC endpoint %s:%d", host, port));
         thread = new Thread(this);
         thread.start();
-    }
-
-    public void setDome(Dome dome) {
-        this.dome = dome;
-        setPixelCount(dome.coords.size());
     }
 
     public String getHost() {
@@ -155,103 +147,38 @@ public class OPC implements Runnable {
         }
     }
 
-    // An option to modify an entire frame's worth of pixels before they're sent to the hardware,
-    // such as to perform color balancing / contrast equilization, etc.
-    public static interface FramePostprocessor {
-        // FIXME this will include out-of-frame pixels set to black
-        void postProcessFrame(int[] pixelBuffer);
-    }
-
     // Automatically called at the end of each draw().
     // This handles the automatic Pixel to LED mapping.
     // If you aren't using that mapping, this function has no effect.
     // In that case, you can call setPixelCount(), setPixel(), and writePixels()
     // separately.
-    public void draw() {
-        //if (pixelLocations == null) {
-        //  // No pixels defined yet
-        //  return;
-        //}
-        //if (output == null) {
-        //  return;
-        //}
-
-        int numPixels = dome.coords.size();
-        int ledAddress = 4;
-
-
-        int[] pixelBuffer = new int[numPixels];
-        //setPixelCount(numPixels);
-        //app.loadPixels();
-
-        //for (int i = 0; i < numPixels; i++) {
-        //  int pixelLocation = pixelLocations[i];
-        //  pixelBuffer[i] = (pixelLocation != -1 ? app.pixels[pixelLocation] : 0);
-        //}
-
-        //System.out.println(dome.coords.size());
-        //System.out.println(dome.getColor(dome.coords.get(0)));
-
-        for (int i = 0; i < dome.coords.size(); i++) {
-            pixelBuffer[i] = dome.getColor(dome.coords.get(i));
-        }
-
-        if (framePostprocessor != null) {
-            framePostprocessor.postProcessFrame(pixelBuffer);
-        }
+    public void dispatch(int[] buffer) {
+        int numPixels = buffer.length;
+	if (packetData == null) {
+	    initPacketData(numPixels);
+	}
+	
+        int offset = 4;
         for (int i = 0; i < numPixels; i++) {
-            int pixel = pixelBuffer[i];
-
-            packetData[ledAddress] = (byte) (pixel >> 16);
-            packetData[ledAddress + 1] = (byte) (pixel >> 8);
-            packetData[ledAddress + 2] = (byte) pixel;
-            ledAddress += 3;
-
+            int pixel = buffer[i];
+            packetData[offset] = (byte) (pixel >> 16);
+            packetData[offset + 1] = (byte) (pixel >> 8);
+            packetData[offset + 2] = (byte) pixel;
+            offset += 3;
         }
 
         writePixels();
-
     }
 
-    // Change the number of pixels in our output packet.
-    // This is normally not needed; the output packet is automatically sized
-    // by draw() and by setPixel().
-    void setPixelCount(int numPixels) {
-        int numBytes = 3 * numPixels;
-        int packetLen = 4 + numBytes;
-        if (packetData == null || packetData.length != packetLen) {
-            // Set up our packet buffer
-            packetData = new byte[packetLen];
-            packetData[0] = 0;  // Channel
-            packetData[1] = 0;  // Command (Set pixel colors)
-            packetData[2] = (byte) (numBytes >> 8);
-            packetData[3] = (byte) (numBytes & 0xFF);
-        }
+    void initPacketData(int numPixels) {
+	int ledBytes = 3 * numPixels;
+	packetData = new byte[4 + ledBytes];
+	packetData[0] = 0;  // Channel
+	packetData[1] = 0;  // Command (Set pixel colors)
+	packetData[2] = (byte) (ledBytes >> 8);
+	packetData[3] = (byte) (ledBytes & 0xFF);
     }
-
-    // Directly manipulate a pixel in the output buffer. This isn't needed
-    // for pixels that are mapped to the screen.
-    void setPixel(int number, int c) {
-        int offset = 4 + number * 3;
-        if (packetData == null || packetData.length < offset + 3) {
-            setPixelCount(number + 1);
-        }
-
-        packetData[offset] = (byte) (c >> 16);
-        packetData[offset + 1] = (byte) (c >> 8);
-        packetData[offset + 2] = (byte) c;
-    }
-
-    // Read a pixel from the output buffer. If the pixel was mapped to the display,
-    // this returns the value we captured on the previous frame.
-    int getPixel(int number) {
-        int offset = 4 + number * 3;
-        if (packetData == null || packetData.length < offset + 3) {
-            return 0;
-        }
-        return (packetData[offset] << 16) | (packetData[offset + 1] << 8) | packetData[offset + 2];
-    }
-
+    
     // Transmit our current buffer of pixel values to the OPC server. This is handled
     // automatically in draw() if any pixels are mapped to the screen, but if you haven't
     // mapped any pixels to the screen you'll want to call this directly.

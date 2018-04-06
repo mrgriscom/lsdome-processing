@@ -18,7 +18,7 @@ public class LayoutExport {
     public static void exportLayoutsForSimulator() {
 	for (PanelLayout layout : PanelLayout.values()) {
 	    String layoutName = layout.name().substring(1);
-	    Dome dome = new Dome(layout);
+	    Dome dome = new Dome(layout, null);
 	    
 	    JSONArray values = new JSONArray();
 	    for (int i = 0; i < dome.coords.size(); i++) {

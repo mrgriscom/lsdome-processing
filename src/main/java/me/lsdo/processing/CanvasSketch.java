@@ -6,7 +6,7 @@ import processing.data.FloatList;
 import processing.data.JSONArray;
 import processing.data.JSONObject;
 
-import java.util.ArrayList;
+import java.util.*;
 
 /**
  * Created by shen on 2016/06/26.
@@ -16,12 +16,12 @@ public class CanvasSketch extends XYAnimation {
     protected PApplet app;
     private static int DEFAULT_AA = 8;
 
-    public CanvasSketch(PApplet app, Dome dome, OPC opc){
-        this(app, dome, opc, Config.getSketchProperty("subsampling", DEFAULT_AA));
+    public CanvasSketch(PApplet app, PixelMesh<? extends LedPixel> dome){
+        this(app, dome, Config.getSketchProperty("subsampling", DEFAULT_AA));
     }
 
-    public CanvasSketch(PApplet app, Dome dome, OPC opc, int antiAliasingSamples){
-        super(dome, opc, antiAliasingSamples);
+    public CanvasSketch(PApplet app, PixelMesh<? extends LedPixel> dome, int antiAliasingSamples){
+        super(dome, antiAliasingSamples);
         this.app = app;
     }
 
@@ -34,7 +34,7 @@ public class CanvasSketch extends XYAnimation {
     protected void postFrame(double t){
 
         // draw pixel locations
-        for (DomeCoord c : dome.coords){
+        for (LedPixel c : dome.coords){
 	    PVector2 screenP = dome.domeCoordToScreen(c, app.width, app.height);
             int pixelLocation = (int) Math.floor(screenP.x) + app.width * ((int) Math.floor(screenP.y));
 
@@ -45,7 +45,7 @@ public class CanvasSketch extends XYAnimation {
 
         // on screen text
         app.fill(127f, 256f);
-        app.text("opc @" + opc.getHost(), 100, app.height - 10);
+        app.text("opc @" + dome.getOpcHosts(), 100, app.height - 10);
         app.text(String.format("%.1ffps", app.frameRate), 10, app.height - 10);
 
     }
