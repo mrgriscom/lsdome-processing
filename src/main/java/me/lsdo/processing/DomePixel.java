@@ -44,7 +44,7 @@ public class DomePixel extends LedPixel {
     public PVector2 toXY() {
 	return LayoutUtil.Vrot(LayoutUtil.Vsub(DomeLayoutUtil.coordToXy(this), offset), Math.toRadians(theta));
     }
-    
+
     public boolean equals(Object o) {
         if (o instanceof DomePixel) {
             DomePixel dc = (DomePixel)o;

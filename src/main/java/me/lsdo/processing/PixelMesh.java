@@ -75,14 +75,16 @@ public abstract class PixelMesh<T extends LedPixel> {
         PVector2 pdiag = LayoutUtil.Vsub(LayoutUtil.V(xmax, ymax), p0);
 	return new PVector2[] {p0, pdiag};
     }
-    
+
+    // Return which of N OPC servers manages this pixel
+    public abstract int getOpcChannel(T pixel);
     public abstract double getPixelBufferRadius();
     public abstract double getRadius();
 
     private void initOpcBuffers() {
 	int[] pixelCounts = new int[opcs.size()];
-	for (LedPixel c : coords) {
-	    pixelCounts[c.getOpcChannel()] += 1;
+	for (T c : coords) {
+	    pixelCounts[getOpcChannel(c)] += 1;
 	}
 	opcBuffers = new int[opcs.size()][];
 	for (int i = 0; i < opcs.size(); i++) {
@@ -92,8 +94,8 @@ public abstract class PixelMesh<T extends LedPixel> {
 
     public void dispatch() {
 	int[] pixelCounts = new int[opcs.size()];
-	for (LedPixel c : coords) {
-	    int channel = c.getOpcChannel();
+	for (T c : coords) {
+	    int channel = getOpcChannel(c);
 	    int i = pixelCounts[channel];
             opcBuffers[channel][i] = getColor(c);
 	    pixelCounts[channel] += 1;

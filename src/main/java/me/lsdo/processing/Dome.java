@@ -43,6 +43,10 @@ public class Dome extends PixelMesh<DomePixel> {
 	radius = config.radius;
     }
 
+    public int getOpcChannel(DomePixel pixel) {
+	return 0;
+    }
+    
     public int getPanelSize(){
         return panel_size;
     }

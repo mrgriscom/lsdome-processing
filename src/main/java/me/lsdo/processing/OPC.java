@@ -40,6 +40,10 @@ public class OPC implements Runnable {
         return host;
     }
 
+    public int getPort() {
+        return port;
+    }
+
     // Enable or disable dithering. Dithering avoids the "stair-stepping" artifact and increases color
     // resolution by quickly jittering between adjacent 8-bit brightness levels about 400 times a second.
     // Dithering is on by default.
@@ -112,7 +116,7 @@ public class OPC implements Runnable {
         try {
             pending.write(packet);
         } catch (Exception e) {
-            dispose();
+            dispose(e);
         }
     }
 
@@ -143,7 +147,7 @@ public class OPC implements Runnable {
             pending.write(header);
             pending.write(content);
         } catch (Exception e) {
-            dispose();
+            dispose(e);
         }
     }
 
@@ -194,11 +198,17 @@ public class OPC implements Runnable {
         try {
             output.write(packetData);
         } catch (Exception e) {
-            dispose();
+            dispose(e);
         }
     }
 
-    void dispose() {
+    void dispose(Exception e) {
+	if (e != null) {
+	    System.out.println(host + ":" + port + " connection error:");
+	    System.out.println(e);
+	    e.printStackTrace();
+	}
+	
         // Destroy the socket. Called internally when we've disconnected.
         // (Thread continues to run)
         if (output != null) {
@@ -225,9 +235,9 @@ public class OPC implements Runnable {
                     output = pending;                   // rest of code given access.
                     // pending not set null, more config packets are OK!
                 } catch (ConnectException e) {
-                    dispose();
+                    dispose(e);
                 } catch (IOException e) {
-                    dispose();
+                    dispose(e);
                 }
             }
 
