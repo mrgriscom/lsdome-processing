@@ -15,6 +15,7 @@ import com.google.gson.stream.*;
 public class Prometheus extends PixelMesh<WingPixel> {
 
     static final String LAYOUT_PATH = "/home/drew/dev/lsdome/lsdome/src/config/simulator_layouts/prometheus_wing.json";
+    static final double PLATFORM_WIDTH = 1.; // m
     
     static class LayoutPoint {
 	double[] point;
@@ -54,7 +55,16 @@ public class Prometheus extends PixelMesh<WingPixel> {
         }
         reader.endArray();
         reader.close();
-        return points;
+
+	double minX = Double.POSITIVE_INFINITY;
+	for (PVector2 p : points) {
+	    minX = Math.min(minX, p.x);
+	}
+        List<PVector2> realignedPoints = new ArrayList<PVector2>();
+	for (PVector2 p : points) {
+	    realignedPoints.add(LayoutUtil.V(p.x - minX + .5*PLATFORM_WIDTH, p.y));
+	}
+        return realignedPoints;
     }
     
     public int getOpcChannel(WingPixel pixel) {
