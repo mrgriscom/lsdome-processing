@@ -32,30 +32,31 @@ public abstract class XYAnimation extends DomeAnimation<LedPixel> {
         super(dome);
 	this.baseSubsampling = baseSubsampling;
     }
-    
-    // Can't do this in the constructor because generating the sub-sample coordinates usually
-    // depends on member variables in the sketch, which can only be set after the constructor
-    // has finished.
+
     @Override
     protected void init() {
+	setTransform(dome.transform);
+    }
+    
+    public void setTransform(PixelTransform tx) {
         points_ir = new HashMap<LedPixel, ArrayList<PVector2>>();
         int total_subsamples = 0;
         for (LedPixel c : dome.coords) {
-            PVector2 p = c.toXY();
             ArrayList<PVector2> samples = new ArrayList<PVector2>();
             points_ir.put(c, samples);
 
-            p = normalizePoint(p);
+            PVector2 p = tx.transform(c);
             int num_subsamples = Math.min((int)Math.ceil(baseSubsampling * subsamplingBoost(p)), MAX_SUBSAMPLING);
             boolean jitter = (num_subsamples > 1);
+	    
             for (int i = 0; i < num_subsamples; i++) {
                 PVector2 offset = (jitter ?
-				   normalizePoint(LayoutUtil.polarToXy(LayoutUtil.V(
+				   LayoutUtil.polarToXy(LayoutUtil.V(
 				    Math.random() * dome.getPixelBufferRadius(),
 				    Math.random() * 2*Math.PI
-                                  ))) :
+                                  )) :
                                   LayoutUtil.V(0, 0));
-                PVector2 sample = LayoutUtil.Vadd(p, offset);
+                PVector2 sample = tx.transform(c, offset);
                 samples.add(toIntermediateRepresentation(sample));
             }
 
@@ -65,13 +66,7 @@ public abstract class XYAnimation extends DomeAnimation<LedPixel> {
         System.out.println(String.format("%d subsamples for %d pixels (%.1f samples/pixel)",
 					 total_subsamples, dome.getNumPoints(), (double)total_subsamples / dome.getNumPoints()));
     }
-
-    // Convert an xy coordinate in 'panel length' units such that the perimeter of the display area
-    // is the unit circle.
-    protected PVector2 normalizePoint(PVector2 p) {
-        return LayoutUtil.Vmult(p, 1. / dome.getRadius());
-    }
-
+    
     @Override
     protected int drawPixel(LedPixel c, double t) {
         ArrayList<PVector2> sub = points_ir.get(c);

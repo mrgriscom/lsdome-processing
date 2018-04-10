@@ -38,6 +38,7 @@ public class Dome extends PixelMesh<DomePixel> {
 	DomeLayoutUtil.PanelConfig config = DomeLayoutUtil.getPanelConfig(layout);
 	
         coords.addAll(config.fill(panel_size));
+	transform = config.getDefaultTransform();
 	init();
 
 	radius = config.radius;
@@ -47,12 +48,8 @@ public class Dome extends PixelMesh<DomePixel> {
 	return 0;
     }
     
-    public int getPanelSize(){
-        return panel_size;
-    }
-
     public double getPixelBufferRadius() {
-	return .5*DomeLayoutUtil.pixelSpacing(getPanelSize());
+	return .5*DomeLayoutUtil.pixelSpacing(panel_size);
     }
     
     public double getRadius(){

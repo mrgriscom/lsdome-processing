@@ -12,6 +12,7 @@ public abstract class PixelMesh<T extends LedPixel> {
     // Positions of all the pixels in triangular grid coordinates (and in the order seen by
     // the fadecandy).
     public ArrayList<T> coords;
+    public PixelTransform transform;
 
     // Color
     protected HashMap<LedPixel, Integer> colors;
@@ -53,7 +54,7 @@ public abstract class PixelMesh<T extends LedPixel> {
     
     // Returns the bounding rectangular viewport for the dome pixel area (rotated by angle 'rot').
     // 1st vector in the array is the lower left corner; 2nd vector is the width/height.
-    public PVector2[] getViewport(double rot) {
+    public PVector2[] getViewport(double rot) { // TODO use pixel transform
         double xmin = getRadius();
         double xmax = -getRadius();
         double ymin = getRadius();
@@ -78,7 +79,10 @@ public abstract class PixelMesh<T extends LedPixel> {
 
     // Return which of N OPC servers manages this pixel
     public abstract int getOpcChannel(T pixel);
+    // This should be roughly one-half of the average spacing between pixels
     public abstract double getPixelBufferRadius();
+
+    // TODO make this obsolete
     public abstract double getRadius();
 
     private void initOpcBuffers() {

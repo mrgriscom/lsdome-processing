@@ -13,23 +13,16 @@ public class DomePixel extends LedPixel {
     // and a within-panel pixel component.
     public TriCoord pixel;
 
-    // temporary -- these should be moved to a separate transform in XYAnimation
-    PVector2 offset;
-    double theta;
-    
     public DomePixel(TriCoord uni, int panel_length) {
         universal = uni;
         panel = TriCoord.toPanel(uni, panel_length);
         pixel = TriCoord.toPixel(uni, panel_length);
     }
 
-    public DomePixel(TriCoord panel, TriCoord pixel, PVector2 origin, double theta) {
+    public DomePixel(TriCoord panel, TriCoord pixel) {
         universal = TriCoord.toUniversal(panel, pixel);
         this.panel = panel;
         this.pixel = pixel;
-
-	this.offset = DomeLayoutUtil.axialToXy(origin);
-	this.theta = theta;
     }
 
     public TriCoord getCoord(TriCoord.CoordType type) {
@@ -42,7 +35,7 @@ public class DomePixel extends LedPixel {
     }
 
     public PVector2 toXY() {
-	return LayoutUtil.Vrot(LayoutUtil.Vsub(DomeLayoutUtil.coordToXy(this), offset), Math.toRadians(theta));
+	return DomeLayoutUtil.coordToXy(this);
     }
 
     public boolean equals(Object o) {

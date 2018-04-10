@@ -72,7 +72,8 @@ public class Prometheus extends PixelMesh<WingPixel> {
     }
     
     public double getPixelBufferRadius() {
-	return .15 * .6;  // 15 cm spacing * 60% to account for denser areas of wing
+	double spacing = .15; // m
+	return .5 * spacing * .7; // reduce to 70% to account for denser areas of wing
     }
     
     public double getRadius(){
