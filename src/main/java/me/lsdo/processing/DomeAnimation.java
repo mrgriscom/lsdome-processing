@@ -33,6 +33,10 @@ public abstract class DomeAnimation<T extends LedPixel> {
 	
         preFrame(t, deltaT);
         for (T c : dome.coords){
+	    if (c.spacerPixel) {
+		continue;
+	    }
+	    
             dome.setColor(c, drawPixel(c, t));
         }
         postFrame(t);

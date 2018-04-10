@@ -31,7 +31,7 @@ public abstract class PixelMesh<T extends LedPixel> {
     }
     
     public Integer getColor(LedPixel dCoord){
-      return colors.get(dCoord);
+	return dCoord.spacerPixel ? 0 : colors.get(dCoord);
     }
 
     public void setColor(LedPixel dCoord, Integer color){
