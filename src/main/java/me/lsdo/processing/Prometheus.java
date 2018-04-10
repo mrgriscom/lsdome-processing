@@ -38,6 +38,10 @@ public class Prometheus extends PixelMesh<WingPixel> {
 		coords.add(new WingPixel(wing, i, pixels.get(i)));
 	    }
 	}
+
+	transform = PixelTransform.simpleTransform(new LayoutUtil.Transform(){
+		public PVector2 transform(PVector2 p) { return LayoutUtil.Vmult(p, .1); }
+	    });
 	
 	init();
     }
@@ -62,6 +66,7 @@ public class Prometheus extends PixelMesh<WingPixel> {
 	}
         List<PVector2> realignedPoints = new ArrayList<PVector2>();
 	for (PVector2 p : points) {
+	    // Note: assuming y-axis is centered properly
 	    realignedPoints.add(LayoutUtil.V(p.x - minX + .5*PLATFORM_WIDTH, p.y));
 	}
         return realignedPoints;
@@ -74,10 +79,6 @@ public class Prometheus extends PixelMesh<WingPixel> {
     public double getPixelBufferRadius() {
 	double spacing = .15; // m
 	return .5 * spacing * .7; // reduce to 70% to account for denser areas of wing
-    }
-    
-    public double getRadius(){
-        return 9.; // ?
     }
 
 }

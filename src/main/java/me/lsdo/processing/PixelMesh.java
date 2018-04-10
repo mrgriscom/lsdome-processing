@@ -42,35 +42,41 @@ public abstract class PixelMesh<T extends LedPixel> {
         return coords.size();
     }
 
-    // TODO figure out fate of these
     public PVector2 domeCoordToScreen(LedPixel c, int width, int height) {
-	return LayoutUtil.xyToScreen(c.toXY(),
-				     width, height, 2 * getRadius(), true);
+	return LayoutUtil.xyToScreen(transform.transform(c),
+				     width, height, 2., false);
     }
 
-    public PVector2[] getViewport() {
-	return getViewport(0.);
-    }
-    
-    // Returns the bounding rectangular viewport for the dome pixel area (rotated by angle 'rot').
+    // Returns the bounding rectangular viewport for the dome pixel area
     // 1st vector in the array is the lower left corner; 2nd vector is the width/height.
-    public PVector2[] getViewport(double rot) { // TODO use pixel transform
-        double xmin = getRadius();
-        double xmax = -getRadius();
-        double ymin = getRadius();
-        double ymax = -getRadius();
+    public PVector2[] getViewport() {
+        double xmin = Double.POSITIVE_INFINITY;
+        double xmax = Double.NEGATIVE_INFINITY;
+        double ymin = Double.POSITIVE_INFINITY;
+        double ymax = Double.NEGATIVE_INFINITY;
         for (LedPixel c : coords) {
-	    PVector2 p = LayoutUtil.Vrot(c.toXY(), rot);
+	    PVector2 p = transform.transform(c);
             xmin = Math.min(xmin, p.x);
             xmax = Math.max(xmax, p.x);
             ymin = Math.min(ymin, p.y);
             ymax = Math.max(ymax, p.y);
         }
-        double margin = getPixelBufferRadius();
-        xmin -= margin;
-        xmax += margin;
-        ymin -= margin;
-        ymax += margin;
+
+	// this assumes 'transform' is linear, and the same for all coords
+	int radial_steps = 64;
+	double xmargin = 0;
+	double ymargin = 0;
+	LedPixel ref = coords.get(0);
+	for (int i = 0; i < radial_steps; i++) {
+	    PVector2 margin = LayoutUtil.polarToXy(LayoutUtil.V(getPixelBufferRadius(), (float)i / radial_steps * 2*Math.PI));
+	    PVector2 txMargin = transform.transform(ref, LayoutUtil.Vsub(margin, ref.toXY()));
+	    xmargin = Math.max(xmargin, txMargin.x);
+	    ymargin = Math.max(ymargin, txMargin.y);
+	}
+        xmin -= xmargin;
+        xmax += xmargin;
+        ymin -= ymargin;
+        ymax += ymargin;
 
 	PVector2 p0 = LayoutUtil.V(xmin, ymin);
         PVector2 pdiag = LayoutUtil.Vsub(LayoutUtil.V(xmax, ymax), p0);
@@ -81,9 +87,6 @@ public abstract class PixelMesh<T extends LedPixel> {
     public abstract int getOpcChannel(T pixel);
     // This should be roughly one-half of the average spacing between pixels
     public abstract double getPixelBufferRadius();
-
-    // TODO make this obsolete
-    public abstract double getRadius();
 
     private void initOpcBuffers() {
 	int[] pixelCounts = new int[opcs.size()];

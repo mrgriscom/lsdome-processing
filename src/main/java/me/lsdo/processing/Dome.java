@@ -51,9 +51,5 @@ public class Dome extends PixelMesh<DomePixel> {
     public double getPixelBufferRadius() {
 	return .5*DomeLayoutUtil.pixelSpacing(panel_size);
     }
-    
-    public double getRadius(){
-        return radius;
-    }
 
 }
