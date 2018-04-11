@@ -36,9 +36,10 @@ public class CanvasSketch extends XYAnimation {
         // draw pixel locations
         for (LedPixel c : dome.coords){
 	    PVector2 screenP = dome.domeCoordToScreen(c, app.width, app.height);
-            int pixelLocation = (int) Math.floor(screenP.x) + app.width * ((int) Math.floor(screenP.y));
-
-            app.pixels[pixelLocation] = 0xFFFFFF ^ app.pixels[pixelLocation];
+	    int ix = coordToPixelIndex(screenP);
+	    if (ix >= 0) {
+		app.pixels[ix] = 0xFFFFFF ^ app.pixels[ix];
+	    }
         }
 
         app.updatePixels();
@@ -50,11 +51,21 @@ public class CanvasSketch extends XYAnimation {
 
     }
 
+    int coordToPixelIndex(PVector2 p) {
+	int x = (int)Math.floor(p.x);
+	int y = (int)Math.floor(p.y);
+	if (x < 0 || x >= app.width || y < 0 || y >= app.height) {
+	    return -1;
+	} else {
+	    return y * app.width + x;
+	}
+    }
+    
     @Override
-    protected int samplePoint(PVector2 screenP, double t)
+    protected int samplePoint(PVector2 p, double t)
     {
-        int sampleLocation = (int)(Math.floor(screenP.x)) + app.width * ((int) Math.floor(screenP.y));
-        return app.pixels[sampleLocation];
+	int i = coordToPixelIndex(p);
+	return i >= 0 ? app.pixels[i] : 0;
     }
 
     // Store samples as screen coordinates.
