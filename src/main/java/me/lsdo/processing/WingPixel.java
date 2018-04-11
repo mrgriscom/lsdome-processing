@@ -20,7 +20,7 @@ public class WingPixel extends LedPixel {
     }
 
     public PVector2 toXY() {
-	return wing == 0 ? xy : LayoutUtil.V(-xy.x, xy.y);
+	return xy;
     }
     
     public boolean equals(Object o) {

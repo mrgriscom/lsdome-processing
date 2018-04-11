@@ -12,6 +12,13 @@ import java.io.*;
 import com.google.gson.*;
 import com.google.gson.stream.*;
 
+enum WingDisplayMode {
+    UNIFIED,
+    MIRROR,
+    FLIP_HORIZ,
+    ROTATE_180
+};
+
 public class Prometheus extends PixelMesh<WingPixel> {
 
     static final String LAYOUT_PATH = "/home/drew/dev/lsdome/lsdome/src/config/simulator_layouts/prometheus_wing.json";
@@ -21,13 +28,18 @@ public class Prometheus extends PixelMesh<WingPixel> {
     static class LayoutPoint {
 	double[] point;
     }
+
+    WingDisplayMode mode;
     
+    // left and right are from the butterfly's perspective
     public Prometheus(OPC opcLeft, OPC opcRight) {
 	super();
 
 	opcs.add(opcLeft);
 	opcs.add(opcRight);
 
+	mode = WingDisplayMode.UNIFIED;
+	
 	List<PVector2> pixels;
 	try {
 	    pixels = loadPixels(LAYOUT_PATH);
@@ -40,11 +52,40 @@ public class Prometheus extends PixelMesh<WingPixel> {
 	    }
 	}
 
-	transform = PixelTransform.simpleTransform(new LayoutUtil.Transform(){
-		public PVector2 transform(PVector2 p) { return LayoutUtil.Vmult(p, 1./WINGSPAN); }
-	    });
+	// initial transform creates a mirrored wing if both wings are meant to be
+	// fixed relative to each other (as in UNIFIED mode)
+	transform = new PixelTransform() {
+		public PVector2 transform(LedPixel px, PVector2 offset) {
+		    PVector2 p = px.toXY();
+		    if (mode == WingDisplayMode.UNIFIED && ((WingPixel)px).wing == 1) {
+			p = LayoutUtil.V(-p.x, p.y);
+		    }
+		    p = LayoutUtil.Vadd(p, offset);
+
+		    return LayoutUtil.Vmult(p, 2./WINGSPAN);
+		}
+	    };
 	
 	init();
+
+	// do this after init() to overwrite the compound transform created there (this is
+	// janky and should be refactored, obv)
+	// for the applicable mode, this transform mirrors the 2nd wing from the 1st in various ways
+	final PixelTransform baseTx = transform;
+	transform = new PixelTransform() {
+		public PVector2 transform(LedPixel px, PVector2 offset) {
+		    PVector2 p = baseTx.transform(px, offset);
+		    p = placement.transform(p);
+		    if (((WingPixel)px).wing == 1) {
+			if (mode == WingDisplayMode.FLIP_HORIZ) {
+			    p = LayoutUtil.V(-p.x, p.y);
+			} else if (mode == WingDisplayMode.ROTATE_180) {
+			    p = LayoutUtil.V(-p.x, -p.y);
+			}
+		    }
+		    return p;
+		}
+	    };
     }
 
     private List<PVector2> loadPixels(String path) throws IOException {
@@ -81,8 +122,8 @@ public class Prometheus extends PixelMesh<WingPixel> {
 		// spacer pixel
 		realignedPoints.add(null);
 	    } else {
-		// Note: assuming y-axis is centered properly
-		realignedPoints.add(LayoutUtil.V(p.x - minX + .5*PLATFORM_WIDTH, p.y));
+		// Note: assuming y-axis is centered properly (but reversed)
+		realignedPoints.add(LayoutUtil.V(p.x - minX + .5*PLATFORM_WIDTH, -p.y));
 	    }
 	}
         return realignedPoints;

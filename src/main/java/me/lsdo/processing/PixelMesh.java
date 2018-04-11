@@ -14,6 +14,18 @@ public abstract class PixelMesh<T extends LedPixel> {
     public ArrayList<T> coords;
     public PixelTransform transform;
 
+    static class PlacementTransform implements LayoutUtil.Transform {
+	double xo = 0;
+	double yo = 0;
+	double scale = 1;
+	double rot = 0;
+
+	public PVector2 transform(PVector2 p) {
+	    return LayoutUtil.Vadd(LayoutUtil.Vmult(LayoutUtil.Vrot(p, rot), scale), LayoutUtil.V(xo, yo));
+	}
+    }
+    public PlacementTransform placement = new PlacementTransform();
+    
     // Color
     protected HashMap<LedPixel, Integer> colors;
 
@@ -28,6 +40,15 @@ public abstract class PixelMesh<T extends LedPixel> {
             setColor(c, 0);
 	}	
 	initOpcBuffers();
+
+	// update the final transform to include the modifiable placement transform atop the
+	// original pixels-to-canvas transform
+	final PixelTransform baseTx = transform;
+	transform = new PixelTransform() {
+		public PVector2 transform(LedPixel px, PVector2 offset) {
+		    return PixelMesh.this.placement.transform(baseTx.transform(px, offset));
+		}
+	    };
     }
     
     public Integer getColor(LedPixel dCoord){

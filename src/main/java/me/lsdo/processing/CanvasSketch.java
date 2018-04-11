@@ -34,12 +34,26 @@ public class CanvasSketch extends XYAnimation {
     protected void postFrame(double t){
 
         // draw pixel locations
-        for (LedPixel c : dome.coords){
-	    PVector2 screenP = dome.domeCoordToScreen(c, app.width, app.height);
-	    int ix = coordToPixelIndex(screenP);
-	    if (ix >= 0) {
-		app.pixels[ix] = 0xFFFFFF ^ app.pixels[ix];
+	int[] ixs = new int[dome.coords.size()];
+	for (int i = 0; i < ixs.length; i++) {
+	    LedPixel c = dome.coords.get(i);
+	    if (c.spacerPixel) {
+		ixs[i] = -1;
+	    } else {
+		PVector2 screenP = dome.domeCoordToScreen(c, app.width, app.height);
+		ixs[i] = coordToPixelIndex(screenP);
 	    }
+        }
+	Arrays.sort(ixs); // do this to catch duplicates -- since we use xor, if two points occupy the same pixel it will not be marked
+	for (int i = 0; i < ixs.length; i++) {
+	    int ix = ixs[i];
+	    if (ix < 0) {
+		continue;
+	    }
+	    if (i > 0 && ix == ixs[i - 1]) {
+		continue;
+	    }
+	    app.pixels[ix] = 0xFFFFFF ^ app.pixels[ix];
         }
 
         app.updatePixels();
