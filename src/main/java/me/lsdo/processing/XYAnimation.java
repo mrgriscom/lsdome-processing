@@ -8,7 +8,7 @@ package me.lsdo.processing;
 
 import java.util.*;
 
-public abstract class XYAnimation extends DomeAnimation<LedPixel> {
+public abstract class XYAnimation extends DomeAnimation<LedPixel> implements PixelTransform.TransformListener {
 
     static final int DEFAULT_BASE_SUBSAMPLING = 1;
     static final int MAX_SUBSAMPLING = 64;
@@ -35,6 +35,10 @@ public abstract class XYAnimation extends DomeAnimation<LedPixel> {
 
     @Override
     protected void init() {
+	transformChanged();
+    }
+
+    public void transformChanged() {
 	setTransform(dome.transform);
     }
     

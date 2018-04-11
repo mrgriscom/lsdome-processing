@@ -11,7 +11,7 @@ public abstract class DomeAnimation<T extends LedPixel> {
 
     public static final double FRAMERATE_SMOOTHING_FACTOR = .9;  // [0, 1) -- higher == smoother
     
-    protected PixelMesh<? extends T> dome;
+    public PixelMesh<? extends T> dome;
     
     private boolean initialized = false;
     private double lastT = 0;

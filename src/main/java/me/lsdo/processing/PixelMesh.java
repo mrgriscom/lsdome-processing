@@ -43,8 +43,7 @@ public abstract class PixelMesh<T extends LedPixel> {
     }
 
     public PVector2 domeCoordToScreen(LedPixel c, int width, int height) {
-	return LayoutUtil.xyToScreen(transform.transform(c),
-				     width, height, 2., false);
+	return LayoutUtil.xyToScreen(transform.transform(c), width, height);
     }
 
     // Returns the bounding rectangular viewport for the dome pixel area
@@ -61,22 +60,11 @@ public abstract class PixelMesh<T extends LedPixel> {
             ymin = Math.min(ymin, p.y);
             ymax = Math.max(ymax, p.y);
         }
-
-	// this assumes 'transform' is linear, and the same for all coords
-	int radial_steps = 64;
-	double xmargin = 0;
-	double ymargin = 0;
-	LedPixel ref = coords.get(0);
-	for (int i = 0; i < radial_steps; i++) {
-	    PVector2 margin = LayoutUtil.polarToXy(LayoutUtil.V(getPixelBufferRadius(), (float)i / radial_steps * 2*Math.PI));
-	    PVector2 txMargin = transform.transform(ref, LayoutUtil.Vsub(margin, ref.toXY()));
-	    xmargin = Math.max(xmargin, txMargin.x);
-	    ymargin = Math.max(ymargin, txMargin.y);
-	}
-        xmin -= xmargin;
-        xmax += xmargin;
-        ymin -= ymargin;
-        ymax += ymargin;
+	PVector2 margin = LayoutUtil.Vmult(transform.getMargins(coords.get(0)), getPixelBufferRadius());
+        xmin -= margin.x;
+        xmax += margin.x;
+        ymin -= margin.y;
+        ymax += margin.y;
 
 	PVector2 p0 = LayoutUtil.V(xmin, ymin);
         PVector2 pdiag = LayoutUtil.Vsub(LayoutUtil.V(xmax, ymax), p0);
