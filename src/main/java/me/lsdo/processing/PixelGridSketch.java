@@ -8,6 +8,8 @@
 // need processing to run (i.e., can run headless), but this sketch writes the content back to the
 // processing canvas for visualization.
 
+// TODO is this used or useful?
+
 package me.lsdo.processing;
 
 import java.util.*;
@@ -27,7 +29,7 @@ public class PixelGridSketch {
 	// Pre-compute screen coordinates for dome pixels.
 	screenCoords = new HashMap<LedPixel, PVector2>();
         for (LedPixel c : animation.dome.coords) {
-            PVector2 screenCoord = animation.dome.domeCoordToScreen(c, app.width, app.height);
+	    PVector2 screenCoord = LayoutUtil.xyToScreen(animation.dome.transform.transform(c), app.width, app.height);
 	    screenCoords.put(c, screenCoord);
         }
     }

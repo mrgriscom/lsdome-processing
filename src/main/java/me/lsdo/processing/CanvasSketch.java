@@ -46,7 +46,7 @@ public class CanvasSketch extends WindowAnimation {
 	    if (c.spacerPixel) {
 		ixs[i] = -1;
 	    } else {
-		PVector2 screenP = dome.domeCoordToScreen(c, app.width, app.height);
+		PVector2 screenP = LayoutUtil.xyToScreen(transform.transform(c), app.width, app.height);
 		int[] xy = boundsCheck(screenP);
 		ixs[i] = xy != null ? linearOffset(xy[0], xy[1]) : -1;
 	    }

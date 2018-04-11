@@ -63,10 +63,6 @@ public abstract class PixelMesh<T extends LedPixel> {
         return coords.size();
     }
 
-    public PVector2 domeCoordToScreen(LedPixel c, int width, int height) {
-	return LayoutUtil.xyToScreen(transform.transform(c), width, height);
-    }
-
     // Returns the bounding rectangular viewport for the dome pixel area
     // 1st vector in the array is the lower left corner; 2nd vector is the width/height.
     public PVector2[] getViewport() {
