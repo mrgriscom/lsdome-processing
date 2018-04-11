@@ -11,7 +11,7 @@ import java.util.*;
 /**
  * Created by shen on 2016/06/26.
  */
-public class CanvasSketch extends XYAnimation {
+public class CanvasSketch extends WindowAnimation {
 
     protected PApplet app;
     private static int DEFAULT_AA = 8;
@@ -23,11 +23,17 @@ public class CanvasSketch extends XYAnimation {
     public CanvasSketch(PApplet app, PixelMesh<? extends LedPixel> dome, int antiAliasingSamples){
         super(dome, antiAliasingSamples);
         this.app = app;
+	initViewport(app.width, app.height, true);
     }
 
     @Override
-    protected void preFrame(double t, double deltaT){
+    public void captureFrame() {
         app.loadPixels();
+    }
+
+    @Override
+    public int getPixel(int x, int y) {
+	return app.pixels[linearOffset(x, y)];
     }
 
     @Override
@@ -41,7 +47,8 @@ public class CanvasSketch extends XYAnimation {
 		ixs[i] = -1;
 	    } else {
 		PVector2 screenP = dome.domeCoordToScreen(c, app.width, app.height);
-		ixs[i] = coordToPixelIndex(screenP);
+		int[] xy = boundsCheck(screenP);
+		ixs[i] = xy != null ? linearOffset(xy[0], xy[1]) : -1;
 	    }
         }
 	Arrays.sort(ixs); // do this to catch duplicates -- since we use xor, if two points occupy the same pixel it will not be marked
@@ -65,29 +72,6 @@ public class CanvasSketch extends XYAnimation {
 
     }
 
-    int coordToPixelIndex(PVector2 p) {
-	int x = (int)Math.floor(p.x);
-	int y = (int)Math.floor(p.y);
-	if (x < 0 || x >= app.width || y < 0 || y >= app.height) {
-	    return -1;
-	} else {
-	    return y * app.width + x;
-	}
-    }
-    
-    @Override
-    protected int samplePoint(PVector2 p, double t)
-    {
-	int i = coordToPixelIndex(p);
-	return i >= 0 ? app.pixels[i] : 0;
-    }
-
-    // Store samples as screen coordinates.
-    @Override
-    protected PVector2 toIntermediateRepresentation(PVector2 p) {
-	return LayoutUtil.xyToScreen(p, app.width, app.height);
-    }
-    
     public void draw()
     {
         draw(app.millis() / 1000.);

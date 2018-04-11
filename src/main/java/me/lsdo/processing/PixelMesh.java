@@ -92,26 +92,26 @@ public abstract class PixelMesh<T extends LedPixel> {
 	return new PVector2[] {p0, pdiag};
     }
 
-    public PixelTransform stretchToViewport(int width, int height) {
+    public LayoutUtil.Transform stretchToViewport(int width, int height) {
 	return stretchToViewport(width, height, 1., 1.);
     }
     
-    public PixelTransform stretchToViewport(final int width, final int height, final double xscale, final double yscale) {
+    public LayoutUtil.Transform stretchToViewport(final int width, final int height, final double xscale, final double yscale) {
 	PVector2 viewport[] = getViewport();
 	final PVector2 p0 = viewport[0];
 	final PVector2 pDim = viewport[1];
-	return transform.compoundTransform(new LayoutUtil.Transform() {
-		double reproject(double p, double p0, double dim, double extent, double scale) {
-		    double val = (p - p0) / dim; // normalize [0,1]
-		    val = -extent * (1 - val) + extent * val; // normalize [-extent,extent]
-		    return val / scale;
-		}
+	return new LayoutUtil.Transform() {
+	    double reproject(double p, double p0, double dim, double extent, double scale) {
+		double val = (p - p0) / dim; // normalize [0,1]
+		val = -extent * (1 - val) + extent * val; // normalize [-extent,extent]
+		return val / scale;
+	    }
 		    
-		public PVector2 transform(PVector2 p) {
-		    return LayoutUtil.V(reproject(p.x, p0.x, pDim.x, (double)width/height, xscale),
-					reproject(p.y, p0.y, pDim.y, 1., yscale));
-		}
-	    });
+	    public PVector2 transform(PVector2 p) {
+		return LayoutUtil.V(reproject(p.x, p0.x, pDim.x, (double)width/height, xscale),
+				    reproject(p.y, p0.y, pDim.y, 1., yscale));
+	    }
+	};
     }
     
     // Return which of N OPC servers manages this pixel
