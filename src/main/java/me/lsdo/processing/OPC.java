@@ -24,7 +24,7 @@ public class OPC implements Runnable {
 
     public OPC()
     {
-	this(Config.getConfig().OpcHostname,
+	this(Config.getConfig().OpcHostname.get(0),
 	     Config.getConfig().OpcPort);
     }
 

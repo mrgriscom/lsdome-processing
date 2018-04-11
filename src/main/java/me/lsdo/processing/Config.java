@@ -39,7 +39,18 @@ public class Config {
 	loadProperties(domeProps, "config.properties");
 	loadProperties(sketchProps, "sketch.properties");
 
-	OpcHostname = domeProps.getProperty("opchostname", DEFAULT_HOST);
+	OpcHostname = new ArrayList<String>();
+	int i = 1;
+	while (true) {
+	    String hostProp = (i == 1 ?
+			       domeProps.getProperty("opchostname", DEFAULT_HOST) :
+			       domeProps.getProperty("opchostname" + i, ""));
+	    if (hostProp.isEmpty()) {
+		break;
+	    }
+	    OpcHostname.add(hostProp);
+	    i += 1;
+	}
 	OpcPort = getProperty(domeProps, "opcport", DEFAULT_PORT);
 	numPanels = getProperty(domeProps, "num_panels", DEFAULT_PANELS);
 	geomType = domeProps.getProperty("geometry", "");
@@ -98,10 +109,21 @@ public class Config {
     // Debug mode.
     static final boolean DEBUG = false;
 
-    public String OpcHostname;
+    public List<String> OpcHostname;
     public int OpcPort;
     public String geomType;
     public int numPanels;
+
+    public OPC[] makeOPCs(int n) {
+	OPC[] opcs = new OPC[n];
+	for (int i = 0; i < n; i++) {
+	    OPC opc = (i < OpcHostname.size() ?
+		       new OPC(OpcHostname.get(i), OpcPort) :
+		       new OPC(OpcHostname.get(0), OpcPort + i - OpcHostname.size() + 1));
+	    opcs[i] = opc;
+	}
+	return opcs;
+    }
     
     // Size of single panel's pixel grid.
     static final int PANEL_SIZE = 15;
