@@ -23,7 +23,7 @@ public class Prometheus extends PixelMesh<WingPixel> {
 
     static final String LAYOUT_PATH = "/home/drew/dev/lsdome/lsdome/src/config/simulator_layouts/prometheus_wing.json";
     static final double PLATFORM_WIDTH = 1.; // m
-    static final double WINGSPAN = 10.; // m
+    static final double WINGSPAN = 18.; // m
     
     static class LayoutPoint {
 	double[] point;
@@ -65,13 +65,14 @@ public class Prometheus extends PixelMesh<WingPixel> {
 		    return LayoutUtil.Vmult(p, 2./WINGSPAN);
 		}
 	    };
+	// save this *before* init()
+	final PixelTransform baseTx = transform;
 	
 	init();
 
 	// do this after init() to overwrite the compound transform created there (this is
 	// janky and should be refactored, obv)
 	// for the applicable mode, this transform mirrors the 2nd wing from the 1st in various ways
-	final PixelTransform baseTx = transform;
 	transform = new PixelTransform() {
 		public PVector2 transform(LedPixel px, PVector2 offset) {
 		    PVector2 p = baseTx.transform(px, offset);
