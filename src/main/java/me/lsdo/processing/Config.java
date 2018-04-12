@@ -54,6 +54,7 @@ public class Config {
 	OpcPort = getProperty(domeProps, "opcport", DEFAULT_PORT);
 	numPanels = getProperty(domeProps, "num_panels", DEFAULT_PANELS);
 	geomType = domeProps.getProperty("geometry", "");
+	layoutPath = domeProps.getProperty("layout", "");
 
 	boolean validGeomType = false;
 	for (String s : knownGeometries) {
@@ -113,7 +114,8 @@ public class Config {
     public int OpcPort;
     public String geomType;
     public int numPanels;
-
+    public String layoutPath;
+    
     public OPC[] makeOPCs(int n) {
 	OPC[] opcs = new OPC[n];
 	for (int i = 0; i < n; i++) {

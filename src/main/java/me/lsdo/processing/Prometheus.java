@@ -21,7 +21,6 @@ enum WingDisplayMode {
 
 public class Prometheus extends PixelMesh<WingPixel> {
 
-    static final String LAYOUT_PATH = "/home/drew/dev/lsdome/lsdome/src/config/simulator_layouts/prometheus_wing.json";
     static final double PLATFORM_WIDTH = 1.; // m
     static final double WINGSPAN = 18.; // m
     
@@ -39,12 +38,17 @@ public class Prometheus extends PixelMesh<WingPixel> {
 	opcs.add(opcRight);
 
 	mode = WingDisplayMode.UNIFIED;
+
+	String layoutPath = Config.getConfig().layoutPath;
+	if (layoutPath.isEmpty()) {
+	    throw new RuntimeException("json layout not specified in config 'layout' property");
+	}
 	
 	List<PVector2> pixels;
 	try {
-	    pixels = loadPixels(LAYOUT_PATH);
+	    pixels = loadPixels(layoutPath);
 	} catch (IOException e) {
-	    throw new RuntimeException("can't load wing pixel layout json");
+	    throw new RuntimeException("can't load wing pixel layout json at " + layoutPath);
 	}
 	for (int i = 0; i < pixels.size(); i++) {
 	    for (int wing = 0; wing < 2; wing++) {
