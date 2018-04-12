@@ -19,7 +19,7 @@ public abstract class XYAnimation extends DomeAnimation<LedPixel> implements Pix
     // display pixel's color. Most simply the samples will be xy-coordinates near the dome pixels,
     // though they may also be transformed into some intermediate vector space (screen pixels, a
     // UV-mapped texture, etc.) for efficiency.
-    private HashMap<LedPixel, ArrayList<PVector2>> points_ir;
+    protected HashMap<LedPixel, ArrayList<PVector2>> points_ir;
 
     public XYAnimation(PixelMesh<? extends LedPixel> dome) {
         this(dome, Config.getSketchProperty("subsampling", DEFAULT_BASE_SUBSAMPLING));

@@ -14,6 +14,8 @@ public abstract class WindowAnimation extends XYAnimation {
 
     public LayoutUtil.Transform windowTransform;
     PixelTransform transform;
+
+    public double outsideViewportProportion;
     
     public WindowAnimation(final PixelMesh<? extends LedPixel> dome, int antiAliasingSamples) {
         super(dome, antiAliasingSamples);
@@ -48,6 +50,11 @@ public abstract class WindowAnimation extends XYAnimation {
 	    windowTransform = dome.stretchToViewport(width, height, xscale, yscale);
 	}
 	applyTransform(transform);
+	outsideViewportProportion = proportionOutsideBounds();
+	if (outsideViewportProportion > 0) {
+	    System.out.println(String.format("%.2f%% outsize window area!", 100. * outsideViewportProportion));
+	}
+
     }
 
     public abstract void captureFrame();
@@ -87,5 +94,18 @@ public abstract class WindowAnimation extends XYAnimation {
 	return width * y + x;
     }
 
+    double proportionOutsideBounds() {
+	int total = 0;
+	int oob = 0;
+	for (Map.Entry<LedPixel, ArrayList<PVector2>> e : points_ir.entrySet()) {
+	    for (PVector2 p : e.getValue()) {
+		total++;
+		if (boundsCheck(p) == null) {
+		    oob++;
+		}
+	    }
+	}
+	return (double)oob / total;
+    }
 }
 
