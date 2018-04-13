@@ -11,7 +11,7 @@ repositories {
 }
 
 dependencies {
-    compile "org.processing:core:2.2.1"
+    compile "org.processing:core:3.3.7"
     compile "junit:junit:3.8.2"
     compile "com.google.code.gson:gson:2.8.2"
     compile "org.zeromq:jeromq:0.4.3"

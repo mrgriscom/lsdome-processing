@@ -116,7 +116,7 @@ public class Prometheus extends PixelMesh<WingPixel> {
 	    double x = lp.point[0];
 	    double y = lp.point[1];
 	    double z = lp.point[2];
-	    if (z != 0 || (x == -5 && y == -5) /* old method*/) {
+	    if (z != 0) {
 		// spacer pixel
 		points.add(null);
 	    } else {
