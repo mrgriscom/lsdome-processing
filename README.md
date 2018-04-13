@@ -91,11 +91,24 @@ No quotes. Then, update version number in `build.gradle`, and `gradle bintrayupl
 
 ## Use
 
+### Config
+
+The `config.properties` file contains important settings:
+
+- `geometry`: what kind of mesh is being displayed on:
+  - `lsdome` -- the triangular panels of the limitless slip dome; specify the number of panels (2, 6, 13, or 24) with `num_panels`
+  - `prometheus` -- butterfly wings
+- `opchostname` -- domain or IP address of the OPC server. Specify additional OPC servers via `opchostname2`, etc.
+- `opcport` -- port for the OPC server(s)
+
+### Animations
+
 There's a few ways to create animations with the library.
 
 * _Canvas_ - easiest way possible. Start with almost any Processing sketch you 
 created or borrowed off of the internet, and add a few lines of code to make it light up 
 some LEDs. You'd be essentially using the LEDs as a bright but low res display.
+* _WindowAnimation_ - mapping a pre-made window/rectangle of pixels onto the mesh (though not necessarily a Processing window)
 * _XY Animation_ - you are rendering a scene using some Maths and shit. Thus, 
 have some way of turning XY-coordinates (a 2D vector, actually) into a colour. 
 A typical usecase would be rainbow fractals.
@@ -115,7 +128,7 @@ Simple add these lines
 
 to near the top of the file. Then, to the `setup` method, add
 
-    sketch = new CanvasSketch(this, new Dome(), new OPC());
+    sketch = Driver.makeCanvas(this);
 
 and to the end of the `draw` method:
 
@@ -144,29 +157,13 @@ ran in a headless scenario.
 This mode is when you are working with the Dome directly. That way, you can play
 with the funky UVW co-ordinate system. See `Kaleidoscope` for a good example.
 
-### Configuration
-
-There are a few things to specify: OPC Host and port, and dome configuration.
-
-OPC Host and port defaults to `127.0.0.1:7890`. You can change this either by
-
-**Hardcoding**: `opc = new OPC("192.168.1.2", 7890)`
-
-Using the `config.properties` file. e.g.
-
-    opchostname=192.168.1.2
-    opcport=7890
-    
-place this file in working directory.
-
-The dome layout supports 2 (default), 6 and 13 panels. This is specified
-via the `Dome` constructor.
-
 ## Design Notes
+
+_This is somewhat out of date_
 
 The general idea:
 
-* `Dome` class contains most of the geometry.
+* `PixelMesh` class represents the pixel mesh geometry in physical space.
 * `OPC` class contains the OPC client. Based on Micah Scott's code from the Fadecandy examples.
 * `DomeAnimation` is an abstract class. Extend it to animate the Dome directly, UVW geometry and all.
 * `XYAnimation` is an abstract class too. It extends `DomeAnimation`. It abstracts over that geometry.
