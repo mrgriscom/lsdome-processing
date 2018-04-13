@@ -15,10 +15,10 @@ public abstract class PixelMesh<T extends LedPixel> {
     public PixelTransform transform;
 
     static class PlacementTransform implements LayoutUtil.Transform {
-	double xo = 0;
-	double yo = 0;
-	double scale = 1;
-	double rot = 0;
+	double xo = Config.getSketchProperty("place_x", 0.);
+	double yo = Config.getSketchProperty("place_y", 0.);
+	double scale = Config.getSketchProperty("place_scale", 1.);
+	double rot = Math.toRadians(Config.getSketchProperty("place_rot", 0.));
 
 	public PVector2 transform(PVector2 p) {
 	    return LayoutUtil.Vadd(LayoutUtil.Vmult(LayoutUtil.Vrot(p, rot), scale), LayoutUtil.V(xo, yo));

@@ -37,7 +37,18 @@ public class Prometheus extends PixelMesh<WingPixel> {
 	opcs.add(opcLeft);
 	opcs.add(opcRight);
 
-	mode = WingDisplayMode.UNIFIED;
+	String modeSetting = Config.getSketchProperty("wing_mode", "unified");
+	if (modeSetting.equals("unified")) {
+	    mode = WingDisplayMode.UNIFIED;
+	} else if (modeSetting.equals("mirror")) {
+	    mode = WingDisplayMode.MIRROR;
+	} else if (modeSetting.equals("flip")) {
+	    mode = WingDisplayMode.FLIP_HORIZ;
+	} else if (modeSetting.equals("opposite")) {
+	    mode = WingDisplayMode.ROTATE_180;
+	} else {
+	    throw new RuntimeException("unrecognized wing mode '" + modeSetting + "'");
+	}
 
 	String layoutPath = Config.getConfig().layoutPath;
 	if (layoutPath.isEmpty()) {
