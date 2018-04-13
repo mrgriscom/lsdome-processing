@@ -22,6 +22,8 @@ public class OPC implements Runnable {
     private byte firmwareConfig;
     private String colorCorrection;
 
+    boolean failedAlready = false;
+    
     public OPC()
     {
 	this(Config.getConfig().OpcHostname.get(0),
@@ -31,7 +33,7 @@ public class OPC implements Runnable {
     public OPC(String host, int port) {
         this.host = host;
         this.port = port;
-	System.out.println(String.format("OPC endpoint %s:%d", host, port));
+	System.out.println("OPC endpoint " + getServer() + "; connecting...");
         thread = new Thread(this);
         thread.start();
     }
@@ -44,6 +46,10 @@ public class OPC implements Runnable {
         return port;
     }
 
+    public String getServer() {
+	return host + ":" + port;
+    }
+    
     // Enable or disable dithering. Dithering avoids the "stair-stepping" artifact and increases color
     // resolution by quickly jittering between adjacent 8-bit brightness levels about 400 times a second.
     // Dithering is on by default.
@@ -204,18 +210,20 @@ public class OPC implements Runnable {
 
     void dispose(Exception e) {
 	if (e != null) {
-	    System.out.println(host + ":" + port + " connection error:");
-	    System.out.println(e);
-	    e.printStackTrace();
+	    System.out.println(getServer() + " connection error: " + e);
+	    if (!failedAlready) {
+		e.printStackTrace();
+	    }
 	}
 	
         // Destroy the socket. Called internally when we've disconnected.
         // (Thread continues to run)
         if (output != null) {
-            System.out.println("Disconnected from OPC server");
+            System.out.println("Disconnected from OPC " + getServer());
         }
         socket = null;
         output = pending = null;
+	failedAlready = true;
     }
 
     public void run() {
@@ -229,7 +237,8 @@ public class OPC implements Runnable {
                     socket = new Socket(host, port);
                     socket.setTcpNoDelay(true);
                     pending = socket.getOutputStream(); // Avoid race condition...
-                    System.out.println("Connected to OPC server");
+                    System.out.println("OPC " + getServer() + " connected");
+		    failedAlready = false;
                     sendColorCorrectionPacket();        // These write to 'pending'
                     sendFirmwareConfigPacket();         // rather than 'output' before
                     output = pending;                   // rest of code given access.
