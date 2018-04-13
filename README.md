@@ -3,48 +3,48 @@
 [![Build Status](https://travis-ci.org/shen-tian/lsdome-processing.svg?branch=master)](https://travis-ci.org/shen-tian/lsdome-processing)
 [![Download](https://api.bintray.com/packages/shen-tian/maven/lsdome-processing/images/download.svg)](https://bintray.com/shen-tian/maven/lsdome-processing/_latestVersion)
 
-This is a Processing Library for [Limitless Slip Dome](https://github.com/shen-tian/l-s-dome).
-This uses the correct format for Processing [Contributed Libraries](https://github.com/processing/processing/wiki/How-to-Install-a-Contributed-Library).
-Note that this targets Processing 2. No idea if/when we'll support Processing 3.
-
-It can also be used as a straightforward Java library, if you'd prefer to not
-use the standard Processing tools, or as someone put it, "avoid the arty bullshit
-language that doesn't make sense".
+This is the shared library powering the [Limitless Slip Dome](https://github.com/shen-tian/l-s-dome), Prometheus, and other LED mesh projects.
+It can be used as a Processing 3 [contributed library](https://github.com/processing/processing/wiki/How-to-Install-a-Contributed-Library) for making Processing sketches.
+This library also contains the infrastructure to power LED animations that don't depend on Processing.
 
 ## Goals
 
-Make it easy to target the Limitless Slip Dome, with its particular geometry,
-over [Open Pixel Control](http://openpixelcontrol.org/) protocol. Note that this
-is not dependent on use of Fadecady controller boards.
-
-This helps with two related aspects that are non-trivial: laying out of the
-pixels in the triangular pattern, mirroring the physical wiring of the dome. 
-This is most useful for sketches which are indifferent to pixel layout; it also
-allows easier use of animations that specifically takes advantage of this 
-geometry (see `kaleidoscope`).
+This library handles awareness of the pixel geometry in physical space, various utility functions and skeleton animations to help with mapping virtual animation canvases onto the pixel mesh, and talking to pixels via [Open Pixel Control](http://openpixelcontrol.org/).
 
 ## Build/Install
 
 There's two main ways of using the library: as a Processing Contributed library, 
 or as a Java library.
 
-### Processing
+### As a Processing library
 
-The process is slightly manual. But we don't want to deal with Processing's 
-library publishing stuff. Instructions work on Linux and macOS. Something 
-similar should work in Windows. Assumes you've got Java installed.
+This is the most commonly used method.
 
-1. `git clone` this repo somewhere.
-2. `./gradlew makeArtifact` to build. This creates `lsdome.zip` in `\build\distributions\`.
-3. Unzip the contents into your Processing `libraries` folder. This seems to be `~\Documents\Processing\libraries`
-on macOS and `~/sketchbook/libraries` on linux (which only appears after running processing for the first time). Restart Processing IDE and you are good. 
+1. Install Processing:
+    cd ~
+    wget http://download.processing.org/processing-3.3.7-linux64.tgz
+    tar xvzf processing-3.3.7-linux64.tgz
 
-Will fix in the gradle script.
+2. Run the Processing IDE to create the local working directory.
+    ~/processing-3.3.7/processing
+
+3. Clone this repo and enter the directory
+
+4. Build
+    ./gradlew makeArtifact
+
+5. Unpack the built library into your Processing install:
+    PROCESSING_WD=~/sketchbook  # linux
+    PROCESSING_WD=~\Documents\Processing  # mac
+    rm -r $PROCESSING_WD/libraries/lsdome/
+    unzip ./build/distributions/lsdome.zip -d $PROCESSING_WD/libraries/
 
 ### Plain Java
 
 The library is published at the Maven repo on _jcenter_, so you just need to add it as a dependency into your
- build-runner/project tool of choice. If you are using Gradle:
+ build-runner/project tool of choice. **Typically the published jar is very out of date, as we're often frantically hacking close to an event deadline.**
+
+If you are using Gradle:
 
     repositories {
         jcenter()
@@ -52,7 +52,7 @@ The library is published at the Maven repo on _jcenter_, so you just need to add
 
     dependencies {
         compile 'me.lsdo.processing:lsdome-processing:0.9.2'
-        }
+    }
 
 in the right place in your `gradle.build`. If you are using Leiningen:
 
@@ -62,7 +62,7 @@ in the right place in your `gradle.build`. If you are using Leiningen:
 
 in your `project.clj` should do the trick.
 
-### Building the JAR
+#### Building the JAR
 
 If you need to do this, for whatever reason, simple `git clone` the repo, 
 ensure you've got Java installed, and go
@@ -71,7 +71,7 @@ ensure you've got Java installed, and go
 
 builds the JAR and places it in `/build/ibs/`.
 
-### Publishing the JAR
+#### Publishing the JAR
 
 To do this, you need the _jcenter_ API keys. Gradle will look for 
 `gradle.properties` in the project root folder. It expect something like
@@ -80,7 +80,6 @@ To do this, you need the _jcenter_ API keys. Gradle will look for
     bintrayApiKey=apikeyxxxxxxxxxxxxxxx
     
 No quotes. Then, update version number in `build.gradle`, and `gradle bintrayupload`.
-
 
 ## Use
 
