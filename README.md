@@ -30,20 +30,22 @@ This is the most commonly used method.
 
 2. Run the Processing IDE to create the local working directory.
 
-    ~/processing-3.3.7/processing
+    `~/processing-3.3.7/processing`
 
 3. Clone this repo and enter the directory
 
 4. Build
 
-    ./gradlew makeArtifact
+    `./gradlew makeArtifact`
 
 5. Unpack the built library into your Processing install:
 
+    ```
     PROCESSING_WD=~/sketchbook  # linux
     PROCESSING_WD=~\Documents\Processing  # mac
     rm -r $PROCESSING_WD/libraries/lsdome/
     unzip ./build/distributions/lsdome.zip -d $PROCESSING_WD/libraries/
+    ```
 
 ### Plain Java
 
