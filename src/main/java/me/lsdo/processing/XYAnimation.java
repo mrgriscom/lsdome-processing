@@ -12,9 +12,9 @@ public abstract class XYAnimation extends DomeAnimation<LedPixel> implements Pix
 
     static final int DEFAULT_BASE_SUBSAMPLING = 1;
     static final int MAX_SUBSAMPLING = 64;
-    static final double DYNAMIC_TRANSFORM_REDUCTION = .3;
     
     private int baseSubsampling;
+    private int dynamicSubsampling;
     boolean transformIsDynamic = false;
     
     // Mapping of display pixels to 1 or more actual samples that will be combined to yield that
@@ -33,6 +33,7 @@ public abstract class XYAnimation extends DomeAnimation<LedPixel> implements Pix
     public XYAnimation(PixelMesh<? extends LedPixel> dome, int baseSubsampling) {
         super(dome);
 	this.baseSubsampling = baseSubsampling;
+	this.dynamicSubsampling = Config.getSketchProperty("dynamic_subsampling", (int)Math.ceil(.3 * baseSubsampling));
     }
 
     @Override
@@ -49,7 +50,7 @@ public abstract class XYAnimation extends DomeAnimation<LedPixel> implements Pix
     }
 
     public int numSubsamples(PVector2 p) {
-	double samples = baseSubsampling * (transformIsDynamic ? DYNAMIC_TRANSFORM_REDUCTION : 1) * subsamplingBoost(p);
+	double samples = (transformIsDynamic ? dynamicSubsampling : baseSubsampling) * subsamplingBoost(p);
 	return Math.min((int)Math.ceil(samples), MAX_SUBSAMPLING);
     }
     
