@@ -32,14 +32,32 @@ public class Prometheus extends PixelMesh<WingPixel> {
 
     double flapPeriod = .5; // seconds
     double maxFlap = .01; // percentage
-    double flapAngle = .30; // radians
-    double flapOrigin = .5; // meters
+    double flapAngle = 0; // radians
+    double minFlapAngle = Math.toRadians(-10);
+    double maxFlapAngle = Math.toRadians(20);
+    double flapVanishingPointOffset = .25; // meters
     
     // state variables
     double flappingStart = -1; // timestamp
     double flappingEnd = -1; // timestamp
     double flapLevel = 1.; // percentage
+    double flapOrigin;
+    
+    void setFlapAngle(double flapAngle) {
+	this.flapAngle = flapAngle;
 
+	double min = Double.POSITIVE_INFINITY;
+	for (LedPixel px : coords) {
+	    if (px.spacerPixel) {
+		continue;
+	    }
+	    
+	    double x = LayoutUtil.Vrot(px.toXY(), flapAngle).x;
+	    min = Math.min(min, x);
+	}
+	flapOrigin = min - flapVanishingPointOffset;
+    }
+    
     void startFlapping() {
 	if (!flappingActive()) {
 	    flappingStart = Config.clock();
@@ -120,13 +138,15 @@ public class Prometheus extends PixelMesh<WingPixel> {
 	    }
 	}
 
+	setFlapAngle(this.flapAngle);
+	
 	final LayoutUtil.Transform flapper = new LayoutUtil.Transform() {
 		public PVector2 transform(PVector2 p) {
 		    if (flapLevel == 1.) {
 			return p;
 		    } else {
 			p = LayoutUtil.Vrot(p, flapAngle);
-			p = LayoutUtil.V(p.x / Math.max(flapLevel, .01), p.y);
+			p = LayoutUtil.V((p.x - flapOrigin) / Math.max(flapLevel, .01) + flapOrigin, p.y);
 			p = LayoutUtil.Vrot(p, -flapAngle);
 			return p;
 		    }

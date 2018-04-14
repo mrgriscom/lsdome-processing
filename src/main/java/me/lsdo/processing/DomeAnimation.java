@@ -93,6 +93,17 @@ public abstract class DomeAnimation<T extends LedPixel> {
 		    txChanged = true;
                 }
             });
+        ctrl.registerHandler("mixer", new InputControl.InputHandler() {
+		@Override
+                public void slider(double val) {
+		    if (!(dome instanceof Prometheus)) {
+			return;
+		    }
+		    Prometheus prom = ((Prometheus)dome);
+		    prom.setFlapAngle(prom.minFlapAngle * (1 - val) + prom.maxFlapAngle * val);
+		    txChanged = true;
+                }
+            });
     }
     
     public void draw(double t) {
