@@ -78,6 +78,21 @@ public abstract class DomeAnimation<T extends LedPixel> {
                     }
                 }
             });
+        ctrl.registerHandler("playpause_b", new InputControl.InputHandler() {
+		@Override
+                public void button(boolean pressed) {
+		    if (!(dome instanceof Prometheus)) {
+			return;
+		    }
+		    Prometheus prom = ((Prometheus)dome);
+		    if (pressed) {
+			prom.startFlapping();
+		    } else {
+			prom.stopFlapping();
+		    }
+		    txChanged = true;
+                }
+            });
     }
     
     public void draw(double t) {
@@ -87,6 +102,10 @@ public abstract class DomeAnimation<T extends LedPixel> {
 	}
 
 	ctrl.processInput();
+	// hacky
+	if (dome instanceof Prometheus && ((Prometheus)dome).manageFlapState()) {
+	    txChanged = true;
+	}
 	if (txChanged) {
 	    if (this instanceof PixelTransform.TransformListener) {
 		((PixelTransform.TransformListener)this).transformChanged();

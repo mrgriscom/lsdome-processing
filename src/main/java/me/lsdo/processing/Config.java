@@ -15,6 +15,16 @@ public class Config {
 
     private Properties domeProps = new Properties();
     private Properties sketchProps = new Properties();
+
+    static long startMillis = -1;
+
+    public static double clock() {
+	long now = System.currentTimeMillis();
+	if (startMillis == -1) {
+	    startMillis = now;
+	}
+	return (now - startMillis) / 1000.;
+    }
     
     private static class ConfigInstance {
         public static Config config = new Config();

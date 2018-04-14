@@ -29,6 +29,59 @@ public class Prometheus extends PixelMesh<WingPixel> {
     }
 
     WingDisplayMode mode;
+
+    double flapPeriod = .5; // seconds
+    double maxFlap = .01; // percentage
+    double flapAngle = .30; // radians
+    double flapOrigin = .5; // meters
+    
+    // state variables
+    double flappingStart = -1; // timestamp
+    double flappingEnd = -1; // timestamp
+    double flapLevel = 1.; // percentage
+
+    void startFlapping() {
+	if (!flappingActive()) {
+	    flappingStart = Config.clock();
+	}
+	flappingEnd = -1;
+    }
+
+    void stopFlapping() {
+	flappingEnd = flappingStart + flapPeriod * Math.ceil((Config.clock() - flappingStart) / flapPeriod);
+    }
+
+    boolean flappingActive() {
+	return (flappingStart >= 0 && (flappingEnd < 0 || Config.clock() < flappingEnd));
+    }
+    
+    // some curve connecting (0,0) to (1,1)
+    double flapEasing(double x) {
+	// linear
+	//return x;
+
+	// sinusoidal
+	return .5*(1 - Math.cos(x * Math.PI));
+
+	// polynomial
+	//double power = 3;
+	//double k = Math.pow(1 - Math.abs(2*x - 1), power);
+	//return (x < .5 ? .5*k : 1 - .5*k);
+    }
+
+    boolean manageFlapState() {
+	if (!flappingActive()) {
+	    flapLevel = 1.;
+	    return false;
+	}
+	
+	double flapProgress = ((Config.clock() - flappingStart) / flapPeriod) % 1.; // 0 to 1
+	double easingX = 1 - Math.abs(2*flapProgress - 1); // 0 to 1 to 0
+	flapLevel = 1 - flapEasing(easingX); // 1 to 0 to 1
+	flapLevel = maxFlap + flapLevel * (1 - maxFlap);
+	
+	return true;
+    }
     
     // left and right are from the butterfly's perspective
     public Prometheus(OPC opcLeft, OPC opcRight) {
@@ -67,16 +120,28 @@ public class Prometheus extends PixelMesh<WingPixel> {
 	    }
 	}
 
+	final LayoutUtil.Transform flapper = new LayoutUtil.Transform() {
+		public PVector2 transform(PVector2 p) {
+		    if (flapLevel == 1.) {
+			return p;
+		    } else {
+			p = LayoutUtil.Vrot(p, flapAngle);
+			p = LayoutUtil.V(p.x / Math.max(flapLevel, .01), p.y);
+			p = LayoutUtil.Vrot(p, -flapAngle);
+			return p;
+		    }
+		}
+	    };	
 	// initial transform creates a mirrored wing if both wings are meant to be
 	// fixed relative to each other (as in UNIFIED mode)
 	transform = new PixelTransform() {
 		public PVector2 transform(LedPixel px, PVector2 offset) {
 		    PVector2 p = px.toXY();
+		    p = LayoutUtil.Vadd(p, offset);
+		    p = flapper.transform(p);
 		    if (mode == WingDisplayMode.UNIFIED && ((WingPixel)px).wing == 1) {
 			p = LayoutUtil.V(-p.x, p.y);
 		    }
-		    p = LayoutUtil.Vadd(p, offset);
-
 		    return LayoutUtil.Vmult(p, 2./WINGSPAN);
 		}
 	    };
