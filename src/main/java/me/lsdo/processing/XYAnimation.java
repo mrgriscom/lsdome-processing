@@ -12,8 +12,10 @@ public abstract class XYAnimation extends DomeAnimation<LedPixel> implements Pix
 
     static final int DEFAULT_BASE_SUBSAMPLING = 1;
     static final int MAX_SUBSAMPLING = 64;
-
+    static final double DYNAMIC_TRANSFORM_REDUCTION = .3;
+    
     private int baseSubsampling;
+    boolean transformIsDynamic = false;
     
     // Mapping of display pixels to 1 or more actual samples that will be combined to yield that
     // display pixel's color. Most simply the samples will be xy-coordinates near the dome pixels,
@@ -41,6 +43,15 @@ public abstract class XYAnimation extends DomeAnimation<LedPixel> implements Pix
     public void transformChanged() {
 	applyTransform(dome.transform);
     }
+
+    public void dynamicTransformMode(boolean enabled) {
+	transformIsDynamic = enabled;
+    }
+
+    public int numSubsamples(PVector2 p) {
+	double samples = baseSubsampling * (transformIsDynamic ? DYNAMIC_TRANSFORM_REDUCTION : 1) * subsamplingBoost(p);
+	return Math.min((int)Math.ceil(samples), MAX_SUBSAMPLING);
+    }
     
     public void applyTransform(PixelTransform tx) {
         points_ir = new HashMap<LedPixel, ArrayList<PVector2>>();
@@ -50,7 +61,7 @@ public abstract class XYAnimation extends DomeAnimation<LedPixel> implements Pix
             points_ir.put(c, samples);
 
             PVector2 p = tx.transform(c);
-            int num_subsamples = Math.min((int)Math.ceil(baseSubsampling * subsamplingBoost(p)), MAX_SUBSAMPLING);
+            int num_subsamples = numSubsamples(p);
             boolean jitter = (num_subsamples > 1);
 	    
             for (int i = 0; i < num_subsamples; i++) {

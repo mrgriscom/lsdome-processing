@@ -114,7 +114,7 @@ public abstract class DomeAnimation<T extends LedPixel> {
 
 	ctrl.processInput();
 	// hacky
-	if (dome instanceof Prometheus && ((Prometheus)dome).manageFlapState()) {
+	if (dome instanceof Prometheus && ((Prometheus)dome).manageFlapState(this)) {
 	    txChanged = true;
 	}
 	if (txChanged) {

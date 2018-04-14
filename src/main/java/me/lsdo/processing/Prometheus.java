@@ -43,6 +43,7 @@ public class Prometheus extends PixelMesh<WingPixel> {
     double flappingEnd = -1; // timestamp
     double flapLevel = 1.; // percentage
     double flapOrigin;
+    boolean isFlapping = false;
     
     void setFlapAngle(double flapAngle) {
 	this.flapAngle = flapAngle;
@@ -88,18 +89,22 @@ public class Prometheus extends PixelMesh<WingPixel> {
 	//return (x < .5 ? .5*k : 1 - .5*k);
     }
 
-    boolean manageFlapState() {
-	if (!flappingActive()) {
+    boolean manageFlapState(DomeAnimation anim) {
+	boolean active = flappingActive();
+	if (active) {
+	    double flapProgress = ((Config.clock() - flappingStart) / flapPeriod) % 1.; // 0 to 1
+	    double easingX = 1 - Math.abs(2*flapProgress - 1); // 0 to 1 to 0
+	    flapLevel = 1 - flapEasing(easingX); // 1 to 0 to 1
+	    flapLevel = maxFlap + flapLevel * (1 - maxFlap);
+	} else {
 	    flapLevel = 1.;
-	    return false;
 	}
-	
-	double flapProgress = ((Config.clock() - flappingStart) / flapPeriod) % 1.; // 0 to 1
-	double easingX = 1 - Math.abs(2*flapProgress - 1); // 0 to 1 to 0
-	flapLevel = 1 - flapEasing(easingX); // 1 to 0 to 1
-	flapLevel = maxFlap + flapLevel * (1 - maxFlap);
-	
-	return true;
+	if (anim instanceof PixelTransform.TransformListener) {
+	    ((PixelTransform.TransformListener)anim).dynamicTransformMode(active);
+	}
+	boolean changed = (active != isFlapping);
+	isFlapping = active;
+	return active || changed;
     }
     
     // left and right are from the butterfly's perspective

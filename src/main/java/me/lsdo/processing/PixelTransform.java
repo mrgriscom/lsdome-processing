@@ -4,6 +4,9 @@ public abstract class PixelTransform {
 
     static interface TransformListener {
 	public void transformChanged();
+
+	// indicates whether the transform is expected to be changing a lot
+	public void dynamicTransformMode(boolean enabled);
     }
     
     public PVector2 transform(LedPixel px) {
