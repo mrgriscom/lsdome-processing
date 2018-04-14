@@ -23,7 +23,8 @@ public class Prometheus extends PixelMesh<WingPixel> {
 
     static final double PLATFORM_WIDTH = 1.; // m
     static final double WINGSPAN = 18.; // m
-    
+
+    // for deserializing from json
     static class LayoutPoint {
 	double[] point;
     }
@@ -139,7 +140,11 @@ public class Prometheus extends PixelMesh<WingPixel> {
 	}
 
 	setFlapAngle(this.flapAngle);
-	
+
+	// note that flapping just warps the projection transform -- it doesn't create a mask
+	// for the original shape of the wing, meaning content initially 'off-wing' will move into
+	// view. for processing-based sketches the source window forms a natural boundary, so it looks
+	// fine, but for 'infinite canvas' headless sketches, the effect might look a bit weird.
 	final LayoutUtil.Transform flapper = new LayoutUtil.Transform() {
 		public PVector2 transform(PVector2 p) {
 		    if (flapLevel == 1.) {
