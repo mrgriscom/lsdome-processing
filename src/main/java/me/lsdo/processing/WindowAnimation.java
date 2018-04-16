@@ -46,7 +46,7 @@ public abstract class WindowAnimation extends XYAnimation {
 
     @Override
     public void transformChanged() {
-	if (!preserveAspect) {
+	if (!preserveAspect && !transformIsDynamic) {
 	    windowTransform = dome.stretchToViewport(width, height, xscale, yscale);
 	}
 	applyTransform(transform);

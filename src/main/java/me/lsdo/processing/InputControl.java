@@ -13,8 +13,6 @@ enum ControlType {
     JOG
 }
 
-// Note: this class is a dup of the one in the separate lsdome sketches repo
-
 public class InputControl {
 
     public static final int PORT = 5556;

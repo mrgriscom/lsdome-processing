@@ -15,7 +15,7 @@ public abstract class XYAnimation extends DomeAnimation<LedPixel> implements Pix
     
     private int baseSubsampling;
     private int dynamicSubsampling;
-    boolean transformIsDynamic = false;
+    protected boolean transformIsDynamic = false;
     
     // Mapping of display pixels to 1 or more actual samples that will be combined to yield that
     // display pixel's color. Most simply the samples will be xy-coordinates near the dome pixels,
