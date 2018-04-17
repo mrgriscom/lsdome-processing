@@ -8,7 +8,7 @@ public abstract class WindowAnimation extends XYAnimation {
 
     int width;
     int height;
-    boolean preserveAspect;
+    public boolean preserveAspect;
     double xscale;
     double yscale;
 
@@ -20,11 +20,6 @@ public abstract class WindowAnimation extends XYAnimation {
     public WindowAnimation(final PixelMesh<? extends LedPixel> dome, int antiAliasingSamples) {
         super(dome, antiAliasingSamples);
 
-	windowTransform = new LayoutUtil.Transform() {
-		public PVector2 transform(PVector2 p) {
-		    return p;
-		}
-	    };
 	transform = new PixelTransform() {
 		public PVector2 transform(LedPixel px, PVector2 offset) {
 		    return windowTransform.transform(dome.transform.transform(px, offset));
@@ -46,7 +41,13 @@ public abstract class WindowAnimation extends XYAnimation {
 
     @Override
     public void transformChanged() {
-	if (!preserveAspect && !transformIsDynamic) {
+	if (preserveAspect) {
+	    windowTransform = new LayoutUtil.Transform() {
+		    public PVector2 transform(PVector2 p) {
+			return p;
+		    }
+		};
+	} else if (!transformIsDynamic) {
 	    windowTransform = dome.stretchToViewport(width, height, xscale, yscale);
 	}
 	applyTransform(transform);

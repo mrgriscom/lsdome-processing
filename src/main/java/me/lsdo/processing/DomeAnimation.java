@@ -104,6 +104,16 @@ public abstract class DomeAnimation<T extends LedPixel> {
 		    txChanged = true;
                 }
             });
+        ctrl.registerHandler("load_a", new InputControl.InputHandler() {
+		@Override
+                public void button(boolean pressed) {
+		    if (pressed && DomeAnimation.this instanceof WindowAnimation) {
+			WindowAnimation win = (WindowAnimation)DomeAnimation.this;
+			win.preserveAspect = !win.preserveAspect;
+			txChanged = true;
+		    }
+                }
+            });
     }
     
     public void draw(double t) {
