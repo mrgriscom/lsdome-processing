@@ -22,7 +22,7 @@ enum WingDisplayMode {
 public class Prometheus extends PixelMesh<WingPixel> {
 
     static final double PLATFORM_WIDTH = 1.; // m
-    static final double WINGSPAN = 18.; // m
+    static final double WINGSPAN = 15.5; // m (factors in platform_width)
 
     // for deserializing from json
     static class LayoutPoint {

@@ -11,7 +11,10 @@ public abstract class WindowAnimation extends XYAnimation {
     public boolean preserveAspect;
     double xscale;
     double yscale;
-
+    // sometimes the content must be squeezed to fit the window; if so, this represents the
+    // true aspect ratio of the original content
+    double aspectRatio;
+    
     public LayoutUtil.Transform windowTransform;
     PixelTransform transform;
 
@@ -27,16 +30,25 @@ public abstract class WindowAnimation extends XYAnimation {
 	    };
     }
 
-    public void initViewport(int width, int height, boolean preserveAspect) {
-	initViewport(width, height, preserveAspect, 1., 1.);
+    public double getWindowAspectRatio() {
+	return (double)width / height;
     }
     
-    public void initViewport(int width, int height, boolean preserveAspect, double xscale, double yscale) {
+    public void initViewport(int width, int height, boolean preserveAspect) {
+	initViewport(width, height, preserveAspect, 0.);
+    }
+    
+    public void initViewport(int width, int height, boolean preserveAspect, double realAspectRatio) {
+	initViewport(width, height, preserveAspect, realAspectRatio, 1., 1.);
+    }
+    
+    public void initViewport(int width, int height, boolean preserveAspect, double realAspectRatio, double xscale, double yscale) {
 	this.width = width;
 	this.height = height;
 	this.preserveAspect = preserveAspect;
 	this.xscale = xscale;
 	this.yscale = yscale;
+	this.aspectRatio = (realAspectRatio > 0 ? realAspectRatio : getWindowAspectRatio());
     }
 
     @Override
@@ -44,7 +56,8 @@ public abstract class WindowAnimation extends XYAnimation {
 	if (preserveAspect) {
 	    windowTransform = new LayoutUtil.Transform() {
 		    public PVector2 transform(PVector2 p) {
-			return p;
+			double aspectCorrection = aspectRatio / getWindowAspectRatio();
+			return LayoutUtil.V(p.x / aspectCorrection, p.y);
 		    }
 		};
 	} else if (!transformIsDynamic) {
