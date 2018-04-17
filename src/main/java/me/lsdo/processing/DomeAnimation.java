@@ -132,6 +132,12 @@ public abstract class DomeAnimation<T extends LedPixel> {
 		((PixelTransform.TransformListener)this).transformChanged();
 	    }
 	    txChanged = false;
+	    /*
+	    System.out.println("xo: " + dome.placement.xo);
+	    System.out.println("yo: " + dome.placement.yo);
+	    System.out.println("rot: " + dome.placement.rot);
+	    System.out.println("scale: " + dome.placement.scale);
+	    */
 	}
 	
 	double deltaT = t - lastT;
