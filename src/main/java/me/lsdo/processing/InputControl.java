@@ -8,6 +8,7 @@ import org.zeromq.ZMQ.Context;
 import org.zeromq.ZMQ.Socket;
 
 enum ControlType {
+    RAW,
     BUTTON,
     SLIDER,
     JOG
@@ -32,6 +33,34 @@ public class InputControl {
         public void jog(boolean inc) {
             throw new RuntimeException("handler did not override!");
         }
+
+	public void setRaw(String s) {
+	    if (s.equals("true")) {
+		set(true);
+	    } else if (s.equals("false")) {
+		set(false);
+	    } else {
+		try {
+		    set(Double.parseDouble(s));
+		    return;
+		} catch (NumberFormatException nfe) {
+		}
+
+		set(s);
+	    }
+	}
+
+	public void set(String s) {
+            throw new RuntimeException("handler did not override!");
+	}
+	
+	public void set(double d) {
+            throw new RuntimeException("handler did not override!");
+	}
+
+	public void set(boolean b) {
+            throw new RuntimeException("handler did not override!");
+	}
     }
 
     public InputControl() {
@@ -77,8 +106,12 @@ public class InputControl {
         ControlType type;
         boolean boolVal = false;
         double realVal = -1;
-        
-        if (evt.equals("press")) {
+	String strVal = null;
+
+	if (evt.startsWith("~")) {
+	    type = ControlType.RAW;
+	    strVal = evt.substring(1);	
+        } else if (evt.equals("press")) {
             type = ControlType.BUTTON;
             boolVal = true;
         } else if (evt.equals("release")) {
@@ -99,6 +132,9 @@ public class InputControl {
         }
 
         switch (type) {
+	case RAW:
+	    handler.setRaw(strVal);
+	    break;
         case BUTTON:
             handler.button(boolVal);
             break;

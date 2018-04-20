@@ -37,11 +37,25 @@ public abstract class DomeAnimation<T extends LedPixel> {
 		    txChanged = true;
                 }
             });
+        ctrl.registerHandler("xo", new InputControl.InputHandler() {
+		@Override
+                public void set(double d) {
+		    dome.placement.xo = d;
+		    txChanged = true;
+                }
+            });
         ctrl.registerHandler("jog_b", new InputControl.InputHandler() {
 		@Override
                 public void jog(boolean pressed) {
                     boolean forward = pressed;
 		    dome.placement.yo += (forward ? 1 : -1) * .01;
+		    txChanged = true;
+                }
+            });
+        ctrl.registerHandler("yo", new InputControl.InputHandler() {
+		@Override
+                public void set(double d) {
+		    dome.placement.yo = d;
 		    txChanged = true;
                 }
             });
@@ -52,10 +66,24 @@ public abstract class DomeAnimation<T extends LedPixel> {
 		    txChanged = true;
                 }
             });
+        ctrl.registerHandler("rot", new InputControl.InputHandler() {
+		@Override
+                public void set(double d) {
+		    dome.placement.rot = Math.toRadians(d);
+		    txChanged = true;
+                }
+            });
         ctrl.registerHandler("pitch_b", new InputControl.InputHandler() {
 		@Override
                 public void slider(double val) {
 		    dome.placement.scale = Math.exp(2*(val - .5));
+		    txChanged = true;
+                }
+            });
+        ctrl.registerHandler("scale", new InputControl.InputHandler() {
+		@Override
+                public void set(double d) {
+		    dome.placement.scale = d;
 		    txChanged = true;
                 }
             });
@@ -78,9 +106,44 @@ public abstract class DomeAnimation<T extends LedPixel> {
                     }
                 }
             });
+        ctrl.registerHandler("wingmode", new InputControl.InputHandler() {
+		@Override
+                public void set(String s) {
+		    if (dome instanceof Prometheus) {
+			Prometheus p = (Prometheus)dome;
+			if (s.equals("unified")) {
+			    p.mode = WingDisplayMode.UNIFIED;
+			} else if (s.equals("mirror")) {
+			    p.mode = WingDisplayMode.MIRROR;
+			} else if (s.equals("flip")) {
+			    p.mode = WingDisplayMode.FLIP_HORIZ;
+			} else if (s.equals("opposite")) {
+			    p.mode = WingDisplayMode.ROTATE_180;
+			} else {
+			    return;
+			}
+			txChanged = true;
+                    }
+                }
+            });
         ctrl.registerHandler("playpause_b", new InputControl.InputHandler() {
 		@Override
                 public void button(boolean pressed) {
+		    if (!(dome instanceof Prometheus)) {
+			return;
+		    }
+		    Prometheus prom = ((Prometheus)dome);
+		    if (pressed) {
+			prom.startFlapping();
+		    } else {
+			prom.stopFlapping();
+		    }
+		    txChanged = true;
+                }
+            });
+        ctrl.registerHandler("flap", new InputControl.InputHandler() {
+		@Override
+                public void set(boolean pressed) {
 		    if (!(dome instanceof Prometheus)) {
 			return;
 		    }
@@ -110,6 +173,16 @@ public abstract class DomeAnimation<T extends LedPixel> {
 		    if (pressed && DomeAnimation.this instanceof WindowAnimation) {
 			WindowAnimation win = (WindowAnimation)DomeAnimation.this;
 			win.preserveAspect = !win.preserveAspect;
+			txChanged = true;
+		    }
+                }
+            });
+        ctrl.registerHandler("stretch", new InputControl.InputHandler() {
+		@Override
+                public void set(boolean b) {
+		    if (DomeAnimation.this instanceof WindowAnimation) {
+			WindowAnimation win = (WindowAnimation)DomeAnimation.this;
+			win.preserveAspect = !b;
 			txChanged = true;
 		    }
                 }
