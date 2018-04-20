@@ -125,7 +125,7 @@ public class InputControl {
             boolVal = false;
         } else {
             type = ControlType.SLIDER;
-            realVal = Integer.parseInt(evt) / 127.;
+            realVal = Double.parseDouble(evt);
             if (realVal < 0. || realVal > 1.) {
                 System.err.println("slider out of range " + realVal);
             }

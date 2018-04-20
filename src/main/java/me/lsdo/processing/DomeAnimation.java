@@ -37,6 +37,14 @@ public abstract class DomeAnimation<T extends LedPixel> {
 		    txChanged = true;
                 }
             });
+        ctrl.registerHandler("jog-xo", new InputControl.InputHandler() {
+		@Override
+                public void jog(boolean pressed) {
+                    boolean forward = pressed;
+		    dome.placement.xo += (forward ? 1 : -1) * .01;
+		    txChanged = true;
+                }
+            });
         ctrl.registerHandler("xo", new InputControl.InputHandler() {
 		@Override
                 public void set(double d) {
@@ -45,6 +53,14 @@ public abstract class DomeAnimation<T extends LedPixel> {
                 }
             });
         ctrl.registerHandler("jog_b", new InputControl.InputHandler() {
+		@Override
+                public void jog(boolean pressed) {
+                    boolean forward = pressed;
+		    dome.placement.yo += (forward ? 1 : -1) * .01;
+		    txChanged = true;
+                }
+            });
+        ctrl.registerHandler("jog-yo", new InputControl.InputHandler() {
 		@Override
                 public void jog(boolean pressed) {
                     boolean forward = pressed;
@@ -66,6 +82,14 @@ public abstract class DomeAnimation<T extends LedPixel> {
 		    txChanged = true;
                 }
             });
+        ctrl.registerHandler("jog-rot", new InputControl.InputHandler() {
+		@Override
+                public void jog(boolean pressed) {
+                    boolean forward = pressed;
+		    dome.placement.rot += (forward ? 1 : -1) * .01 * Math.PI;
+		    txChanged = true;
+                }
+            });
         ctrl.registerHandler("rot", new InputControl.InputHandler() {
 		@Override
                 public void set(double d) {
@@ -77,6 +101,14 @@ public abstract class DomeAnimation<T extends LedPixel> {
 		@Override
                 public void slider(double val) {
 		    dome.placement.scale = Math.exp(2*(val - .5));
+		    txChanged = true;
+                }
+            });
+        ctrl.registerHandler("jog-scale", new InputControl.InputHandler() {
+		@Override
+                public void jog(boolean pressed) {
+                    boolean forward = pressed;
+		    dome.placement.scale *= 1. + (forward ? 1 : -1) * .01;
 		    txChanged = true;
                 }
             });
@@ -167,6 +199,17 @@ public abstract class DomeAnimation<T extends LedPixel> {
 		    txChanged = true;
                 }
             });
+        ctrl.registerHandler("flap-angle", new InputControl.InputHandler() {
+		@Override
+                public void slider(double val) {
+		    if (!(dome instanceof Prometheus)) {
+			return;
+		    }
+		    Prometheus prom = ((Prometheus)dome);
+		    prom.setFlapAngle(prom.minFlapAngle * (1 - val) + prom.maxFlapAngle * val);
+		    txChanged = true;
+                }
+            });
         ctrl.registerHandler("load_a", new InputControl.InputHandler() {
 		@Override
                 public void button(boolean pressed) {
@@ -186,6 +229,66 @@ public abstract class DomeAnimation<T extends LedPixel> {
 			txChanged = true;
 		    }
                 }
+            });
+        ctrl.registerHandler("wingmode_unified", new InputControl.InputHandler() {
+		@Override
+                public void set(boolean pressed) {
+		    if (pressed) {
+			((Prometheus)dome).mode = WingDisplayMode.UNIFIED;
+		    }
+		    txChanged = true;
+		}
+            });
+        ctrl.registerHandler("wingmode_mirror", new InputControl.InputHandler() {
+		@Override
+                public void set(boolean pressed) {
+		    if (pressed) {
+			((Prometheus)dome).mode = WingDisplayMode.MIRROR;
+		    }
+		    txChanged = true;
+		}
+            });
+        ctrl.registerHandler("wingmode_flip", new InputControl.InputHandler() {
+		@Override
+                public void set(boolean pressed) {
+		    if (pressed) {
+			((Prometheus)dome).mode = WingDisplayMode.FLIP_HORIZ;
+		    }
+		    txChanged = true;
+		}
+            });
+        ctrl.registerHandler("wingmode_rotate", new InputControl.InputHandler() {
+		@Override
+                public void set(boolean pressed) {
+		    if (pressed) {
+			((Prometheus)dome).mode = WingDisplayMode.ROTATE_180;
+		    }
+		    txChanged = true;
+		}
+            });
+        ctrl.registerHandler("stretch_yes", new InputControl.InputHandler() {
+		@Override
+                public void set(boolean pressed) {
+		    if (pressed) {
+			if (DomeAnimation.this instanceof WindowAnimation) {
+			    WindowAnimation win = (WindowAnimation)DomeAnimation.this;
+			    win.preserveAspect = false;
+			    txChanged = true;
+			}
+		    }
+		}
+            });
+        ctrl.registerHandler("stretch_no", new InputControl.InputHandler() {
+		@Override
+                public void set(boolean pressed) {
+		    if (pressed) {
+			if (DomeAnimation.this instanceof WindowAnimation) {
+			    WindowAnimation win = (WindowAnimation)DomeAnimation.this;
+			    win.preserveAspect = true;
+			    txChanged = true;
+			}
+		    }
+		}
             });
     }
     
