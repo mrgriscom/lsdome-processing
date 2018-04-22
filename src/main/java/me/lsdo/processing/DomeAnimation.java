@@ -210,6 +210,28 @@ public abstract class DomeAnimation<T extends LedPixel> {
 		    txChanged = true;
                 }
             });
+        ctrl.registerHandler("flap-depth", new InputControl.InputHandler() {
+		@Override
+                public void slider(double val) {
+		    if (!(dome instanceof Prometheus)) {
+			return;
+		    }
+		    Prometheus prom = ((Prometheus)dome);
+		    prom.maxFlap = prom.minMaxFlap * (1 - val) + prom.maxMaxFlap * val;
+		    txChanged = true;
+                }
+            });
+        ctrl.registerHandler("flap-speed", new InputControl.InputHandler() {
+		@Override
+                public void slider(double val) {
+		    if (!(dome instanceof Prometheus)) {
+			return;
+		    }
+		    Prometheus prom = ((Prometheus)dome);
+		    prom.flapPeriod = prom.maxFlapPeriod * Math.pow(prom.minFlapPeriod / prom.maxFlapPeriod, val);
+		    txChanged = true;
+                }
+            });
         ctrl.registerHandler("load_a", new InputControl.InputHandler() {
 		@Override
                 public void button(boolean pressed) {

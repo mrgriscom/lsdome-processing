@@ -31,11 +31,16 @@ public class Prometheus extends PixelMesh<WingPixel> {
 
     WingDisplayMode mode;
 
-    double flapPeriod = .5; // seconds
-    double maxFlap = .01; // percentage
-    double flapAngle = 0; // radians
+    double maxMaxFlap = .01;
+    double minMaxFlap = .5;
     double minFlapAngle = Math.toRadians(-10);
     double maxFlapAngle = Math.toRadians(20);
+    double minFlapPeriod = .25;
+    double maxFlapPeriod = 2;
+    
+    double flapPeriod = .5; // seconds
+    double maxFlap = maxMaxFlap; // percentage
+    double flapAngle = 0; // radians
     double flapVanishingPointOffset = .25; // meters
     
     // state variables
