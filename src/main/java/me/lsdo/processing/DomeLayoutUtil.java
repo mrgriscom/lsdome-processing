@@ -232,6 +232,13 @@ public class DomeLayoutUtil {
         return LayoutUtil.basisTransform(p, U, V);
     }
 
+    // Convert a 2-vector of (U, V) coordinates from the axial coordinate scheme into (x, y) cartesian coordinates
+    public static PVector2 xyToAxial(PVector2 p) {
+	PVector2 U = V(0., 1.);
+        PVector2 V = V(2. / SQRT_3, -1. / SQRT_3);
+        return LayoutUtil.basisTransform(p, U, V);
+    }
+
     // Return the adjacent axial coordinate moving from 'p' in direction 'rot'
     public static PVector2 axialNeighbor(PVector2 p, int rot) {
         int axis = MathUtil.mod(rot, 3);
