@@ -1,6 +1,7 @@
 package me.lsdo.processing;
 
 import java.util.*;
+import java.io.*;
 
 /**
  * Created by shen on 2016/06/28.
@@ -10,21 +11,21 @@ import java.util.*;
 public abstract class DomeAnimation<T extends LedPixel> {
 
     public static final double FRAMERATE_SMOOTHING_FACTOR = .9;  // [0, 1) -- higher == smoother
-    
+
     public PixelMesh<? extends T> dome;
-    
+
     private boolean initialized = false;
     private double lastT = 0;
     public double frameRate = 0.;  // fps
 
     InputControl ctrl;
     boolean txChanged = false;
-    
+
     public DomeAnimation(PixelMesh<? extends T> dome) {
         this.dome = dome;
 	initControl();
     }
-    
+
     void initControl() {
         ctrl = new InputControl();
 	ctrl.init();
@@ -312,8 +313,44 @@ public abstract class DomeAnimation<T extends LedPixel> {
 		    }
 		}
             });
+        ctrl.registerHandler("saveplacement", new InputControl.InputHandler() {
+		@Override
+                public void set(String name) {
+                    if (!(dome instanceof Prometheus)) {
+                        return;
+                    }
+                    if (!(DomeAnimation.this instanceof WindowAnimation)) {
+                        return;
+                    }
+                    Prometheus prom = (Prometheus)dome;
+                    WindowAnimation win = (WindowAnimation)DomeAnimation.this;
+
+                    String wing_mode = null;
+                    if (prom.mode == WingDisplayMode.UNIFIED) {
+                        wing_mode = "unified";
+                    } else if (prom.mode == WingDisplayMode.MIRROR) {
+                        wing_mode = "mirror";
+                    } else if (prom.mode == WingDisplayMode.FLIP_HORIZ) {
+                        wing_mode = "flip";
+                    } else if (prom.mode == WingDisplayMode.ROTATE_180) {
+                        wing_mode = "opposite";
+                    }
+
+                    String csvLine = name+","+"preset"+","+(win.preserveAspect ? "n" : "y")
+                                       +","+wing_mode+","+Math.toDegrees(dome.placement.rot)+","
+                                       +dome.placement.xo+","+dome.placement.yo+","+dome.placement.scale;
+                    try {
+                        FileWriter w = new FileWriter(new File("/home/shen/presets/xx-" + Math.random()));
+                        w.write("name,wing_trim,stretch,wing_mode,rot,xo,yo,scale\n");
+                        w.write(csvLine+"\n");
+                        w.close();
+                    } catch (Exception e) {
+                        System.out.println("error saving preset");
+                    }
+		}
+            });
     }
-    
+
     public void draw(double t) {
 	if (!initialized) {
 	    init();
@@ -330,31 +367,31 @@ public abstract class DomeAnimation<T extends LedPixel> {
 		((PixelTransform.TransformListener)this).transformChanged();
 	    }
 	    txChanged = false;
-	    /*
+/*
 	    System.out.println("xo: " + dome.placement.xo);
 	    System.out.println("yo: " + dome.placement.yo);
 	    System.out.println("rot: " + dome.placement.rot);
 	    System.out.println("scale: " + dome.placement.scale);
-	    */
+*/
 	}
-	
+
 	double deltaT = t - lastT;
 	lastT = t;
 	updateFramerate(deltaT);
-	
+
         preFrame(t, deltaT);
         for (T c : dome.coords){
 	    if (c.spacerPixel) {
 		continue;
 	    }
-	    
+
             dome.setColor(c, drawPixel(c, t));
         }
         postFrame(t);
 	// TODO: frame post-processing (global contrast adjustment, etc.?)
 	dome.dispatch();
     }
-    
+
     public PixelMesh<? extends T> getDome(){
         return dome;
     }
@@ -376,7 +413,7 @@ public abstract class DomeAnimation<T extends LedPixel> {
      */
     protected void postFrame(double t){
     }
-    
+
     // Override: optional
     // Perform one-time initialization that for whatever reason can't be performed in the constructor
     protected void init() {}
