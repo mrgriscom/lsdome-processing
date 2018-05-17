@@ -376,6 +376,22 @@ public abstract class PixelMeshAnimation<T extends LedPixel> {
     // Perform one-time initialization that for whatever reason can't be performed in the constructor
     protected void init() {}
 
+    // Run the animation
+    // note: never returns!
+    public void run(float maxFPS) {
+	while (true) {
+            double start = Config.clock();
+            draw(start);
+            double end = Config.clock();
+            double elapsed = end - start;
+	    double delay = Math.max(1./maxFPS - elapsed, 0);
+            try {
+                Thread.sleep((int)(1000. * delay));
+            } catch (InterruptedException ie) {
+            }
+        }
+    }
+
     private void updateFramerate(double frameT) {
 	double avgFrameLen = frameRate <= 0. ? frameT : 1. / frameRate;
         avgFrameLen = FRAMERATE_SMOOTHING_FACTOR * avgFrameLen + (1 - FRAMERATE_SMOOTHING_FACTOR) * frameT;
