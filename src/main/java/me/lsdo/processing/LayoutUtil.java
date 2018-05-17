@@ -2,6 +2,8 @@ package me.lsdo.processing;
 
 import java.util.*;
 
+// Generally useful vector math and conversion functions
+
 public class LayoutUtil {
 
     // Create a new vector (x, y)

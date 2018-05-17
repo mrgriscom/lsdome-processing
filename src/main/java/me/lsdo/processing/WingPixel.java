@@ -1,6 +1,6 @@
 package me.lsdo.processing;
 
-// Representation of a coordinate within the dome pixel grid. See TriCoord.java for more info.
+// Pixel on a prometheus wing
 
 public class WingPixel extends LedPixel {
 

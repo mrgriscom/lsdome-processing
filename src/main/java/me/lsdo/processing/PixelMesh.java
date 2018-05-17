@@ -2,15 +2,18 @@
 package me.lsdo.processing;
 
 import java.util.*;
-//import processing.core.PVector;
+
+// Abstract base class of representation of mesh geometry
+// Maintains the xy positions of all pixels
+// Handles pushing pixel data to OPC
+// Manages the top-level transform of real-world pixel xy coordinates (in meters) to normalized virtual canvas-space coordinates ([-1,1])
 
 public abstract class PixelMesh<T extends LedPixel> {
 
     List<OPC> opcs;
     private int[][] opcBuffers;
 
-    // Positions of all the pixels in triangular grid coordinates (and in the order seen by
-    // the fadecandy).
+    // All pixels, in the order seen by the fadecandies.
     public ArrayList<T> coords;
     public PixelTransform transform;
 

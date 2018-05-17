@@ -9,6 +9,8 @@ enum PanelLayout {
     _24
 }
 
+// Util functions specifically for laying out the dome panel geometry
+
 public class DomeLayoutUtil {
 
     static PVector2 V(double x, double y) {

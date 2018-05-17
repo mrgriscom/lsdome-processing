@@ -386,7 +386,7 @@ public abstract class PixelMeshAnimation<T extends LedPixel> {
             double elapsed = end - start;
 	    double delay = Math.max(1./maxFPS - elapsed, 0);
             try {
-                Thread.sleep((int)(1000. * delay));
+                Thread.sleep((int)Math.round(1000. * delay));
             } catch (InterruptedException ie) {
             }
         }

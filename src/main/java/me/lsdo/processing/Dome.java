@@ -1,14 +1,8 @@
-/**
- * The abstract structure of the dome. No aware of any sketches.
- *
- * Config is pulled in from elsewhere, and the layout is mostly done by layout util, so class is a little bit
- * thin right now.
- */
-
 package me.lsdo.processing;
 
 import java.util.*;
-//import processing.core.PVector;
+
+// Dome geometry, for a few different supported #s of panels
 
 public class Dome extends PixelMesh<DomePixel> {
 

@@ -21,4 +21,19 @@ public class MathUtil {
         return Math.log(x) / LN2;
     }
 
+    // easings: some curve connecting (0,0) to (1,1)
+    public static double linearEasing(double x) {
+	return x;
+    }
+    public static double sineEasing(double x) {
+	return .5*(1 - Math.cos(x * Math.PI));
+    }
+    public static double polyEasing(double x) {
+	return polyEasing(x, 3.);
+    }
+    public static double polyEasing(double x, double power) {
+	double k = Math.pow(1 - Math.abs(2*x - 1), power);
+	return (x < .5 ? .5*k : 1 - .5*k);
+    }
+
 }

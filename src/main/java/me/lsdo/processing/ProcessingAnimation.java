@@ -39,6 +39,9 @@ public class ProcessingAnimation extends WindowAnimation {
     @Override
     protected void postFrame(double t){
 
+	// the screen positions of the pixels could be computed once per transform change for
+	// increased efficiency, but we seem to be doing ok as-is
+	
         // draw pixel locations onto the processing canvas for clarity
 	int[] ixs = new int[mesh.coords.size()];
 	for (int i = 0; i < ixs.length; i++) {
