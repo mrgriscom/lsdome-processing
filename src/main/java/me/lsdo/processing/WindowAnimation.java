@@ -6,9 +6,14 @@ import java.util.*;
 
 public abstract class WindowAnimation extends XYAnimation {
 
+    // window width in pixels
     int width;
+    // window height in pixels
     int height;
+    // if false, stretch the mesh geometry independently in the x- and y-axes to maximally cover the window
     public boolean preserveAspect;
+    // downscale the window to squeeze more window area onto geometry with irregular edges, at the expense
+    // of leaving some of the geometry blank / outside of the window area
     double xscale;
     double yscale;
     // sometimes the content must be squeezed to fit the window; if so, this represents the
@@ -20,12 +25,12 @@ public abstract class WindowAnimation extends XYAnimation {
 
     public double outsideViewportProportion;
     
-    public WindowAnimation(final PixelMesh<? extends LedPixel> dome, int antiAliasingSamples) {
-        super(dome, antiAliasingSamples);
+    public WindowAnimation(final PixelMesh<? extends LedPixel> mesh, int antiAliasingSamples) {
+        super(mesh, antiAliasingSamples);
 
 	transform = new PixelTransform() {
 		public PVector2 transform(LedPixel px, PVector2 offset) {
-		    return windowTransform.transform(dome.transform.transform(px, offset));
+		    return windowTransform.transform(mesh.transform.transform(px, offset));
 		}
 	    };
     }
@@ -61,7 +66,7 @@ public abstract class WindowAnimation extends XYAnimation {
 		    }
 		};
 	} else if (!transformIsDynamic) {
-	    windowTransform = dome.stretchToViewport(width, height, xscale, yscale);
+	    windowTransform = mesh.stretchToViewport(width, height, xscale, yscale);
 	}
 	applyTransform(transform);
 	outsideViewportProportion = proportionOutsideBounds();

@@ -94,7 +94,7 @@ public class Prometheus extends PixelMesh<WingPixel> {
 	//return (x < .5 ? .5*k : 1 - .5*k);
     }
 
-    boolean manageFlapState(DomeAnimation anim) {
+    boolean manageFlapState(PixelMeshAnimation anim) {
 	boolean active = flappingActive();
 	if (active) {
 	    double flapProgress = ((Config.clock() - flappingStart) / flapPeriod) % 1.; // 0 to 1

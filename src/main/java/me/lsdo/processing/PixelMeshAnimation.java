@@ -3,15 +3,14 @@ package me.lsdo.processing;
 import java.util.*;
 
 /**
- * Created by shen on 2016/06/28.
- *
- * THis forms the basis for a dome animation.
+ * Superclass of all animation classes: takes a geometry, invokes a function to get the
+ * color of each pixel for each frame, manages framerate, etc.
  */
-public abstract class DomeAnimation<T extends LedPixel> {
+public abstract class PixelMeshAnimation<T extends LedPixel> {
 
     public static final double FRAMERATE_SMOOTHING_FACTOR = .9;  // [0, 1) -- higher == smoother
     
-    public PixelMesh<? extends T> dome;
+    public PixelMesh<? extends T> mesh;
     
     private boolean initialized = false;
     private double lastT = 0;
@@ -20,8 +19,8 @@ public abstract class DomeAnimation<T extends LedPixel> {
     InputControl ctrl;
     boolean txChanged = false;
     
-    public DomeAnimation(PixelMesh<? extends T> dome) {
-        this.dome = dome;
+    public PixelMeshAnimation(PixelMesh<? extends T> mesh) {
+        this.mesh = mesh;
 	initControl();
     }
     
@@ -33,7 +32,7 @@ public abstract class DomeAnimation<T extends LedPixel> {
 		@Override
                 public void jog(boolean pressed) {
                     boolean forward = pressed;
-		    dome.placement.xo += (forward ? 1 : -1) * .01;
+		    mesh.placement.xo += (forward ? 1 : -1) * .01;
 		    txChanged = true;
                 }
             });
@@ -41,14 +40,14 @@ public abstract class DomeAnimation<T extends LedPixel> {
 		@Override
                 public void jog(boolean pressed) {
                     boolean forward = pressed;
-		    dome.placement.xo += (forward ? 1 : -1) * .01;
+		    mesh.placement.xo += (forward ? 1 : -1) * .01;
 		    txChanged = true;
                 }
             });
         ctrl.registerHandler("xo", new InputControl.InputHandler() {
 		@Override
                 public void set(double d) {
-		    dome.placement.xo = d;
+		    mesh.placement.xo = d;
 		    txChanged = true;
                 }
             });
@@ -56,7 +55,7 @@ public abstract class DomeAnimation<T extends LedPixel> {
 		@Override
                 public void jog(boolean pressed) {
                     boolean forward = pressed;
-		    dome.placement.yo += (forward ? 1 : -1) * .01;
+		    mesh.placement.yo += (forward ? 1 : -1) * .01;
 		    txChanged = true;
                 }
             });
@@ -64,21 +63,21 @@ public abstract class DomeAnimation<T extends LedPixel> {
 		@Override
                 public void jog(boolean pressed) {
                     boolean forward = pressed;
-		    dome.placement.yo += (forward ? 1 : -1) * .01;
+		    mesh.placement.yo += (forward ? 1 : -1) * .01;
 		    txChanged = true;
                 }
             });
         ctrl.registerHandler("yo", new InputControl.InputHandler() {
 		@Override
                 public void set(double d) {
-		    dome.placement.yo = d;
+		    mesh.placement.yo = d;
 		    txChanged = true;
                 }
             });
         ctrl.registerHandler("pitch_a", new InputControl.InputHandler() {
 		@Override
                 public void slider(double val) {
-		    dome.placement.rot = 2*Math.PI*(val - .5);
+		    mesh.placement.rot = 2*Math.PI*(val - .5);
 		    txChanged = true;
                 }
             });
@@ -86,21 +85,21 @@ public abstract class DomeAnimation<T extends LedPixel> {
 		@Override
                 public void jog(boolean pressed) {
                     boolean forward = pressed;
-		    dome.placement.rot += (forward ? 1 : -1) * .01 * Math.PI;
+		    mesh.placement.rot += (forward ? 1 : -1) * .01 * Math.PI;
 		    txChanged = true;
                 }
             });
         ctrl.registerHandler("rot", new InputControl.InputHandler() {
 		@Override
                 public void set(double d) {
-		    dome.placement.rot = Math.toRadians(d);
+		    mesh.placement.rot = Math.toRadians(d);
 		    txChanged = true;
                 }
             });
         ctrl.registerHandler("pitch_b", new InputControl.InputHandler() {
 		@Override
                 public void slider(double val) {
-		    dome.placement.scale = Math.exp(2*(val - .5));
+		    mesh.placement.scale = Math.exp(2*(val - .5));
 		    txChanged = true;
                 }
             });
@@ -108,14 +107,14 @@ public abstract class DomeAnimation<T extends LedPixel> {
 		@Override
                 public void jog(boolean pressed) {
                     boolean forward = pressed;
-		    dome.placement.scale *= 1. + (forward ? 1 : -1) * .01;
+		    mesh.placement.scale *= 1. + (forward ? 1 : -1) * .01;
 		    txChanged = true;
                 }
             });
         ctrl.registerHandler("scale", new InputControl.InputHandler() {
 		@Override
                 public void set(double d) {
-		    dome.placement.scale = d;
+		    mesh.placement.scale = d;
 		    txChanged = true;
                 }
             });
@@ -123,8 +122,8 @@ public abstract class DomeAnimation<T extends LedPixel> {
 		@Override
                 public void button(boolean pressed) {
                     if (pressed) {
-			if (dome instanceof Prometheus) {
-			    Prometheus p = (Prometheus)dome;
+			if (mesh instanceof Prometheus) {
+			    Prometheus p = (Prometheus)mesh;
 			    WingDisplayMode[] modes = WingDisplayMode.values();
 			    for (int i = 0; i < modes.length; i++) {
 				if (p.mode == modes[i]) {
@@ -141,8 +140,8 @@ public abstract class DomeAnimation<T extends LedPixel> {
         ctrl.registerHandler("wingmode", new InputControl.InputHandler() {
 		@Override
                 public void set(String s) {
-		    if (dome instanceof Prometheus) {
-			Prometheus p = (Prometheus)dome;
+		    if (mesh instanceof Prometheus) {
+			Prometheus p = (Prometheus)mesh;
 			if (s.equals("unified")) {
 			    p.mode = WingDisplayMode.UNIFIED;
 			} else if (s.equals("mirror")) {
@@ -161,10 +160,10 @@ public abstract class DomeAnimation<T extends LedPixel> {
         ctrl.registerHandler("playpause_b", new InputControl.InputHandler() {
 		@Override
                 public void button(boolean pressed) {
-		    if (!(dome instanceof Prometheus)) {
+		    if (!(mesh instanceof Prometheus)) {
 			return;
 		    }
-		    Prometheus prom = ((Prometheus)dome);
+		    Prometheus prom = ((Prometheus)mesh);
 		    if (pressed) {
 			prom.startFlapping();
 		    } else {
@@ -176,10 +175,10 @@ public abstract class DomeAnimation<T extends LedPixel> {
         ctrl.registerHandler("flap", new InputControl.InputHandler() {
 		@Override
                 public void set(boolean pressed) {
-		    if (!(dome instanceof Prometheus)) {
+		    if (!(mesh instanceof Prometheus)) {
 			return;
 		    }
-		    Prometheus prom = ((Prometheus)dome);
+		    Prometheus prom = ((Prometheus)mesh);
 		    if (pressed) {
 			prom.startFlapping();
 		    } else {
@@ -191,10 +190,10 @@ public abstract class DomeAnimation<T extends LedPixel> {
         ctrl.registerHandler("mixer", new InputControl.InputHandler() {
 		@Override
                 public void slider(double val) {
-		    if (!(dome instanceof Prometheus)) {
+		    if (!(mesh instanceof Prometheus)) {
 			return;
 		    }
-		    Prometheus prom = ((Prometheus)dome);
+		    Prometheus prom = ((Prometheus)mesh);
 		    prom.setFlapAngle(prom.minFlapAngle * (1 - val) + prom.maxFlapAngle * val);
 		    txChanged = true;
                 }
@@ -202,10 +201,10 @@ public abstract class DomeAnimation<T extends LedPixel> {
         ctrl.registerHandler("flap-angle", new InputControl.InputHandler() {
 		@Override
                 public void slider(double val) {
-		    if (!(dome instanceof Prometheus)) {
+		    if (!(mesh instanceof Prometheus)) {
 			return;
 		    }
-		    Prometheus prom = ((Prometheus)dome);
+		    Prometheus prom = ((Prometheus)mesh);
 		    prom.setFlapAngle(prom.minFlapAngle * (1 - val) + prom.maxFlapAngle * val);
 		    txChanged = true;
                 }
@@ -213,10 +212,10 @@ public abstract class DomeAnimation<T extends LedPixel> {
         ctrl.registerHandler("flap-depth", new InputControl.InputHandler() {
 		@Override
                 public void slider(double val) {
-		    if (!(dome instanceof Prometheus)) {
+		    if (!(mesh instanceof Prometheus)) {
 			return;
 		    }
-		    Prometheus prom = ((Prometheus)dome);
+		    Prometheus prom = ((Prometheus)mesh);
 		    prom.maxFlap = prom.minMaxFlap * (1 - val) + prom.maxMaxFlap * val;
 		    txChanged = true;
                 }
@@ -224,10 +223,10 @@ public abstract class DomeAnimation<T extends LedPixel> {
         ctrl.registerHandler("flap-speed", new InputControl.InputHandler() {
 		@Override
                 public void slider(double val) {
-		    if (!(dome instanceof Prometheus)) {
+		    if (!(mesh instanceof Prometheus)) {
 			return;
 		    }
-		    Prometheus prom = ((Prometheus)dome);
+		    Prometheus prom = ((Prometheus)mesh);
 		    prom.flapPeriod = prom.maxFlapPeriod * Math.pow(prom.minFlapPeriod / prom.maxFlapPeriod, val);
 		    txChanged = true;
                 }
@@ -235,8 +234,8 @@ public abstract class DomeAnimation<T extends LedPixel> {
         ctrl.registerHandler("load_a", new InputControl.InputHandler() {
 		@Override
                 public void button(boolean pressed) {
-		    if (pressed && DomeAnimation.this instanceof WindowAnimation) {
-			WindowAnimation win = (WindowAnimation)DomeAnimation.this;
+		    if (pressed && PixelMeshAnimation.this instanceof WindowAnimation) {
+			WindowAnimation win = (WindowAnimation)PixelMeshAnimation.this;
 			win.preserveAspect = !win.preserveAspect;
 			txChanged = true;
 		    }
@@ -245,8 +244,8 @@ public abstract class DomeAnimation<T extends LedPixel> {
         ctrl.registerHandler("stretch", new InputControl.InputHandler() {
 		@Override
                 public void set(boolean b) {
-		    if (DomeAnimation.this instanceof WindowAnimation) {
-			WindowAnimation win = (WindowAnimation)DomeAnimation.this;
+		    if (PixelMeshAnimation.this instanceof WindowAnimation) {
+			WindowAnimation win = (WindowAnimation)PixelMeshAnimation.this;
 			win.preserveAspect = !b;
 			txChanged = true;
 		    }
@@ -256,7 +255,7 @@ public abstract class DomeAnimation<T extends LedPixel> {
 		@Override
                 public void set(boolean pressed) {
 		    if (pressed) {
-			((Prometheus)dome).mode = WingDisplayMode.UNIFIED;
+			((Prometheus)mesh).mode = WingDisplayMode.UNIFIED;
 		    }
 		    txChanged = true;
 		}
@@ -265,7 +264,7 @@ public abstract class DomeAnimation<T extends LedPixel> {
 		@Override
                 public void set(boolean pressed) {
 		    if (pressed) {
-			((Prometheus)dome).mode = WingDisplayMode.MIRROR;
+			((Prometheus)mesh).mode = WingDisplayMode.MIRROR;
 		    }
 		    txChanged = true;
 		}
@@ -274,7 +273,7 @@ public abstract class DomeAnimation<T extends LedPixel> {
 		@Override
                 public void set(boolean pressed) {
 		    if (pressed) {
-			((Prometheus)dome).mode = WingDisplayMode.FLIP_HORIZ;
+			((Prometheus)mesh).mode = WingDisplayMode.FLIP_HORIZ;
 		    }
 		    txChanged = true;
 		}
@@ -283,7 +282,7 @@ public abstract class DomeAnimation<T extends LedPixel> {
 		@Override
                 public void set(boolean pressed) {
 		    if (pressed) {
-			((Prometheus)dome).mode = WingDisplayMode.ROTATE_180;
+			((Prometheus)mesh).mode = WingDisplayMode.ROTATE_180;
 		    }
 		    txChanged = true;
 		}
@@ -292,8 +291,8 @@ public abstract class DomeAnimation<T extends LedPixel> {
 		@Override
                 public void set(boolean pressed) {
 		    if (pressed) {
-			if (DomeAnimation.this instanceof WindowAnimation) {
-			    WindowAnimation win = (WindowAnimation)DomeAnimation.this;
+			if (PixelMeshAnimation.this instanceof WindowAnimation) {
+			    WindowAnimation win = (WindowAnimation)PixelMeshAnimation.this;
 			    win.preserveAspect = false;
 			    txChanged = true;
 			}
@@ -304,8 +303,8 @@ public abstract class DomeAnimation<T extends LedPixel> {
 		@Override
                 public void set(boolean pressed) {
 		    if (pressed) {
-			if (DomeAnimation.this instanceof WindowAnimation) {
-			    WindowAnimation win = (WindowAnimation)DomeAnimation.this;
+			if (PixelMeshAnimation.this instanceof WindowAnimation) {
+			    WindowAnimation win = (WindowAnimation)PixelMeshAnimation.this;
 			    win.preserveAspect = true;
 			    txChanged = true;
 			}
@@ -322,7 +321,7 @@ public abstract class DomeAnimation<T extends LedPixel> {
 
 	ctrl.processInput();
 	// hacky
-	if (dome instanceof Prometheus && ((Prometheus)dome).manageFlapState(this)) {
+	if (mesh instanceof Prometheus && ((Prometheus)mesh).manageFlapState(this)) {
 	    txChanged = true;
 	}
 	if (txChanged) {
@@ -331,10 +330,10 @@ public abstract class DomeAnimation<T extends LedPixel> {
 	    }
 	    txChanged = false;
 	    /*
-	    System.out.println("xo: " + dome.placement.xo);
-	    System.out.println("yo: " + dome.placement.yo);
-	    System.out.println("rot: " + dome.placement.rot);
-	    System.out.println("scale: " + dome.placement.scale);
+	    System.out.println("xo: " + mesh.placement.xo);
+	    System.out.println("yo: " + mesh.placement.yo);
+	    System.out.println("rot: " + mesh.placement.rot);
+	    System.out.println("scale: " + mesh.placement.scale);
 	    */
 	}
 	
@@ -343,22 +342,18 @@ public abstract class DomeAnimation<T extends LedPixel> {
 	updateFramerate(deltaT);
 	
         preFrame(t, deltaT);
-        for (T c : dome.coords){
+        for (T c : mesh.coords){
 	    if (c.spacerPixel) {
 		continue;
 	    }
 	    
-            dome.setColor(c, drawPixel(c, t));
+            mesh.setColor(c, drawPixel(c, t));
         }
         postFrame(t);
 	// TODO: frame post-processing (global contrast adjustment, etc.?)
-	dome.dispatch();
+	mesh.dispatch();
     }
     
-    public PixelMesh<? extends T> getDome(){
-        return dome;
-    }
-
     // Main method that need to be implemented.
     protected abstract int drawPixel(T c, double t);
 

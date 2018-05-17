@@ -9,19 +9,19 @@ import processing.data.JSONObject;
 import java.util.*;
 
 /**
- * Created by shen on 2016/06/26.
+ * Animation that wraps a processing app/sketch and sources pixels from the sketch's canvas
  */
-public class CanvasSketch extends WindowAnimation {
+public class ProcessingAnimation extends WindowAnimation {
 
     protected PApplet app;
     private static int DEFAULT_AA = 8;
 
-    public CanvasSketch(PApplet app, PixelMesh<? extends LedPixel> dome){
-        this(app, dome, Config.getSketchProperty("subsampling", DEFAULT_AA));
+    public ProcessingAnimation(PApplet app, PixelMesh<? extends LedPixel> mesh){
+        this(app, mesh, Config.getSketchProperty("subsampling", DEFAULT_AA));
     }
 
-    public CanvasSketch(PApplet app, PixelMesh<? extends LedPixel> dome, int antiAliasingSamples){
-        super(dome, antiAliasingSamples);
+    public ProcessingAnimation(PApplet app, PixelMesh<? extends LedPixel> mesh, int antiAliasingSamples){
+        super(mesh, antiAliasingSamples);
         this.app = app;
 	initViewport(app.width, app.height, true);
     }
@@ -39,10 +39,10 @@ public class CanvasSketch extends WindowAnimation {
     @Override
     protected void postFrame(double t){
 
-        // draw pixel locations
-	int[] ixs = new int[dome.coords.size()];
+        // draw pixel locations onto the processing canvas for clarity
+	int[] ixs = new int[mesh.coords.size()];
 	for (int i = 0; i < ixs.length; i++) {
-	    LedPixel c = dome.coords.get(i);
+	    LedPixel c = mesh.coords.get(i);
 	    if (c.spacerPixel) {
 		ixs[i] = -1;
 	    } else {
@@ -67,7 +67,7 @@ public class CanvasSketch extends WindowAnimation {
 
         // on screen text
         app.fill(127f, 256f);
-        app.text("opc @" + dome.getOpcHosts(), 100, app.height - 10);
+        app.text("opc @" + mesh.getOpcHosts(), 100, app.height - 10);
         app.text(String.format("%.1ffps", app.frameRate), 10, app.height - 10);
 
     }

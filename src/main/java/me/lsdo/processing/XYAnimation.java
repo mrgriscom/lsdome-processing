@@ -2,36 +2,39 @@ package me.lsdo.processing;
 
 // Template for sketches that compute pixel values directly based on their (x,y) position within a
 // a scene. This implies you have a sampling function to render a scene pixel-by-pixel (such as
-// ray-tracing and fractals). This sketch is also used to sample rendered pixels from a processing
-// canvas via CanvasSketch. Spatial anti-aliasing is supported. Variable-density sub-sampling is
-// supported.
+// ray-tracing and fractals). This sketch is also used to sample pixels from a pre-rendered screen
+// (including all processing sketches) via WindowAnimation.
+// Spatial anti-aliasing is supported.
+// Variable-density sub-sampling is supported.
 
 import java.util.*;
 
-public abstract class XYAnimation extends DomeAnimation<LedPixel> implements PixelTransform.TransformListener {
+public abstract class XYAnimation extends PixelMeshAnimation<LedPixel> implements PixelTransform.TransformListener {
 
     static final int DEFAULT_BASE_SUBSAMPLING = 1;
     static final int MAX_SUBSAMPLING = 64;
     
     private int baseSubsampling;
     private int dynamicSubsampling;
+    // true when the transform is expected to be changing a lot (like, per frame); we'll likely want to reduce
+    // amount of anti-aliasing to preserve CPU and framerate
     protected boolean transformIsDynamic = false;
     
     // Mapping of display pixels to 1 or more actual samples that will be combined to yield that
-    // display pixel's color. Most simply the samples will be xy-coordinates near the dome pixels,
+    // display pixel's color. Most simply the samples will be xy-coordinates near the mesh pixels,
     // though they may also be transformed into some intermediate vector space (screen pixels, a
     // UV-mapped texture, etc.) for efficiency.
     protected HashMap<LedPixel, ArrayList<PVector2>> points_ir;
 
-    public XYAnimation(PixelMesh<? extends LedPixel> dome) {
-        this(dome, Config.getSketchProperty("subsampling", DEFAULT_BASE_SUBSAMPLING));
+    public XYAnimation(PixelMesh<? extends LedPixel> mesh) {
+        this(mesh, Config.getSketchProperty("subsampling", DEFAULT_BASE_SUBSAMPLING));
     }
 
     // Assign each display pixel to N random samples based on the required amount of subsampling.
     // Furthermore, each subsample is converted to its intermediate representation to avoid
     // re-computing it every frame.
-    public XYAnimation(PixelMesh<? extends LedPixel> dome, int baseSubsampling) {
-        super(dome);
+    public XYAnimation(PixelMesh<? extends LedPixel> mesh, int baseSubsampling) {
+        super(mesh);
 	this.baseSubsampling = baseSubsampling;
 	this.dynamicSubsampling = Config.getSketchProperty("dynamic_subsampling", (int)Math.ceil(.3 * baseSubsampling));
     }
@@ -42,7 +45,7 @@ public abstract class XYAnimation extends DomeAnimation<LedPixel> implements Pix
     }
 
     public void transformChanged() {
-	applyTransform(dome.transform);
+	applyTransform(mesh.transform);
     }
 
     public void dynamicTransformMode(boolean enabled) {
@@ -57,7 +60,7 @@ public abstract class XYAnimation extends DomeAnimation<LedPixel> implements Pix
     public void applyTransform(PixelTransform tx) {
         points_ir = new HashMap<LedPixel, ArrayList<PVector2>>();
         int total_subsamples = 0;
-        for (LedPixel c : dome.coords) {
+        for (LedPixel c : mesh.coords) {
             ArrayList<PVector2> samples = new ArrayList<PVector2>();
             points_ir.put(c, samples);
 
@@ -68,7 +71,7 @@ public abstract class XYAnimation extends DomeAnimation<LedPixel> implements Pix
             for (int i = 0; i < num_subsamples; i++) {
                 PVector2 offset = (jitter ?
 				   LayoutUtil.polarToXy(LayoutUtil.V(
-				    Math.random() * dome.getPixelBufferRadius(),
+				    Math.random() * mesh.getPixelBufferRadius(),
 				    Math.random() * 2*Math.PI
                                   )) :
                                   LayoutUtil.V(0, 0));
@@ -80,7 +83,7 @@ public abstract class XYAnimation extends DomeAnimation<LedPixel> implements Pix
         }
 
         System.out.println(String.format("%d subsamples for %d pixels (%.1f samples/pixel)",
-					 total_subsamples, dome.getNumPoints(), (double)total_subsamples / dome.getNumPoints()));
+					 total_subsamples, mesh.getNumPoints(), (double)total_subsamples / mesh.getNumPoints()));
     }
     
     @Override
