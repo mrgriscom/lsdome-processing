@@ -1,10 +1,9 @@
 // Global configuration variables.
-package me.lsdo.processing;
+package me.lsdo.processing.util;
 
 import java.util.*;
 import java.io.*;
-
-
+import me.lsdo.processing.OPC;
 
 public class Config {
 
@@ -136,8 +135,5 @@ public class Config {
 	}
 	return opcs;
     }
-    
-    // Size of single panel's pixel grid.
-    static final int PANEL_SIZE = 15;
 
 }

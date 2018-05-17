@@ -1,26 +1,32 @@
-package me.lsdo.processing;
+package me.lsdo.processing.geometry.prometheus;
 
 import java.util.*;
 import java.io.*;
 import com.google.gson.*;
 import com.google.gson.stream.*;
+import me.lsdo.processing.LedPixel;
+import me.lsdo.processing.PixelMesh;
+import me.lsdo.processing.PixelMeshAnimation;
+import me.lsdo.processing.PixelTransform;
+import me.lsdo.processing.OPC;
+import me.lsdo.processing.util.*;
 
 // Prometheus geometry. Reads first wing's pixel positions from simulator json config. Maps 2nd wing
 // relative to 1st wing according to several different modes.
 
-// How to map 2nd wing relative to 1st wing
-enum WingDisplayMode {
-    // Keep the 2nd wing locked relative to the 1st wing, to match how they appear in real life; transform them as a single unit
-    UNIFIED,
-    // Mirror the 1st wing to the 2nd wing exactly (reverses display on 2nd wing)
-    MIRROR,
-    // Flip the 1st wing along the horizontal axis of the screen to get the placement of the 2nd wing
-    FLIP_HORIZ,
-    // Rotate the 1st wing 180deg around the canvas origin to get the placement of the 2nd wing
-    ROTATE_180
-};
-
 public class Prometheus extends PixelMesh<WingPixel> {
+
+    // How to map 2nd wing relative to 1st wing
+    public static enum WingDisplayMode {
+	// Keep the 2nd wing locked relative to the 1st wing, to match how they appear in real life; transform them as a single unit
+	UNIFIED,
+	// Mirror the 1st wing to the 2nd wing exactly (reverses display on 2nd wing)
+	MIRROR,
+	// Flip the 1st wing along the horizontal axis of the screen to get the placement of the 2nd wing
+	FLIP_HORIZ,
+	// Rotate the 1st wing 180deg around the canvas origin to get the placement of the 2nd wing
+	ROTATE_180
+    }
 
     static final double PLATFORM_WIDTH = 1.; // m
     static final double WINGSPAN = 15.5; // m (factors in platform_width)
@@ -30,7 +36,7 @@ public class Prometheus extends PixelMesh<WingPixel> {
 	double[] point;
     }
 
-    WingDisplayMode mode;
+    public WingDisplayMode mode;
     
     // left and right are from the butterfly's perspective
     public Prometheus(OPC opcLeft, OPC opcRight) {
@@ -178,16 +184,16 @@ public class Prometheus extends PixelMesh<WingPixel> {
     ////////// FLAPPING
     
     // flapping parameter limits
-    double maxMaxFlap = .01;
-    double minMaxFlap = .5;
-    double minFlapAngle = Math.toRadians(-10);
-    double maxFlapAngle = Math.toRadians(20);
-    double minFlapPeriod = .25;
-    double maxFlapPeriod = 2;
+    public double maxMaxFlap = .01;
+    public double minMaxFlap = .5;
+    public double minFlapAngle = Math.toRadians(-10);
+    public double maxFlapAngle = Math.toRadians(20);
+    public double minFlapPeriod = .25;
+    public double maxFlapPeriod = 2;
 
     // flapping parameters
-    double flapPeriod = .5; // seconds
-    double maxFlap = maxMaxFlap; // percentage
+    public double flapPeriod = .5; // seconds
+    public double maxFlap = maxMaxFlap; // percentage
     double flapAngle = 0; // radians
     double flapVanishingPointOffset = .25; // meters
     
@@ -198,7 +204,7 @@ public class Prometheus extends PixelMesh<WingPixel> {
     double flapOrigin;
     boolean isFlapping = false;
     
-    void setFlapAngle(double flapAngle) {
+    public void setFlapAngle(double flapAngle) {
 	this.flapAngle = flapAngle;
 
 	double min = Double.POSITIVE_INFINITY;
@@ -213,14 +219,14 @@ public class Prometheus extends PixelMesh<WingPixel> {
 	flapOrigin = min - flapVanishingPointOffset;
     }
     
-    void startFlapping() {
+    public void startFlapping() {
 	if (!flappingActive()) {
 	    flappingStart = Config.clock();
 	}
 	flappingEnd = -1;
     }
 
-    void stopFlapping() {
+    public void stopFlapping() {
 	flappingEnd = flappingStart + flapPeriod * Math.ceil((Config.clock() - flappingStart) / flapPeriod);
     }
 
@@ -232,7 +238,7 @@ public class Prometheus extends PixelMesh<WingPixel> {
 	return MathUtil.sineEasing(x);
     }
     
-    boolean manageFlapState(PixelMeshAnimation anim) {
+    public boolean manageFlapState(PixelMeshAnimation anim) {
 	boolean active = flappingActive();
 	if (active) {
 	    double flapProgress = ((Config.clock() - flappingStart) / flapPeriod) % 1.; // 0 to 1

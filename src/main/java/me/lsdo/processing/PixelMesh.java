@@ -2,6 +2,7 @@
 package me.lsdo.processing;
 
 import java.util.*;
+import me.lsdo.processing.util.*;
 
 // Abstract base class of representation of mesh geometry
 // Maintains the xy positions of all pixels
@@ -10,14 +11,14 @@ import java.util.*;
 
 public abstract class PixelMesh<T extends LedPixel> {
 
-    List<OPC> opcs;
+    public List<OPC> opcs;
     private int[][] opcBuffers;
 
     // All pixels, in the order seen by the fadecandies.
     public ArrayList<T> coords;
     public PixelTransform transform;
 
-    static class PlacementTransform implements LayoutUtil.Transform {
+    public static class PlacementTransform implements LayoutUtil.Transform {
 	double xo = Config.getSketchProperty("place_x", 0.);
 	double yo = Config.getSketchProperty("place_y", 0.);
 	double scale = Config.getSketchProperty("place_scale", 1.);

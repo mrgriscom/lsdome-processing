@@ -1,8 +1,10 @@
 package me.lsdo.processing;
 
+import me.lsdo.processing.util.*;
+
 public abstract class PixelTransform {
 
-    static interface TransformListener {
+    public static interface TransformListener {
 	public void transformChanged();
 
 	// indicates whether the transform is expected to be changing a lot

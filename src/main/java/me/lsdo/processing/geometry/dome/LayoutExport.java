@@ -1,13 +1,14 @@
-package me.lsdo.processing;
+package me.lsdo.processing.geometry.dome;
 
 import java.util.*;
 import java.io.*;
 import processing.data.*;
+import me.lsdo.processing.util.*;
 
 // Utility class to dump the various panel layouts to json format readable by the OPC simulator.
 
 // To run:
-// java -cp library/lsdome.jar:$HOME/processing-2.2.1/core/library/core.jar me.lsdo.processing.LayoutExport
+// java -cp library/lsdome.jar:$HOME/processing-2.2.1/core/library/core.jar me.lsdo.processing.geometry.dome.LayoutExport
 
 public class LayoutExport {
 

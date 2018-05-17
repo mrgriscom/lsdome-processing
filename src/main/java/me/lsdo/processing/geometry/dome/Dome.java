@@ -1,11 +1,17 @@
-package me.lsdo.processing;
+package me.lsdo.processing.geometry.dome;
 
 import java.util.*;
+import me.lsdo.processing.PixelMesh;
+import me.lsdo.processing.OPC;
+import me.lsdo.processing.util.*;
 
 // Dome geometry, for a few different supported #s of panels
 
 public class Dome extends PixelMesh<DomePixel> {
-
+    
+    // Size of single panel's pixel grid.
+    public static final int PANEL_SIZE = 15;
+    
     // Size of a single panel's pixel grid
     private int panel_size;
 
@@ -27,7 +33,7 @@ public class Dome extends PixelMesh<DomePixel> {
 	opcs.add(opc);
 	
         // e.g. 15
-        panel_size = Config.PANEL_SIZE;
+        panel_size = PANEL_SIZE;
 
 	DomeLayoutUtil.PanelConfig config = DomeLayoutUtil.getPanelConfig(layout);
 	

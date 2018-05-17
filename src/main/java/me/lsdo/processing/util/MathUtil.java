@@ -1,4 +1,4 @@
-package me.lsdo.processing;
+package me.lsdo.processing.util;
 
 public class MathUtil {
 

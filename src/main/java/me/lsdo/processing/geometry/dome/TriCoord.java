@@ -1,8 +1,7 @@
-package me.lsdo.processing;
+package me.lsdo.processing.geometry.dome;
 
 import java.util.*;
-
-//import processing.core.PVector;
+import me.lsdo.processing.util.*;
 
 // Representation of a lattice (integer) coordinate within a 3-axis triangular coordinate system.
 // Unlike a two-axis x/y coordinate system, a triangular lattice has points along 3 axes. It is

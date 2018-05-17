@@ -1,6 +1,7 @@
 package me.lsdo.processing;
 
 import java.util.*;
+import me.lsdo.processing.util.*;
 
 // Animations that sample from a pre-rendered window / 2d array of pixels.
 

@@ -1,12 +1,8 @@
 package me.lsdo.processing;
 
-import processing.core.PApplet;
-
-import processing.data.FloatList;
-import processing.data.JSONArray;
-import processing.data.JSONObject;
-
 import java.util.*;
+import processing.core.PApplet;
+import me.lsdo.processing.util.*;
 
 /**
  * Animation that wraps a processing app/sketch and sources pixels from the sketch's canvas

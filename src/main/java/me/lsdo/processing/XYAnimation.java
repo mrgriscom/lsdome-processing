@@ -8,6 +8,7 @@ package me.lsdo.processing;
 // Variable-density sub-sampling is supported.
 
 import java.util.*;
+import me.lsdo.processing.util.*;
 
 public abstract class XYAnimation extends PixelMeshAnimation<LedPixel> implements PixelTransform.TransformListener {
 

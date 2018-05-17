@@ -1,4 +1,7 @@
-package me.lsdo.processing;
+package me.lsdo.processing.geometry.dome;
+
+import me.lsdo.processing.LedPixel;
+import me.lsdo.processing.util.*;
 
 // Representation of a coordinate within the dome pixel grid. See TriCoord.java for more info.
 

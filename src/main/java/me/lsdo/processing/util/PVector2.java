@@ -1,4 +1,4 @@
-package me.lsdo.processing;
+package me.lsdo.processing.util;
 
 /* -*- mode: java; c-basic-offset: 2; indent-tabs-mode: nil -*- */
 

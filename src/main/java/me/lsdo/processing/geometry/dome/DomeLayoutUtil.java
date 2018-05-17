@@ -1,6 +1,8 @@
-package me.lsdo.processing;
+package me.lsdo.processing.geometry.dome;
 
 import java.util.*;
+import me.lsdo.processing.PixelTransform;
+import me.lsdo.processing.util.*;
 
 enum PanelLayout {
     _2,

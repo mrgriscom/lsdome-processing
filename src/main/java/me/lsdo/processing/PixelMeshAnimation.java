@@ -1,6 +1,8 @@
 package me.lsdo.processing;
 
 import java.util.*;
+import me.lsdo.processing.geometry.prometheus.*;
+import me.lsdo.processing.util.*;
 
 /**
  * Superclass of all animation classes: takes a geometry, invokes a function to get the
@@ -124,7 +126,7 @@ public abstract class PixelMeshAnimation<T extends LedPixel> {
                     if (pressed) {
 			if (mesh instanceof Prometheus) {
 			    Prometheus p = (Prometheus)mesh;
-			    WingDisplayMode[] modes = WingDisplayMode.values();
+			    Prometheus.WingDisplayMode[] modes = Prometheus.WingDisplayMode.values();
 			    for (int i = 0; i < modes.length; i++) {
 				if (p.mode == modes[i]) {
 				    p.mode = modes[(i + 1) % modes.length];
@@ -143,13 +145,13 @@ public abstract class PixelMeshAnimation<T extends LedPixel> {
 		    if (mesh instanceof Prometheus) {
 			Prometheus p = (Prometheus)mesh;
 			if (s.equals("unified")) {
-			    p.mode = WingDisplayMode.UNIFIED;
+			    p.mode = Prometheus.WingDisplayMode.UNIFIED;
 			} else if (s.equals("mirror")) {
-			    p.mode = WingDisplayMode.MIRROR;
+			    p.mode = Prometheus.WingDisplayMode.MIRROR;
 			} else if (s.equals("flip")) {
-			    p.mode = WingDisplayMode.FLIP_HORIZ;
+			    p.mode = Prometheus.WingDisplayMode.FLIP_HORIZ;
 			} else if (s.equals("opposite")) {
-			    p.mode = WingDisplayMode.ROTATE_180;
+			    p.mode = Prometheus.WingDisplayMode.ROTATE_180;
 			} else {
 			    return;
 			}
@@ -255,7 +257,7 @@ public abstract class PixelMeshAnimation<T extends LedPixel> {
 		@Override
                 public void set(boolean pressed) {
 		    if (pressed) {
-			((Prometheus)mesh).mode = WingDisplayMode.UNIFIED;
+			((Prometheus)mesh).mode = Prometheus.WingDisplayMode.UNIFIED;
 		    }
 		    txChanged = true;
 		}
@@ -264,7 +266,7 @@ public abstract class PixelMeshAnimation<T extends LedPixel> {
 		@Override
                 public void set(boolean pressed) {
 		    if (pressed) {
-			((Prometheus)mesh).mode = WingDisplayMode.MIRROR;
+			((Prometheus)mesh).mode = Prometheus.WingDisplayMode.MIRROR;
 		    }
 		    txChanged = true;
 		}
@@ -273,7 +275,7 @@ public abstract class PixelMeshAnimation<T extends LedPixel> {
 		@Override
                 public void set(boolean pressed) {
 		    if (pressed) {
-			((Prometheus)mesh).mode = WingDisplayMode.FLIP_HORIZ;
+			((Prometheus)mesh).mode = Prometheus.WingDisplayMode.FLIP_HORIZ;
 		    }
 		    txChanged = true;
 		}
@@ -282,7 +284,7 @@ public abstract class PixelMeshAnimation<T extends LedPixel> {
 		@Override
                 public void set(boolean pressed) {
 		    if (pressed) {
-			((Prometheus)mesh).mode = WingDisplayMode.ROTATE_180;
+			((Prometheus)mesh).mode = Prometheus.WingDisplayMode.ROTATE_180;
 		    }
 		    txChanged = true;
 		}

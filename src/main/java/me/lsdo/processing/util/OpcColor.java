@@ -1,4 +1,4 @@
-package me.lsdo.processing;
+package me.lsdo.processing.util;
 
 /**
  * A few color related functions. Separating these out from how Processing

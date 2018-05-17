@@ -1,4 +1,7 @@
-package me.lsdo.processing;
+package me.lsdo.processing.geometry.prometheus;
+
+import me.lsdo.processing.LedPixel;
+import me.lsdo.processing.util.*;
 
 // Pixel on a prometheus wing
 
