@@ -21,7 +21,7 @@ public abstract class WindowAnimation extends XYAnimation {
     // true aspect ratio of the original content
     double aspectRatio;
     
-    public LayoutUtil.Transform windowTransform;
+    public PixelTransform windowTransform;
     PixelTransform transform;
 
     public double outsideViewportProportion;
@@ -29,11 +29,13 @@ public abstract class WindowAnimation extends XYAnimation {
     public WindowAnimation(final PixelMesh<? extends LedPixel> mesh, int antiAliasingSamples) {
         super(mesh, antiAliasingSamples);
 
-	transform = new PixelTransform() {
-		public PVector2 transform(LedPixel px, PVector2 offset) {
-		    return windowTransform.transform(mesh.transform.transform(px, offset));
+	transform = mesh.transform.compoundTransform(
+            // need a closure as windowTransform is a new object every time it's changed
+	    new PixelTransform() {
+		public PVector2 transform(PVector2 p) {
+		    return windowTransform.transform(p);
 		}
-	    };
+	    });
     }
 
     public double getWindowAspectRatio() {
@@ -60,13 +62,13 @@ public abstract class WindowAnimation extends XYAnimation {
     @Override
     public void transformChanged() {
 	if (preserveAspect) {
-	    windowTransform = new LayoutUtil.Transform() {
+	    windowTransform = new PixelTransform() {
 		    public PVector2 transform(PVector2 p) {
 			double aspectCorrection = aspectRatio / getWindowAspectRatio();
 			return LayoutUtil.V(p.x / aspectCorrection, p.y);
 		    }
 		};
-	} else if (!transformIsDynamic) {
+	} else if (!transformIsAnimating) {
 	    windowTransform = mesh.stretchToViewport(width, height, xscale, yscale);
 	}
 	applyTransform(transform);

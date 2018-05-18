@@ -142,11 +142,11 @@ public class DomeLayoutUtil {
         abstract ArrayList<DomePixel> fill(int n);
 
 	PixelTransform getDefaultTransform() {
-	    return PixelTransform.simpleTransform(new LayoutUtil.Transform(){
+	    return new PixelTransform() {
 		    public PVector2 transform(PVector2 p) {
 			return LayoutUtil.Vmult(LayoutUtil.Vsub(p, offset), 1. / radius);
 		    }
-		});
+		};
 	}
     }
 

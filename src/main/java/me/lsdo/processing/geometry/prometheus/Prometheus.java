@@ -41,7 +41,7 @@ public class Prometheus extends PixelMesh<WingPixel> {
     // left and right are from the butterfly's perspective
     public Prometheus(OPC opcLeft, OPC opcRight) {
 	super();
-
+	
 	opcs.add(opcLeft);
 	opcs.add(opcRight);
 
@@ -57,31 +57,49 @@ public class Prometheus extends PixelMesh<WingPixel> {
 	} else {
 	    throw new RuntimeException("unrecognized wing mode '" + modeSetting + "'");
 	}
+	
+	init();
+    }
 
+    protected List<WingPixel> getCoords() {
 	String layoutPath = Config.getConfig().layoutPath;
 	if (layoutPath.isEmpty()) {
 	    throw new RuntimeException("json layout not specified in config 'layout' property");
 	}
 	
-	List<PVector2> pixels;
+	List<PVector2> coords;
 	try {
-	    pixels = loadPixels(layoutPath);
+	    coords = loadPixels(layoutPath);
 	} catch (IOException e) {
 	    throw new RuntimeException("can't load wing pixel layout json at " + layoutPath);
 	}
-	for (int i = 0; i < pixels.size(); i++) {
+	List<WingPixel> pixels = new ArrayList<WingPixel>();
+	for (int i = 0; i < coords.size(); i++) {
 	    for (int wing = 0; wing < 2; wing++) {
-		coords.add(new WingPixel(wing, i, pixels.get(i)));
+		pixels.add(new WingPixel(wing, i, coords.get(i)));
 	    }
 	}
+	return pixels;
+    }
+
+    protected PixelTransform getDefaultTransform() {
+	// initial transform creates a mirrored wing if both wings are meant to be
+	// fixed relative to each other (as in UNIFIED mode)
+	PixelTransform defaultTx = new PixelTransform() {
+		public PVector2 transform(LedPixel px, PVector2 p) {
+		    if (mode == WingDisplayMode.UNIFIED && ((WingPixel)px).wing == 1) {
+			p = LayoutUtil.V(-p.x, p.y);
+		    }
+		    return LayoutUtil.Vmult(p, 2./WINGSPAN);
+		}
+	    };
 
 	setFlapAngle(this.flapAngle);
-
 	// note that flapping just warps the projection transform -- it doesn't create a mask
 	// for the original shape of the wing, meaning content initially 'off-wing' will move into
 	// view. for processing-based sketches the source window forms a natural boundary, so it looks
 	// fine, but for 'infinite canvas' headless sketches, the effect might look a bit weird.
-	final LayoutUtil.Transform flapper = new LayoutUtil.Transform() {
+	PixelTransform flapper = new PixelTransform() {
 		public PVector2 transform(PVector2 p) {
 		    if (flapLevel == 1.) {
 			return p;
@@ -92,45 +110,27 @@ public class Prometheus extends PixelMesh<WingPixel> {
 			return p;
 		    }
 		}
-	    };	
-	// initial transform creates a mirrored wing if both wings are meant to be
-	// fixed relative to each other (as in UNIFIED mode)
-	transform = new PixelTransform() {
-		public PVector2 transform(LedPixel px, PVector2 offset) {
-		    PVector2 p = px.toXY();
-		    p = LayoutUtil.Vadd(p, offset);
-		    p = flapper.transform(p);
-		    if (mode == WingDisplayMode.UNIFIED && ((WingPixel)px).wing == 1) {
-			p = LayoutUtil.V(-p.x, p.y);
-		    }
-		    return LayoutUtil.Vmult(p, 2./WINGSPAN);
-		}
 	    };
-	// save this *before* init()
-	final PixelTransform baseTx = transform;
-	
-	init();
 
-	// FIXME!!!
-	// do this after init() to overwrite the compound transform created there (this is
-	// janky and should be refactored, obv)
-	// for the applicable mode, this transform mirrors the 2nd wing from the 1st in various ways
-	transform = new PixelTransform() {
-		public PVector2 transform(LedPixel px, PVector2 offset) {
-		    PVector2 p = baseTx.transform(px, offset);
-		    p = placement.transform(p);
-		    if (((WingPixel)px).wing == 1) {
-			if (mode == WingDisplayMode.FLIP_HORIZ) {
-			    p = LayoutUtil.V(-p.x, p.y);
-			} else if (mode == WingDisplayMode.ROTATE_180) {
-			    p = LayoutUtil.V(-p.x, -p.y);
-			}
-		    }
-		    return p;
-		}
-	    };
+	return flapper.compoundTransform(defaultTx);
     }
-
+    
+    protected PixelTransform getPostPlacementTransform() {
+	// for the applicable mode, this transform mirrors the 2nd wing from the 1st in various ways
+	return new PixelTransform() {
+	    public PVector2 transform(LedPixel px, PVector2 p) {
+		if (((WingPixel)px).wing == 1) {
+		    if (mode == WingDisplayMode.FLIP_HORIZ) {
+			p = LayoutUtil.V(-p.x, p.y);
+		    } else if (mode == WingDisplayMode.ROTATE_180) {
+			p = LayoutUtil.V(-p.x, -p.y);
+		    }
+		}
+		return p;
+	    }
+	};
+    }
+    
     private List<PVector2> loadPixels(String path) throws IOException {
 	Gson gson = new Gson();
 	InputStream is = new BufferedInputStream(new FileInputStream(new File(path)));
@@ -249,7 +249,7 @@ public class Prometheus extends PixelMesh<WingPixel> {
 	    flapLevel = 1.;
 	}
 	if (anim instanceof PixelTransform.TransformListener) {
-	    ((PixelTransform.TransformListener)anim).dynamicTransformMode(active);
+	    ((PixelTransform.TransformListener)anim).transformAnimating(active);
 	}
 	boolean changed = (active != isFlapping);
 	isFlapping = active;

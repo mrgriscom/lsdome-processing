@@ -3,6 +3,7 @@ package me.lsdo.processing.geometry.dome;
 import java.util.*;
 import me.lsdo.processing.PixelMesh;
 import me.lsdo.processing.OPC;
+import me.lsdo.processing.PixelTransform;
 import me.lsdo.processing.util.*;
 
 // Dome geometry, for a few different supported #s of panels
@@ -11,12 +12,8 @@ public class Dome extends PixelMesh<DomePixel> {
     
     // Size of single panel's pixel grid.
     public static final int PANEL_SIZE = 15;
-    
-    // Size of a single panel's pixel grid
-    private int panel_size;
 
-    // Distance from center to farthest pixel, in panel lengths
-    private double radius;
+    DomeLayoutUtil.PanelConfig config;
 
     public Dome(OPC opc) {
         this(Config.getConfig().numPanels, opc);
@@ -29,27 +26,25 @@ public class Dome extends PixelMesh<DomePixel> {
 
     protected Dome(PanelLayout layout, OPC opc) {
 	super();
-
 	opcs.add(opc);
-	
-        // e.g. 15
-        panel_size = PANEL_SIZE;
-
-	DomeLayoutUtil.PanelConfig config = DomeLayoutUtil.getPanelConfig(layout);
-	
-        coords.addAll(config.fill(panel_size));
-	transform = config.getDefaultTransform();
+	config = DomeLayoutUtil.getPanelConfig(layout);
 	init();
-
-	radius = config.radius;
     }
 
+    protected List<DomePixel> getCoords() {
+	return config.fill(PANEL_SIZE);
+    }
+
+    protected PixelTransform getDefaultTransform() {
+	return config.getDefaultTransform();
+    }
+    
     public int getOpcChannel(DomePixel pixel) {
 	return 0;
     }
     
     public double getPixelBufferRadius() {
-	return .5*DomeLayoutUtil.pixelSpacing(panel_size);
+	return .5*DomeLayoutUtil.pixelSpacing(PANEL_SIZE);
     }
 
 }

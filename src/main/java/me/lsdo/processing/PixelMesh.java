@@ -18,7 +18,7 @@ public abstract class PixelMesh<T extends LedPixel> {
     public ArrayList<T> coords;
     public PixelTransform transform;
 
-    public static class PlacementTransform implements LayoutUtil.Transform {
+    public static class PlacementTransform extends PixelTransform {
 	double xo = Config.getSketchProperty("place_x", 0.);
 	double yo = Config.getSketchProperty("place_y", 0.);
 	double scale = Config.getSketchProperty("place_scale", 1.);
@@ -39,20 +39,28 @@ public abstract class PixelMesh<T extends LedPixel> {
 	colors = new HashMap<LedPixel, Integer>();
     }
 
+    // child implementations must call this at the end of their constructor
     public void init() {
+	coords.addAll(getCoords());
         for (LedPixel c : coords) {
             setColor(c, 0);
 	}	
 	initOpcBuffers();
 
-	// update the final transform to include the modifiable placement transform atop the
-	// original pixels-to-canvas transform
-	final PixelTransform baseTx = transform;
-	transform = new PixelTransform() {
-		public PVector2 transform(LedPixel px, PVector2 offset) {
-		    return PixelMesh.this.placement.transform(baseTx.transform(px, offset));
-		}
-	    };
+	transform = getDefaultTransform();
+	transform = transform.compoundTransform(placement);
+	PixelTransform postPlacementTx = getPostPlacementTransform();
+	if (postPlacementTx != null) {
+	    transform = transform.compoundTransform(postPlacementTx);
+	}
+    }
+
+    protected abstract List<T> getCoords();
+
+    protected abstract PixelTransform getDefaultTransform();
+
+    protected PixelTransform getPostPlacementTransform() {
+	return null;
     }
     
     public Integer getColor(LedPixel dCoord){
@@ -92,15 +100,15 @@ public abstract class PixelMesh<T extends LedPixel> {
 	return new PVector2[] {p0, pdiag};
     }
 
-    public LayoutUtil.Transform stretchToViewport(int width, int height) {
+    public PixelTransform stretchToViewport(int width, int height) {
 	return stretchToViewport(width, height, 1., 1.);
     }
     
-    public LayoutUtil.Transform stretchToViewport(final int width, final int height, final double xscale, final double yscale) {
+    public PixelTransform stretchToViewport(final int width, final int height, final double xscale, final double yscale) {
 	PVector2 viewport[] = getViewport();
 	final PVector2 p0 = viewport[0];
 	final PVector2 pDim = viewport[1];
-	return new LayoutUtil.Transform() {
+	return new PixelTransform() {
 	    double reproject(double p, double p0, double dim, double extent, double scale) {
 		double val = (p - p0) / dim; // normalize [0,1]
 		val = -extent * (1 - val) + extent * val; // normalize [-extent,extent]

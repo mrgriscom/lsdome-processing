@@ -1,6 +1,7 @@
 package me.lsdo.processing.util;
 
 import java.util.*;
+import me.lsdo.processing.*;
 
 // Generally useful vector math and conversion functions
 
@@ -44,12 +45,8 @@ public class LayoutUtil {
         return Vadd(Vmult(U, p.x), Vmult(V, p.y));
     }
 
-    public static interface Transform {
-        public PVector2 transform(PVector2 p);
-    }
-
     // Convert a set of points in bulk according to some transformation function.
-    public static ArrayList<PVector2> transform(ArrayList<PVector2> points, Transform tx) {
+    public static ArrayList<PVector2> transform(ArrayList<PVector2> points, PixelTransform tx) {
         ArrayList<PVector2> transformed = new ArrayList<PVector2>();
         for (PVector2 p : points) {
             transformed.add(tx.transform(p));
@@ -58,8 +55,8 @@ public class LayoutUtil {
     }
 
     // Transformation that translates a point by 'offset'
-    public static Transform translate(final PVector2 offset) {
-        return new Transform() {
+    public static PixelTransform translate(final PVector2 offset) {
+        return new PixelTransform() {
             public PVector2 transform(PVector2 p) {
                 return Vadd(p, offset);
             }

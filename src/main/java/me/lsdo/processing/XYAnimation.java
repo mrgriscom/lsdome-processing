@@ -14,12 +14,14 @@ public abstract class XYAnimation extends PixelMeshAnimation<LedPixel> implement
 
     static final int DEFAULT_BASE_SUBSAMPLING = 1;
     static final int MAX_SUBSAMPLING = 64;
-    
+
+    // number of subsamples per pixel (minimum -- may be increased by subsamplingBoost())
     private int baseSubsampling;
+    // reduced number of subsamples per pixel when transform is animating/in flux
     private int dynamicSubsampling;
     // true when the transform is expected to be changing a lot (like, per frame); we'll likely want to reduce
     // amount of anti-aliasing to preserve CPU and framerate
-    protected boolean transformIsDynamic = false;
+    protected boolean transformIsAnimating = false;
     
     // Mapping of display pixels to 1 or more actual samples that will be combined to yield that
     // display pixel's color. Most simply the samples will be xy-coordinates near the mesh pixels,
@@ -49,12 +51,12 @@ public abstract class XYAnimation extends PixelMeshAnimation<LedPixel> implement
 	applyTransform(mesh.transform);
     }
 
-    public void dynamicTransformMode(boolean enabled) {
-	transformIsDynamic = enabled;
+    public void transformAnimating(boolean enabled) {
+	transformIsAnimating = enabled;
     }
 
     public int numSubsamples(PVector2 p) {
-	double samples = (transformIsDynamic ? dynamicSubsampling : baseSubsampling) * subsamplingBoost(p);
+	double samples = (transformIsAnimating ? dynamicSubsampling : baseSubsampling) * subsamplingBoost(p);
 	return Math.min((int)Math.ceil(samples), MAX_SUBSAMPLING);
     }
     
@@ -76,7 +78,7 @@ public abstract class XYAnimation extends PixelMeshAnimation<LedPixel> implement
 				    Math.random() * 2*Math.PI
                                   )) :
                                   LayoutUtil.V(0, 0));
-                PVector2 sample = tx.transform(c, offset);
+                PVector2 sample = tx.transform(c, LayoutUtil.Vadd(c.toXY(), offset));
                 samples.add(toIntermediateRepresentation(sample));
             }
 
