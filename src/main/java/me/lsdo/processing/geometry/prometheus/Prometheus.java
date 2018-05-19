@@ -38,6 +38,7 @@ public class Prometheus extends PixelMesh<WingPixel> {
     }
 
     public WingDisplayMode mode;
+    private FlapManager flapper;
     
     // left and right are from the butterfly's perspective
     public Prometheus(OPC opcLeft, OPC opcRight) {
@@ -95,25 +96,15 @@ public class Prometheus extends PixelMesh<WingPixel> {
 		}
 	    };
 
-	setFlapAngle(this.flapAngle);
+	// Can't call this in the constructor because coords haven't been loaded yet, which affects the shape of the flap
+	flapper = new FlapManager(this);
 	// note that flapping just warps the projection transform -- it doesn't create a mask
 	// for the original shape of the wing, meaning content initially 'off-wing' will move into
 	// view. for processing-based sketches the source window forms a natural boundary, so it looks
 	// fine, but for 'infinite canvas' headless sketches, the effect might look a bit weird.
-	PixelTransform flapper = new PixelTransform() {
-		public PVector2 transform(PVector2 p) {
-		    if (flapLevel == 1.) {
-			return p;
-		    } else {
-			p = LayoutUtil.Vrot(p, flapAngle);
-			p = LayoutUtil.V((p.x - flapOrigin) / Math.max(flapLevel, .01) + flapOrigin, p.y);
-			p = LayoutUtil.Vrot(p, -flapAngle);
-			return p;
-		    }
-		}
-	    };
+	PixelTransform flapTx = flapper.getFlapTransform();
 
-	return flapper.compoundTransform(defaultTx);
+	return flapTx.compoundTransform(defaultTx);
     }
     
     protected PixelTransform getPostPlacementTransform() {
@@ -184,7 +175,8 @@ public class Prometheus extends PixelMesh<WingPixel> {
 
     public void registerHandlers(InputControl ctrl) {
 	super.registerHandlers(ctrl);
-
+	flapper.registerHandlers(ctrl);
+	
 	final Prometheus mesh = this;
 	
         ctrl.registerHandler("playpause_a", new InputControl.InputHandler() {
@@ -212,56 +204,6 @@ public class Prometheus extends PixelMesh<WingPixel> {
 		    } catch (IllegalArgumentException e) {
 			// ignore; leave mode as is
 		    }
-                }
-            });
-        ctrl.registerHandler("playpause_b", new InputControl.InputHandler() {
-		@Override
-                public void button(boolean pressed) {
-		    if (pressed) {
-			mesh.startFlapping();
-		    } else {
-			mesh.stopFlapping();
-		    }
-		    txChanged = true;
-                }
-            });
-        ctrl.registerHandler("flap", new InputControl.InputHandler() {
-		@Override
-                public void set(boolean pressed) {
-		    if (pressed) {
-			mesh.startFlapping();
-		    } else {
-			mesh.stopFlapping();
-		    }
-		    txChanged = true;
-                }
-            });
-        ctrl.registerHandler("mixer", new InputControl.InputHandler() {
-		@Override
-                public void slider(double val) {
-		    mesh.setFlapAngle(mesh.minFlapAngle * (1 - val) + mesh.maxFlapAngle * val);
-		    txChanged = true;
-                }
-            });
-        ctrl.registerHandler("flap-angle", new InputControl.InputHandler() {
-		@Override
-                public void slider(double val) {
-		    mesh.setFlapAngle(mesh.minFlapAngle * (1 - val) + mesh.maxFlapAngle * val);
-		    txChanged = true;
-                }
-            });
-        ctrl.registerHandler("flap-depth", new InputControl.InputHandler() {
-		@Override
-                public void slider(double val) {
-		    mesh.maxFlap = mesh.minMaxFlap * (1 - val) + mesh.maxMaxFlap * val;
-		    txChanged = true;
-                }
-            });
-        ctrl.registerHandler("flap-speed", new InputControl.InputHandler() {
-		@Override
-                public void slider(double val) {
-		    mesh.flapPeriod = mesh.maxFlapPeriod * Math.pow(mesh.minFlapPeriod / mesh.maxFlapPeriod, val);
-		    txChanged = true;
                 }
             });
         ctrl.registerHandler("wingmode_unified", new InputControl.InputHandler() {
@@ -303,86 +245,10 @@ public class Prometheus extends PixelMesh<WingPixel> {
     }
 
     public void beforeDraw(PixelMeshAnimation anim) {	
-	if (manageFlapState(anim)) {
+	if (flapper.manageState(anim)) {
 	    txChanged = true;
 	}
 	super.beforeDraw(anim);
     }
-    
-    ////////// FLAPPING
-    
-    // flapping parameter limits
-    public double maxMaxFlap = .01;
-    public double minMaxFlap = .5;
-    public double minFlapAngle = Math.toRadians(-10);
-    public double maxFlapAngle = Math.toRadians(20);
-    public double minFlapPeriod = .25;
-    public double maxFlapPeriod = 2;
-
-    // flapping parameters
-    public double flapPeriod = .5; // seconds
-    public double maxFlap = maxMaxFlap; // percentage
-    double flapAngle = 0; // radians
-    double flapVanishingPointOffset = .25; // meters
-    
-    // flapping instantaneous state variables
-    double flappingStart = -1; // timestamp
-    double flappingEnd = -1; // timestamp
-    double flapLevel = 1.; // percentage
-    double flapOrigin;
-    boolean isFlapping = false;
-    
-    public void setFlapAngle(double flapAngle) {
-	this.flapAngle = flapAngle;
-
-	double min = Double.POSITIVE_INFINITY;
-	for (LedPixel px : coords) {
-	    if (px.spacerPixel) {
-		continue;
-	    }
-	    
-	    double x = LayoutUtil.Vrot(px.toXY(), flapAngle).x;
-	    min = Math.min(min, x);
-	}
-	flapOrigin = min - flapVanishingPointOffset;
-    }
-    
-    public void startFlapping() {
-	if (!flappingActive()) {
-	    flappingStart = Config.clock();
-	}
-	flappingEnd = -1;
-    }
-
-    public void stopFlapping() {
-	flappingEnd = flappingStart + flapPeriod * Math.ceil((Config.clock() - flappingStart) / flapPeriod);
-    }
-
-    boolean flappingActive() {
-	return (flappingStart >= 0 && (flappingEnd < 0 || Config.clock() < flappingEnd));
-    }
-
-    double flapEasing(double x) {
-	return MathUtil.sineEasing(x);
-    }
-    
-    public boolean manageFlapState(PixelMeshAnimation anim) {
-	boolean active = flappingActive();
-	if (active) {
-	    double flapProgress = ((Config.clock() - flappingStart) / flapPeriod) % 1.; // 0 to 1
-	    double easingX = 1 - Math.abs(2*flapProgress - 1); // 0 to 1 to 0
-	    flapLevel = 1 - flapEasing(easingX); // 1 to 0 to 1
-	    flapLevel = maxFlap + flapLevel * (1 - maxFlap);
-	} else {
-	    flapLevel = 1.;
-	}
-	if (anim instanceof PixelTransform.TransformListener) {
-	    ((PixelTransform.TransformListener)anim).transformAnimating(active);
-	}
-	boolean changed = (active != isFlapping);
-	isFlapping = active;
-	return active || changed;
-    }
-
     
 }
