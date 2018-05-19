@@ -4,6 +4,7 @@ import java.util.*;
 import java.io.*;
 import com.google.gson.*;
 import com.google.gson.stream.*;
+import me.lsdo.processing.InputControl;
 import me.lsdo.processing.LedPixel;
 import me.lsdo.processing.PixelMesh;
 import me.lsdo.processing.PixelMeshAnimation;
@@ -40,27 +41,27 @@ public class Prometheus extends PixelMesh<WingPixel> {
     
     // left and right are from the butterfly's perspective
     public Prometheus(OPC opcLeft, OPC opcRight) {
-	super();
-	
+	super();	
 	opcs.add(opcLeft);
 	opcs.add(opcRight);
-
-	String modeSetting = Config.getSketchProperty("wing_mode", "unified");
-	if (modeSetting.equals("unified")) {
-	    mode = WingDisplayMode.UNIFIED;
-	} else if (modeSetting.equals("mirror")) {
-	    mode = WingDisplayMode.MIRROR;
-	} else if (modeSetting.equals("flip")) {
-	    mode = WingDisplayMode.FLIP_HORIZ;
-	} else if (modeSetting.equals("opposite")) {
-	    mode = WingDisplayMode.ROTATE_180;
-	} else {
-	    throw new RuntimeException("unrecognized wing mode '" + modeSetting + "'");
-	}
-	
+	mode = parseMode(Config.getSketchProperty("wing_mode", "unified"));
 	init();
     }
 
+    public static WingDisplayMode parseMode(String s) {
+	if (s.equals("unified")) {
+	    return WingDisplayMode.UNIFIED;
+	} else if (s.equals("mirror")) {
+	    return WingDisplayMode.MIRROR;
+	} else if (s.equals("flip")) {
+	    return WingDisplayMode.FLIP_HORIZ;
+	} else if (s.equals("opposite")) {
+	    return WingDisplayMode.ROTATE_180;
+	} else {
+	    throw new IllegalArgumentException("unrecognized wing mode '" + s + "'");
+	}
+    }
+    
     protected List<WingPixel> getCoords() {
 	String layoutPath = Config.getConfig().layoutPath;
 	if (layoutPath.isEmpty()) {
@@ -181,6 +182,133 @@ public class Prometheus extends PixelMesh<WingPixel> {
 	return .5 * spacing * .7; // reduce to 70% to account for denser areas of wing
     }
 
+    public void registerHandlers(InputControl ctrl) {
+	super.registerHandlers(ctrl);
+
+	final Prometheus mesh = this;
+	
+        ctrl.registerHandler("playpause_a", new InputControl.InputHandler() {
+		@Override
+                public void button(boolean pressed) {
+                    if (pressed) {
+			Prometheus.WingDisplayMode[] modes = Prometheus.WingDisplayMode.values();
+			for (int i = 0; i < modes.length; i++) {
+			    if (mesh.mode == modes[i]) {
+				mesh.mode = modes[(i + 1) % modes.length];
+				System.out.println("setting wing mode " + mesh.mode.name());
+				break;
+			    }
+			}
+			txChanged = true;
+                    }
+                }
+            });
+        ctrl.registerHandler("wingmode", new InputControl.InputHandler() {
+		@Override
+                public void set(String s) {
+		    try {
+			mesh.mode = Prometheus.parseMode(s);
+			txChanged = true;
+		    } catch (IllegalArgumentException e) {
+			// ignore; leave mode as is
+		    }
+                }
+            });
+        ctrl.registerHandler("playpause_b", new InputControl.InputHandler() {
+		@Override
+                public void button(boolean pressed) {
+		    if (pressed) {
+			mesh.startFlapping();
+		    } else {
+			mesh.stopFlapping();
+		    }
+		    txChanged = true;
+                }
+            });
+        ctrl.registerHandler("flap", new InputControl.InputHandler() {
+		@Override
+                public void set(boolean pressed) {
+		    if (pressed) {
+			mesh.startFlapping();
+		    } else {
+			mesh.stopFlapping();
+		    }
+		    txChanged = true;
+                }
+            });
+        ctrl.registerHandler("mixer", new InputControl.InputHandler() {
+		@Override
+                public void slider(double val) {
+		    mesh.setFlapAngle(mesh.minFlapAngle * (1 - val) + mesh.maxFlapAngle * val);
+		    txChanged = true;
+                }
+            });
+        ctrl.registerHandler("flap-angle", new InputControl.InputHandler() {
+		@Override
+                public void slider(double val) {
+		    mesh.setFlapAngle(mesh.minFlapAngle * (1 - val) + mesh.maxFlapAngle * val);
+		    txChanged = true;
+                }
+            });
+        ctrl.registerHandler("flap-depth", new InputControl.InputHandler() {
+		@Override
+                public void slider(double val) {
+		    mesh.maxFlap = mesh.minMaxFlap * (1 - val) + mesh.maxMaxFlap * val;
+		    txChanged = true;
+                }
+            });
+        ctrl.registerHandler("flap-speed", new InputControl.InputHandler() {
+		@Override
+                public void slider(double val) {
+		    mesh.flapPeriod = mesh.maxFlapPeriod * Math.pow(mesh.minFlapPeriod / mesh.maxFlapPeriod, val);
+		    txChanged = true;
+                }
+            });
+        ctrl.registerHandler("wingmode_unified", new InputControl.InputHandler() {
+		@Override
+                public void set(boolean pressed) {
+		    if (pressed) {
+			mesh.mode = Prometheus.WingDisplayMode.UNIFIED;
+		    }
+		    txChanged = true;
+		}
+            });
+        ctrl.registerHandler("wingmode_mirror", new InputControl.InputHandler() {
+		@Override
+                public void set(boolean pressed) {
+		    if (pressed) {
+			mesh.mode = Prometheus.WingDisplayMode.MIRROR;
+		    }
+		    txChanged = true;
+		}
+            });
+        ctrl.registerHandler("wingmode_flip", new InputControl.InputHandler() {
+		@Override
+                public void set(boolean pressed) {
+		    if (pressed) {
+			mesh.mode = Prometheus.WingDisplayMode.FLIP_HORIZ;
+		    }
+		    txChanged = true;
+		}
+            });
+        ctrl.registerHandler("wingmode_rotate", new InputControl.InputHandler() {
+		@Override
+                public void set(boolean pressed) {
+		    if (pressed) {
+			mesh.mode = Prometheus.WingDisplayMode.ROTATE_180;
+		    }
+		    txChanged = true;
+		}
+            });	
+    }
+
+    public void beforeDraw(PixelMeshAnimation anim) {	
+	if (manageFlapState(anim)) {
+	    txChanged = true;
+	}
+	super.beforeDraw(anim);
+    }
+    
     ////////// FLAPPING
     
     // flapping parameter limits

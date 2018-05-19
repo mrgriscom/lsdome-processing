@@ -59,6 +59,45 @@ public abstract class WindowAnimation extends XYAnimation {
 	this.aspectRatio = (realAspectRatio > 0 ? realAspectRatio : getWindowAspectRatio());
     }
 
+    public void registerHandlers(InputControl ctrl) {
+	super.registerHandlers(ctrl);
+
+	ctrl.registerHandler("load_a", new InputControl.InputHandler() {
+		@Override
+                public void button(boolean pressed) {
+		    if (pressed) {
+			WindowAnimation.this.preserveAspect = !WindowAnimation.this.preserveAspect;
+			mesh.txChanged = true;
+		    }
+                }
+            });
+        ctrl.registerHandler("stretch", new InputControl.InputHandler() {
+		@Override
+                public void set(boolean b) {
+		    WindowAnimation.this.preserveAspect = !b;
+		    mesh.txChanged = true;
+                }
+            });
+        ctrl.registerHandler("stretch_yes", new InputControl.InputHandler() {
+		@Override
+                public void set(boolean pressed) {
+		    if (pressed) {
+			WindowAnimation.this.preserveAspect = false;
+			mesh.txChanged = true;
+		    }
+		}
+            });
+        ctrl.registerHandler("stretch_no", new InputControl.InputHandler() {
+		@Override
+                public void set(boolean pressed) {
+		    if (pressed) {
+			WindowAnimation.this.preserveAspect = true;
+			mesh.txChanged = true;
+		    }
+		}
+            });
+    }
+    
     @Override
     public void transformChanged() {
 	if (preserveAspect) {

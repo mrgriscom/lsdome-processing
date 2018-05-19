@@ -62,6 +62,111 @@ public abstract class PixelMesh<T extends LedPixel> {
     protected PixelTransform getPostPlacementTransform() {
 	return null;
     }
+
+    public boolean txChanged = false;
+    public void beforeDraw(PixelMeshAnimation anim) {
+	if (txChanged) {
+	    if (anim instanceof PixelTransform.TransformListener) {
+		((PixelTransform.TransformListener)anim).transformChanged();
+	    }
+	    txChanged = false;
+	}
+    }
+    
+    public void registerHandlers(InputControl ctrl) {
+	final PixelMesh<T> mesh = this;
+	
+        ctrl.registerHandler("jog_a", new InputControl.InputHandler() {
+		@Override
+                public void jog(boolean pressed) {
+                    boolean forward = pressed;
+		    mesh.placement.xo += (forward ? 1 : -1) * .01;
+		    txChanged = true;
+                }
+            });
+        ctrl.registerHandler("jog-xo", new InputControl.InputHandler() {
+		@Override
+                public void jog(boolean pressed) {
+                    boolean forward = pressed;
+		    mesh.placement.xo += (forward ? 1 : -1) * .01;
+		    txChanged = true;
+                }
+            });
+        ctrl.registerHandler("xo", new InputControl.InputHandler() {
+		@Override
+                public void set(double d) {
+		    mesh.placement.xo = d;
+		    txChanged = true;
+                }
+            });
+        ctrl.registerHandler("jog_b", new InputControl.InputHandler() {
+		@Override
+                public void jog(boolean pressed) {
+                    boolean forward = pressed;
+		    mesh.placement.yo += (forward ? 1 : -1) * .01;
+		    txChanged = true;
+                }
+            });
+        ctrl.registerHandler("jog-yo", new InputControl.InputHandler() {
+		@Override
+                public void jog(boolean pressed) {
+                    boolean forward = pressed;
+		    mesh.placement.yo += (forward ? 1 : -1) * .01;
+		    txChanged = true;
+                }
+            });
+        ctrl.registerHandler("yo", new InputControl.InputHandler() {
+		@Override
+                public void set(double d) {
+		    mesh.placement.yo = d;
+		    txChanged = true;
+                }
+            });
+        ctrl.registerHandler("pitch_a", new InputControl.InputHandler() {
+		@Override
+                public void slider(double val) {
+		    mesh.placement.rot = 2*Math.PI*(val - .5);
+		    txChanged = true;
+                }
+            });
+        ctrl.registerHandler("jog-rot", new InputControl.InputHandler() {
+		@Override
+                public void jog(boolean pressed) {
+                    boolean forward = pressed;
+		    mesh.placement.rot += (forward ? 1 : -1) * .01 * Math.PI;
+		    txChanged = true;
+                }
+            });
+        ctrl.registerHandler("rot", new InputControl.InputHandler() {
+		@Override
+                public void set(double d) {
+		    mesh.placement.rot = Math.toRadians(d);
+		    txChanged = true;
+                }
+            });
+        ctrl.registerHandler("pitch_b", new InputControl.InputHandler() {
+		@Override
+                public void slider(double val) {
+		    mesh.placement.scale = Math.exp(2*(val - .5));
+		    txChanged = true;
+                }
+            });
+        ctrl.registerHandler("jog-scale", new InputControl.InputHandler() {
+		@Override
+                public void jog(boolean pressed) {
+                    boolean forward = pressed;
+		    mesh.placement.scale *= 1. + (forward ? 1 : -1) * .01;
+		    txChanged = true;
+                }
+            });
+        ctrl.registerHandler("scale", new InputControl.InputHandler() {
+		@Override
+                public void set(double d) {
+		    mesh.placement.scale = d;
+		    txChanged = true;
+                }
+            });	
+    }
     
     public Integer getColor(LedPixel dCoord){
 	return dCoord.spacerPixel ? 0 : colors.get(dCoord);
