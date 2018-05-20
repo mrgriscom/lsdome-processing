@@ -93,7 +93,7 @@ public class NumericParameter {
 
     public void onChange(double prev) { }
 
-    public static double toInternal(double value) {
+    public double toInternal(double value) {
 	return value;
     }
     
@@ -116,8 +116,3 @@ public class NumericParameter {
     }
     
 }
-
-
-//class IntegerParameter {
-//
-//}
