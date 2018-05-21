@@ -18,15 +18,23 @@ import me.lsdo.processing.util.*;
 public class Prometheus extends PixelMesh<WingPixel> {
 
     // How to map 2nd wing relative to 1st wing
-    public static enum WingDisplayMode {
+    public static enum WingDisplayMode implements EnumParameter.CaptionedEnum {
 	// Keep the 2nd wing locked relative to the 1st wing, to match how they appear in real life; transform them as a single unit
-	UNIFIED,
+	UNIFIED("side-by-side (single canvas)"),
 	// Mirror the 1st wing to the 2nd wing exactly (reverses display on 2nd wing)
-	MIRROR,
+	MIRROR("mirrored"),
 	// Flip the 1st wing along the horizontal axis of the screen to get the placement of the 2nd wing
-	FLIP,
+	FLIP("flipped horizontally"),
 	// Rotate the 1st wing 180deg around the canvas origin to get the placement of the 2nd wing
-	OPPOSITE
+	OPPOSITE("rotated 180 around center");
+
+	public final String caption;
+	WingDisplayMode(String caption) {
+	    this.caption = caption;
+	}
+	public String caption() {
+	    return caption;
+	}
     }
 
     static final double PLATFORM_WIDTH = 1.; // m
@@ -54,7 +62,7 @@ public class Prometheus extends PixelMesh<WingPixel> {
 	    };
 	mode.verbose = true;
 	mode.init(mode.enumByName(Config.getSketchProperty("wing_mode", "unified")));
-
+	
 	init();
     }
 
