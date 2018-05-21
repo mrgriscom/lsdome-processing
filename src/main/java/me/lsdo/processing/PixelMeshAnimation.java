@@ -23,7 +23,6 @@ public abstract class PixelMeshAnimation<T extends LedPixel> {
     
     public PixelMeshAnimation(PixelMesh<? extends T> mesh) {
         this.mesh = mesh;
-	initControl();
     }
     
     void initControl() {
@@ -37,6 +36,7 @@ public abstract class PixelMeshAnimation<T extends LedPixel> {
     
     public void draw(double t) {
 	if (!initialized) {
+	    initControl();
 	    init();
 	    initialized = true;
 	}
