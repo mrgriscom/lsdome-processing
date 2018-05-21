@@ -1,9 +1,5 @@
 package me.lsdo.processing.interactivity;
 
-// likely bindings:
-// radio buttons
-// cycle to next
-
 public class EnumParameter<T extends Enum<T>> extends DiscreteValuesParameter<T> {
 
     public static interface CaptionedEnum {
@@ -32,5 +28,5 @@ public class EnumParameter<T extends Enum<T>> extends DiscreteValuesParameter<T>
 	    return null;
 	}
     }
-    
+
 }

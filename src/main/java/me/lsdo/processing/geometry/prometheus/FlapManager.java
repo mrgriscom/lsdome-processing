@@ -138,42 +138,10 @@ public class FlapManager {
     }
 
     public void registerHandlers(InputControl ctrl) {
-	ctrl.registerHandler("playpause_b", new InputControl.InputHandler() {
-		@Override
-                public void button(boolean pressed) {
-		    flapAction.set(pressed);
-                }
-            });
-        ctrl.registerHandler("flap", new InputControl.InputHandler() {
-		@Override
-                public void set(boolean pressed) {
-		    flapAction.set(pressed);
-                }
-            });
-        ctrl.registerHandler("mixer", new InputControl.InputHandler() {
-		@Override
-                public void slider(double val) {
-		    flapAngle.setSlider(val);
-                }
-            });
-        ctrl.registerHandler("flap-angle", new InputControl.InputHandler() {
-		@Override
-                public void slider(double val) {
-		    flapAngle.setSlider(val);
-                }
-            });
-        ctrl.registerHandler("flap-depth", new InputControl.InputHandler() {
-		@Override
-                public void slider(double val) {
-		    flapDepth.setSlider(val);
-                }
-            });
-        ctrl.registerHandler("flap-speed", new InputControl.InputHandler() {
-		@Override
-                public void slider(double val) {
-		    flapPeriod.setSlider(val);
-                }
-            });
+	flapAction.bindAction(ctrl, new String[] {"flap", "playpause_b"});
+	flapAngle.bindSlider(ctrl, new String[] {"flap-angle", "mixer"});
+	flapDepth.bindSlider(ctrl, new String[] {"flap-depth"});
+	flapPeriod.bindSlider(ctrl, new String[] {"flap-speed"});
     }
 
 }

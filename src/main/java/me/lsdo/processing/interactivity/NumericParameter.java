@@ -2,11 +2,6 @@ package me.lsdo.processing.interactivity;
 
 // TODO builder pattern?
 
-// likely bindings
-// slider
-// jog wheel (may have independent sensitivity)
-// discreet inc/dec buttons -- simulates jog, but with bigger steps
-
 public class NumericParameter extends Parameter<Double> {
 
     public enum Scale {
@@ -63,9 +58,16 @@ public class NumericParameter extends Parameter<Double> {
 	}
     }
 
-    public void increment(int numSteps) {
-	for (int i = 0; i < Math.abs(numSteps); i++) {
-	    step(numSteps > 0);
+    public void increment(double jump) {
+	boolean incr = jump > 0;
+	jump = Math.abs(jump);
+	int numSteps = (int)Math.floor(jump);
+	double remainder = jump - numSteps;
+	for (int i = 0; i < numSteps; i++) {
+	    step(incr);
+	}
+	if (remainder > 1e-6) {
+	    step(incr, remainder);
 	}
     }
 
@@ -117,6 +119,64 @@ public class NumericParameter extends Parameter<Double> {
 
     public void setSensitivity(double sensitivity) {
 	this.sensitivity = sensitivity;
+    }
+
+    public void bindDirect(InputControl ctrl, String id) {
+	ctrl.registerHandler(id, new InputControl.InputHandler() {
+		@Override
+		public void set(double val) {
+		    NumericParameter.this.set(val);
+		}
+	    });
+    }
+
+    public void bindJog(InputControl ctrl, String[] ids) {
+	bindJog(ctrl, 1., ids);
+    }
+    
+    public void bindJog(InputControl ctrl, final double sensitivityAdjust, String[] ids) {
+	for (String id : ids) {
+	    ctrl.registerHandler(id, new InputControl.InputHandler() {
+		    @Override
+		    public void jog(boolean inc) {
+			step(inc, sensitivityAdjust);
+		    }
+		});
+	}
+    }
+    
+    public void bindSlider(InputControl ctrl, String[] ids) {
+	for (String id : ids) {
+	    ctrl.registerHandler(id, new InputControl.InputHandler() {
+		    @Override
+		    public void slider(double val) {
+			setSlider(val);
+		    }
+		});
+	}
+    }
+    
+    public void bindIncDecButtons(InputControl ctrl, final double jump, String[] incIds, String[] decIds) {
+	for (String id : incIds) {
+	    ctrl.registerHandler(id, new InputControl.InputHandler() {
+		    @Override
+		    public void button(boolean pressed) {
+			if (pressed) {
+			    increment(jump);
+			}
+		    }
+		});
+	}
+	for (String id : decIds) {
+	    ctrl.registerHandler(id, new InputControl.InputHandler() {
+		    @Override
+		    public void button(boolean pressed) {
+			if (pressed) {
+			    increment(-jump);
+			}
+		    }
+		});
+	}
     }
     
 }

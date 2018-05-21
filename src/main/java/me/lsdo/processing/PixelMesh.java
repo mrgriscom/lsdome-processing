@@ -116,79 +116,17 @@ public abstract class PixelMesh<T extends LedPixel> {
     
     public void registerHandlers(InputControl ctrl) {
 	final PixelMesh<T> mesh = this;
-	
-        ctrl.registerHandler("jog_a", new InputControl.InputHandler() {
-		@Override
-                public void jog(boolean pressed) {
-		    mesh.placement.xo.step(pressed);
-                }
-            });
-        ctrl.registerHandler("jog-xo", new InputControl.InputHandler() {
-		@Override
-                public void jog(boolean pressed) {
-		    mesh.placement.xo.step(pressed);
-                }
-            });
-        ctrl.registerHandler("xo", new InputControl.InputHandler() {
-		@Override
-                public void set(double d) {
-		    mesh.placement.xo.set(d);
-                }
-            });
-        ctrl.registerHandler("jog_b", new InputControl.InputHandler() {
-		@Override
-                public void jog(boolean pressed) {
-		    mesh.placement.yo.step(pressed);
-                }
-            });
-        ctrl.registerHandler("jog-yo", new InputControl.InputHandler() {
-		@Override
-                public void jog(boolean pressed) {
-		    mesh.placement.yo.step(pressed);
-                }
-            });
-        ctrl.registerHandler("yo", new InputControl.InputHandler() {
-		@Override
-                public void set(double d) {
-		    mesh.placement.yo.set(d);
-                }
-            });
-        ctrl.registerHandler("pitch_a", new InputControl.InputHandler() {
-		@Override
-                public void slider(double val) {
-		    mesh.placement.rot.setSlider(val);
-                }
-            });
-        ctrl.registerHandler("jog-rot", new InputControl.InputHandler() {
-		@Override
-                public void jog(boolean pressed) {
-		    mesh.placement.rot.step(pressed);
-                }
-            });
-        ctrl.registerHandler("rot", new InputControl.InputHandler() {
-		@Override
-                public void set(double d) {
-		    mesh.placement.rot.set(d);
-                }
-            });
-        ctrl.registerHandler("pitch_b", new InputControl.InputHandler() {
-		@Override
-                public void slider(double val) {
-		    mesh.placement.scale.setSlider(val);
-                }
-            });
-        ctrl.registerHandler("jog-scale", new InputControl.InputHandler() {
-		@Override
-                public void jog(boolean pressed) {
-		    mesh.placement.scale.step(pressed);
-                }
-            });
-        ctrl.registerHandler("scale", new InputControl.InputHandler() {
-		@Override
-                public void set(double d) {
-		    mesh.placement.scale.set(d);
-                }
-            });	
+
+	mesh.placement.xo.bindJog(ctrl, new String[] {"jog-xo", "jog_a"});
+	mesh.placement.xo.bindDirect(ctrl, "xo");
+	mesh.placement.yo.bindJog(ctrl, new String[] {"jog-yo", "jog_b"});
+	mesh.placement.yo.bindDirect(ctrl, "yo");
+	mesh.placement.rot.bindSlider(ctrl, new String[] {"pitch_a"});
+	mesh.placement.rot.bindJog(ctrl, new String[] {"jog-rot"});
+	mesh.placement.rot.bindDirect(ctrl, "rot");
+	mesh.placement.scale.bindSlider(ctrl, new String[] {"pitch_b"});
+	mesh.placement.scale.bindJog(ctrl, new String[] {"jog-scale"});
+	mesh.placement.scale.bindDirect(ctrl, "scale");
     }
     
     public Integer getColor(LedPixel dCoord){

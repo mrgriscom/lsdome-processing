@@ -35,19 +35,13 @@ public class InputControl {
         }
 
 	public void setRaw(String s) {
-	    if (s.equals("true")) {
-		set(true);
-	    } else if (s.equals("false")) {
-		set(false);
-	    } else {
-		try {
-		    set(Double.parseDouble(s));
-		    return;
-		} catch (NumberFormatException nfe) {
-		}
-
-		set(s);
+	    try {
+		set(Double.parseDouble(s));
+		return;
+	    } catch (NumberFormatException nfe) {
 	    }
+
+	    set(s);
 	}
 
 	public void set(String s) {
@@ -55,10 +49,6 @@ public class InputControl {
 	}
 	
 	public void set(double d) {
-            throw new RuntimeException("handler did not override!");
-	}
-
-	public void set(boolean b) {
             throw new RuntimeException("handler did not override!");
 	}
     }

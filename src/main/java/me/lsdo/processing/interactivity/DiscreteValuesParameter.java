@@ -63,5 +63,51 @@ public abstract class DiscreteValuesParameter<T> extends Parameter<T> {
 	}
 	return disp;
     }
-    
+
+    public void bindDirect(InputControl ctrl, String id) {
+	ctrl.registerHandler(id, new InputControl.InputHandler() {
+		@Override
+		public void set(String val) {
+		    try {
+			setName(val);
+		    } catch (IllegalArgumentException e) {
+			// ignore; leave mode as is
+			System.out.println(e.getMessage());
+		    }
+		}
+	    });
+    }
+
+    public void bindPressToCycle(InputControl ctrl, String[] ids) {
+	for (String id : ids) {
+	    ctrl.registerHandler(id, new InputControl.InputHandler() {
+		    @Override
+		    public void button(boolean pressed) {
+			if (pressed) {
+			    cycleNext();
+			}
+		    }
+		});
+	}
+    }
+
+    public void bindRadioButtons(InputControl ctrl, String prefix) {
+	for (T val : values()) {
+	    final String valName = enumName(val).toLowerCase();
+	    ctrl.registerHandler(prefix + "_" + valName, new InputControl.InputHandler() {
+		    @Override
+		    public void button(boolean pressed) {
+			if (pressed) {
+			    setName(valName);
+			}
+		    }
+		});
+	}
+    }
+
+    public void bindEnum(InputControl ctrl, String id) {
+	bindDirect(ctrl, id);
+	bindRadioButtons(ctrl, id);
+    }
+
 }

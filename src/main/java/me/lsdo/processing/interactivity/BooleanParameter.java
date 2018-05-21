@@ -1,10 +1,5 @@
 package me.lsdo.processing.interactivity;
 
-// likely bindings:
-// button press to toggle
-// button instantaneous (pressed = true, released = false), + inverted
-// radio button t/f (like 2-valued enum)
-
 public class BooleanParameter extends DiscreteValuesParameter<Boolean> {
 
     // public settings -- after initialization, do not modify directly
@@ -38,11 +33,45 @@ public class BooleanParameter extends DiscreteValuesParameter<Boolean> {
     }
         
     public String enumName(Boolean val) {
-	return (val ? "true" : "false");
+	return (val ? "yes" : "no");
     }
 
     public String enumCaption(Boolean val) {
 	return (val ? trueCaption : falseCaption);
+    }
+
+    // equivalent to bindPressToCycle()
+    public void bindPressToToggle(InputControl ctrl, String[] ids) {
+	for (String id : ids) {
+	    ctrl.registerHandler(id, new InputControl.InputHandler() {
+		    @Override
+		    public void button(boolean pressed) {
+			if (pressed) {
+			    toggle();
+			}
+		    }
+		});
+	}
+    }
+
+    public void bindAction(InputControl ctrl, String[] ids) {
+	bindTrueWhilePressed(ctrl, ids);
+    }
+    public void bindTrueWhilePressed(InputControl ctrl, String[] ids) {
+	bindMirrorPressState(ctrl, false, ids);
+    }
+    public void bindFalseWhilePressed(InputControl ctrl, String[] ids) {
+	bindMirrorPressState(ctrl, true, ids);
+    }
+    private void bindMirrorPressState(InputControl ctrl, final boolean falseWhilePressed, String[] ids) {
+	for (String id : ids) {
+	    ctrl.registerHandler(id, new InputControl.InputHandler() {
+		    @Override
+		    public void button(boolean pressed) {
+			BooleanParameter.this.set(falseWhilePressed ^ pressed);
+		    }
+		});
+	}
     }
     
 }

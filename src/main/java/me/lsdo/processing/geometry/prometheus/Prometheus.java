@@ -179,57 +179,9 @@ public class Prometheus extends PixelMesh<WingPixel> {
     public void registerHandlers(InputControl ctrl) {
 	super.registerHandlers(ctrl);
 	flapper.registerHandlers(ctrl);
-	
-        ctrl.registerHandler("playpause_a", new InputControl.InputHandler() {
-		@Override
-                public void button(boolean pressed) {
-                    if (pressed) {
-			mode.cycleNext();
-                    }
-                }
-            });
-        ctrl.registerHandler("wingmode", new InputControl.InputHandler() {
-		@Override
-                public void set(String s) {
-		    try {
-			mode.setName(s);
-		    } catch (IllegalArgumentException e) {
-			// ignore; leave mode as is
-		    }
-                }
-            });
-        ctrl.registerHandler("wingmode_unified", new InputControl.InputHandler() {
-		@Override
-                public void set(boolean pressed) {
-		    if (pressed) {
-			mode.set(Prometheus.WingDisplayMode.UNIFIED);
-		    }
-		}
-            });
-        ctrl.registerHandler("wingmode_mirror", new InputControl.InputHandler() {
-		@Override
-                public void set(boolean pressed) {
-		    if (pressed) {
-			mode.set(Prometheus.WingDisplayMode.MIRROR);
-		    }
-		}
-            });
-        ctrl.registerHandler("wingmode_flip", new InputControl.InputHandler() {
-		@Override
-                public void set(boolean pressed) {
-		    if (pressed) {
-			mode.set(Prometheus.WingDisplayMode.FLIP);
-		    }
-		}
-            });
-        ctrl.registerHandler("wingmode_rotate", new InputControl.InputHandler() {
-		@Override
-                public void set(boolean pressed) {
-		    if (pressed) {
-			mode.set(Prometheus.WingDisplayMode.OPPOSITE);
-		    }
-		}
-            });	
+
+	mode.bindPressToCycle(ctrl, new String[] {"playpause_a"});
+	mode.bindEnum(ctrl, "wingmode");
     }
 
     public void beforeDraw(PixelMeshAnimation anim) {	

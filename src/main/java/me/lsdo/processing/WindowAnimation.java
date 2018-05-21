@@ -12,8 +12,8 @@ public abstract class WindowAnimation extends XYAnimation {
     int width;
     // window height in pixels
     int height;
-    // if false, stretch the mesh geometry independently in the x- and y-axes to maximally cover the window
-    public BooleanParameter preserveAspect;
+    // if true, stretch the mesh geometry independently in the x- and y-axes to maximally cover the window
+    public BooleanParameter stretchAspect;
     // downscale the window to squeeze more window area onto geometry with irregular edges, at the expense
     // of leaving some of the geometry blank / outside of the window area
     double xscale;
@@ -38,12 +38,14 @@ public abstract class WindowAnimation extends XYAnimation {
 		}
 	    });
 
-	preserveAspect = new BooleanParameter("preserve aspect") {
+	stretchAspect = new BooleanParameter("stretch aspect") {
 		@Override
 		public void onChange(Boolean prev) {
 		    mesh.txChanged = true;
 		};
 	    };
+	stretchAspect.trueCaption = "stretch to fit window";
+	stretchAspect.falseCaption = "preserve 1:1";
     }
 
     public double getWindowAspectRatio() {
@@ -61,7 +63,7 @@ public abstract class WindowAnimation extends XYAnimation {
     public void initViewport(int width, int height, boolean preserveAspect, double realAspectRatio, double xscale, double yscale) {
 	this.width = width;
 	this.height = height;
-	this.preserveAspect.init(preserveAspect);
+	this.stretchAspect.init(!preserveAspect);
 	this.xscale = xscale;
 	this.yscale = yscale;
 	this.aspectRatio = (realAspectRatio > 0 ? realAspectRatio : getWindowAspectRatio());
@@ -70,49 +72,23 @@ public abstract class WindowAnimation extends XYAnimation {
     public void registerHandlers(InputControl ctrl) {
 	super.registerHandlers(ctrl);
 
-	ctrl.registerHandler("load_a", new InputControl.InputHandler() {
-		@Override
-                public void button(boolean pressed) {
-		    if (pressed) {
-			WindowAnimation.this.preserveAspect.toggle();
-		    }
-                }
-            });
-        ctrl.registerHandler("stretch", new InputControl.InputHandler() {
-		@Override
-                public void set(boolean b) {
-		    WindowAnimation.this.preserveAspect.set(!b);
-                }
-            });
-        ctrl.registerHandler("stretch_yes", new InputControl.InputHandler() {
-		@Override
-                public void set(boolean pressed) {
-		    if (pressed) {
-			WindowAnimation.this.preserveAspect.set(false);
-		    }
-		}
-            });
-        ctrl.registerHandler("stretch_no", new InputControl.InputHandler() {
-		@Override
-                public void set(boolean pressed) {
-		    if (pressed) {
-			WindowAnimation.this.preserveAspect.set(true);
-		    }
-		}
-            });
+	stretchAspect.bindPressToToggle(ctrl, new String[] {"load_a"});
+	stretchAspect.bindEnum(ctrl, "stretch");
     }
     
     @Override
     public void transformChanged() {
-	if (preserveAspect.get()) {
-	    windowTransform = new PixelTransform() {
-		    public PVector2 transform(PVector2 p) {
-			double aspectCorrection = aspectRatio / getWindowAspectRatio();
-			return LayoutUtil.V(p.x / aspectCorrection, p.y);
-		    }
-		};
-	} else if (!transformIsAnimating) {
-	    windowTransform = mesh.stretchToViewport(width, height, xscale, yscale);
+	if (!transformIsAnimating) {
+	    if (stretchAspect.get()) {
+		windowTransform = mesh.stretchToViewport(width, height, xscale, yscale);
+	    } else {
+		windowTransform = new PixelTransform() {
+			public PVector2 transform(PVector2 p) {
+			    double aspectCorrection = aspectRatio / getWindowAspectRatio();
+			    return LayoutUtil.V(p.x / aspectCorrection, p.y);
+			}
+		    };
+	    }
 	}
 	applyTransform(transform);
 	outsideViewportProportion = proportionOutsideBounds();
