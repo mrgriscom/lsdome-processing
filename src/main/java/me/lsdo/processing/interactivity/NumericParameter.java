@@ -64,14 +64,22 @@ public class NumericParameter extends Parameter<Double> {
 	}
     }
 
-    public void step(boolean incr) {
+    public final void step(boolean incr) {
+	step(incr, 1.);
+    }
+
+    public final void step(boolean incr, double sensitivityAdjust) {
 	if (sensitivity == 0) {
 	    throw new IllegalStateException("sensitivity not set");
 	}
+	_step(incr, sensitivity * sensitivityAdjust);
+    }
+
+    public void _step(boolean incr, double sens) {
 	if (scale == Scale.LINEAR) {
-	    stepLinear(incr, sensitivity);
+	    stepLinear(incr, sens);
 	} else if (scale == Scale.LOG) {
-	    stepLog(incr, sensitivity);
+	    stepLog(incr, sens);
 	}
     }
 

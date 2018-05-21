@@ -13,7 +13,7 @@ public abstract class WindowAnimation extends XYAnimation {
     // window height in pixels
     int height;
     // if false, stretch the mesh geometry independently in the x- and y-axes to maximally cover the window
-    public boolean preserveAspect;
+    public BooleanParameter preserveAspect;
     // downscale the window to squeeze more window area onto geometry with irregular edges, at the expense
     // of leaving some of the geometry blank / outside of the window area
     double xscale;
@@ -37,6 +37,13 @@ public abstract class WindowAnimation extends XYAnimation {
 		    return windowTransform.transform(p);
 		}
 	    });
+
+	preserveAspect = new BooleanParameter("preserve aspect") {
+		@Override
+		public void onChange(Boolean prev) {
+		    mesh.txChanged = true;
+		};
+	    };
     }
 
     public double getWindowAspectRatio() {
@@ -54,7 +61,7 @@ public abstract class WindowAnimation extends XYAnimation {
     public void initViewport(int width, int height, boolean preserveAspect, double realAspectRatio, double xscale, double yscale) {
 	this.width = width;
 	this.height = height;
-	this.preserveAspect = preserveAspect;
+	this.preserveAspect.init(preserveAspect);
 	this.xscale = xscale;
 	this.yscale = yscale;
 	this.aspectRatio = (realAspectRatio > 0 ? realAspectRatio : getWindowAspectRatio());
@@ -67,24 +74,21 @@ public abstract class WindowAnimation extends XYAnimation {
 		@Override
                 public void button(boolean pressed) {
 		    if (pressed) {
-			WindowAnimation.this.preserveAspect = !WindowAnimation.this.preserveAspect;
-			mesh.txChanged = true;
+			WindowAnimation.this.preserveAspect.toggle();
 		    }
                 }
             });
         ctrl.registerHandler("stretch", new InputControl.InputHandler() {
 		@Override
                 public void set(boolean b) {
-		    WindowAnimation.this.preserveAspect = !b;
-		    mesh.txChanged = true;
+		    WindowAnimation.this.preserveAspect.set(!b);
                 }
             });
         ctrl.registerHandler("stretch_yes", new InputControl.InputHandler() {
 		@Override
                 public void set(boolean pressed) {
 		    if (pressed) {
-			WindowAnimation.this.preserveAspect = false;
-			mesh.txChanged = true;
+			WindowAnimation.this.preserveAspect.set(false);
 		    }
 		}
             });
@@ -92,8 +96,7 @@ public abstract class WindowAnimation extends XYAnimation {
 		@Override
                 public void set(boolean pressed) {
 		    if (pressed) {
-			WindowAnimation.this.preserveAspect = true;
-			mesh.txChanged = true;
+			WindowAnimation.this.preserveAspect.set(true);
 		    }
 		}
             });
@@ -101,7 +104,7 @@ public abstract class WindowAnimation extends XYAnimation {
     
     @Override
     public void transformChanged() {
-	if (preserveAspect) {
+	if (preserveAspect.get()) {
 	    windowTransform = new PixelTransform() {
 		    public PVector2 transform(PVector2 p) {
 			double aspectCorrection = aspectRatio / getWindowAspectRatio();

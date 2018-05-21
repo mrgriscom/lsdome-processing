@@ -10,22 +10,13 @@ public class FlapManager {
 
     Prometheus mesh;
     
-    // flapping parameter limits
-    public double maxFlapDepth = .01;
-    public double minFlapDepth = .5;
-    public double minFlapAngle = Math.toRadians(-10);
-    public double maxFlapAngle = Math.toRadians(20);
-    public double minFlapPeriod = .25;
-    public double maxFlapPeriod = 2;
-
     // flapping parameters
-    public double flapPeriod = .5; // seconds
-    public double flapDepth = maxFlapDepth; // percentage
-    // set via setFlapAngle()
-    public double flapAngle = 0; // radians
+    public NumericParameter flapPeriod; // seconds
+    public NumericParameter flapDepth; // percentage
+    public NumericParameter flapAngle; // degrees
     // generally not expected to be modified
     public double flapVanishingPointOffset = .25; // meters
-    
+
     // flapping instantaneous state variables
     double flappingStart = -1; // timestamp
     double flappingEnd = -1; // timestamp
@@ -33,24 +24,64 @@ public class FlapManager {
     double flapOrigin; // meters
     boolean isFlapping = false;
 
-    public FlapManager(Prometheus mesh) {
-	this.mesh = mesh;
-	setFlapAngle(this.flapAngle);
-    }
+    BooleanParameter flapAction;
     
-    public void setFlapAngle(double flapAngle) {
-	this.flapAngle = flapAngle;
+    public FlapManager(final Prometheus mesh) {
+	this.mesh = mesh;
 
-	double min = Double.POSITIVE_INFINITY;
-	for (LedPixel px : mesh.coords) {
-	    if (px.spacerPixel) {
-		continue;
-	    }
+	flapPeriod = new NumericParameter("flap period");
+	flapPeriod.verbose = true;
+	flapPeriod.min = 2.;
+	flapPeriod.max = .25;
+	flapPeriod.scale = NumericParameter.Scale.LOG;
+	flapPeriod.init(.5);
+
+	flapDepth = new NumericParameter("flap depth");
+	flapDepth.verbose = true;
+	flapDepth.min = .5;
+	flapDepth.max = .01;
+	flapDepth.init(flapDepth.max);
+
+	flapAngle = new NumericParameter("flap angle") {
+		@Override
+		public double toInternal(double value) {
+		    return Math.toRadians(value);
+		}
+
+		@Override
+		public void onSet() {
+		    double angle = getInternal();
+		    
+		    double min = Double.POSITIVE_INFINITY;
+		    for (LedPixel px : mesh.coords) {
+			if (px.spacerPixel) {
+			    continue;
+			}
 	    
-	    double x = LayoutUtil.Vrot(px.toXY(), flapAngle).x;
-	    min = Math.min(min, x);
-	}
-	flapOrigin = min - flapVanishingPointOffset;
+			double x = LayoutUtil.Vrot(px.toXY(), angle).x;
+			min = Math.min(min, x);
+		    }
+		    flapOrigin = min - flapVanishingPointOffset;
+		}
+    	    };
+	flapAngle.verbose = true;
+	flapAngle.min = -10;
+	flapAngle.max = 20;
+	flapAngle.init(0);
+
+	flapAction = new BooleanParameter("flap") {
+		@Override
+		public void onTrue() {
+		    startFlapping();
+		}
+
+		@Override
+		public void onFalse() {
+		    stopFlapping();
+		}
+	    };
+	flapAction.verbose = true;
+	flapAction.init(false);
     }
     
     public void startFlapping() {
@@ -61,7 +92,7 @@ public class FlapManager {
     }
 
     public void stopFlapping() {
-	flappingEnd = flappingStart + flapPeriod * Math.ceil((Config.clock() - flappingStart) / flapPeriod);
+	flappingEnd = flappingStart + flapPeriod.get() * Math.ceil((Config.clock() - flappingStart) / flapPeriod.get());
     }
 
     boolean flappingActive() {
@@ -78,9 +109,9 @@ public class FlapManager {
 		if (flapLevel == 1.) {
 		    return p;
 		} else {
-		    p = LayoutUtil.Vrot(p, flapAngle);
+		    p = LayoutUtil.Vrot(p, flapAngle.getInternal());
 		    p = LayoutUtil.V((p.x - flapOrigin) / Math.max(flapLevel, .01) + flapOrigin, p.y);
-		    p = LayoutUtil.Vrot(p, -flapAngle);
+		    p = LayoutUtil.Vrot(p, -flapAngle.getInternal());
 		    return p;
 		}
 	    }
@@ -91,10 +122,10 @@ public class FlapManager {
     public boolean manageState(PixelMeshAnimation anim) {
 	boolean active = flappingActive();
 	if (active) {
-	    double flapProgress = ((Config.clock() - flappingStart) / flapPeriod) % 1.; // 0 to 1
+	    double flapProgress = ((Config.clock() - flappingStart) / flapPeriod.get()) % 1.; // 0 to 1
 	    double easingX = 1 - Math.abs(2*flapProgress - 1); // 0 to 1 to 0
 	    flapLevel = 1 - flapEasing(easingX); // 1 to 0 to 1
-	    flapLevel = flapDepth + flapLevel * (1 - flapDepth);
+	    flapLevel = flapDepth.get() + flapLevel * (1 - flapDepth.get());
 	} else {
 	    flapLevel = 1.;
 	}
@@ -110,45 +141,37 @@ public class FlapManager {
 	ctrl.registerHandler("playpause_b", new InputControl.InputHandler() {
 		@Override
                 public void button(boolean pressed) {
-		    if (pressed) {
-			startFlapping();
-		    } else {
-			stopFlapping();
-		    }
+		    flapAction.set(pressed);
                 }
             });
         ctrl.registerHandler("flap", new InputControl.InputHandler() {
 		@Override
                 public void set(boolean pressed) {
-		    if (pressed) {
-			startFlapping();
-		    } else {
-			stopFlapping();
-		    }
+		    flapAction.set(pressed);
                 }
             });
         ctrl.registerHandler("mixer", new InputControl.InputHandler() {
 		@Override
                 public void slider(double val) {
-		    setFlapAngle(minFlapAngle * (1 - val) + maxFlapAngle * val);
+		    flapAngle.setSlider(val);
                 }
             });
         ctrl.registerHandler("flap-angle", new InputControl.InputHandler() {
 		@Override
                 public void slider(double val) {
-		    setFlapAngle(minFlapAngle * (1 - val) + maxFlapAngle * val);
+		    flapAngle.setSlider(val);
                 }
             });
         ctrl.registerHandler("flap-depth", new InputControl.InputHandler() {
 		@Override
                 public void slider(double val) {
-		    flapDepth = minFlapDepth * (1 - val) + maxFlapDepth * val;
+		    flapDepth.setSlider(val);
                 }
             });
         ctrl.registerHandler("flap-speed", new InputControl.InputHandler() {
 		@Override
                 public void slider(double val) {
-		    flapPeriod = maxFlapPeriod * Math.pow(minFlapPeriod / maxFlapPeriod, val);
+		    flapPeriod.setSlider(val);
                 }
             });
     }

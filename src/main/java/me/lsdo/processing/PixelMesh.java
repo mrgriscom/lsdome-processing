@@ -19,14 +19,54 @@ public abstract class PixelMesh<T extends LedPixel> {
     public ArrayList<T> coords;
     public PixelTransform transform;
 
-    public static class PlacementTransform extends PixelTransform {
-	double xo = Config.getSketchProperty("place_x", 0.);
-	double yo = Config.getSketchProperty("place_y", 0.);
-	double scale = Config.getSketchProperty("place_scale", 1.);
-	double rot = Math.toRadians(Config.getSketchProperty("place_rot", 0.));
+    public class PlacementTransform extends PixelTransform {
+	class PlacementParameter extends NumericParameter {
+	    public PlacementParameter(String name) {
+		super(name);
+	    }
+	    
+	    @Override
+	    public void onChange(Double prev) {
+		txChanged = true;
+	    }
+	}
 
+	PlacementParameter xo;
+	PlacementParameter yo;
+	PlacementParameter rot;
+	PlacementParameter scale;
+	
+	public PlacementTransform() {
+	    xo = new PlacementParameter("xo");
+	    xo.setSensitivity(.01);
+	    xo.init(Config.getSketchProperty("place_x", 0.));
+	    
+	    yo = new PlacementParameter("yo");
+	    yo.setSensitivity(.01);
+	    yo.init(Config.getSketchProperty("place_y", 0.));
+
+	    rot = new PlacementParameter("rot") {
+		    public double toInternal(double value) {
+			return Math.toRadians(value);
+		    }
+		};
+	    rot.setSensitivity(.01 * 180);
+	    rot.min = -180;
+	    rot.max = 180;
+	    rot.softLimits = true;
+	    rot.init(Math.toRadians(Config.getSketchProperty("place_rot", 0.)));
+
+	    scale = new PlacementParameter("scale");
+	    scale.scale = NumericParameter.Scale.LOG;
+	    scale.setSensitivity(.01);
+	    scale.max = 3.;
+	    scale.min = 1./scale.max;
+	    scale.softLimits = true;
+	    scale.init(Config.getSketchProperty("place_scale", 1.));
+	}
+	
 	public PVector2 transform(PVector2 p) {
-	    return LayoutUtil.Vadd(LayoutUtil.Vmult(LayoutUtil.Vrot(p, rot), scale), LayoutUtil.V(xo, yo));
+	    return LayoutUtil.Vadd(LayoutUtil.Vmult(LayoutUtil.Vrot(p, rot.getInternal()), scale.get()), LayoutUtil.V(xo.get(), yo.get()));
 	}
     }
     public PlacementTransform placement = new PlacementTransform();
@@ -80,91 +120,73 @@ public abstract class PixelMesh<T extends LedPixel> {
         ctrl.registerHandler("jog_a", new InputControl.InputHandler() {
 		@Override
                 public void jog(boolean pressed) {
-                    boolean forward = pressed;
-		    mesh.placement.xo += (forward ? 1 : -1) * .01;
-		    txChanged = true;
+		    mesh.placement.xo.step(pressed);
                 }
             });
         ctrl.registerHandler("jog-xo", new InputControl.InputHandler() {
 		@Override
                 public void jog(boolean pressed) {
-                    boolean forward = pressed;
-		    mesh.placement.xo += (forward ? 1 : -1) * .01;
-		    txChanged = true;
+		    mesh.placement.xo.step(pressed);
                 }
             });
         ctrl.registerHandler("xo", new InputControl.InputHandler() {
 		@Override
                 public void set(double d) {
-		    mesh.placement.xo = d;
-		    txChanged = true;
+		    mesh.placement.xo.set(d);
                 }
             });
         ctrl.registerHandler("jog_b", new InputControl.InputHandler() {
 		@Override
                 public void jog(boolean pressed) {
-                    boolean forward = pressed;
-		    mesh.placement.yo += (forward ? 1 : -1) * .01;
-		    txChanged = true;
+		    mesh.placement.yo.step(pressed);
                 }
             });
         ctrl.registerHandler("jog-yo", new InputControl.InputHandler() {
 		@Override
                 public void jog(boolean pressed) {
-                    boolean forward = pressed;
-		    mesh.placement.yo += (forward ? 1 : -1) * .01;
-		    txChanged = true;
+		    mesh.placement.yo.step(pressed);
                 }
             });
         ctrl.registerHandler("yo", new InputControl.InputHandler() {
 		@Override
                 public void set(double d) {
-		    mesh.placement.yo = d;
-		    txChanged = true;
+		    mesh.placement.yo.set(d);
                 }
             });
         ctrl.registerHandler("pitch_a", new InputControl.InputHandler() {
 		@Override
                 public void slider(double val) {
-		    mesh.placement.rot = 2*Math.PI*(val - .5);
-		    txChanged = true;
+		    mesh.placement.rot.setSlider(val);
                 }
             });
         ctrl.registerHandler("jog-rot", new InputControl.InputHandler() {
 		@Override
                 public void jog(boolean pressed) {
-                    boolean forward = pressed;
-		    mesh.placement.rot += (forward ? 1 : -1) * .01 * Math.PI;
-		    txChanged = true;
+		    mesh.placement.rot.step(pressed);
                 }
             });
         ctrl.registerHandler("rot", new InputControl.InputHandler() {
 		@Override
                 public void set(double d) {
-		    mesh.placement.rot = Math.toRadians(d);
-		    txChanged = true;
+		    mesh.placement.rot.set(d);
                 }
             });
         ctrl.registerHandler("pitch_b", new InputControl.InputHandler() {
 		@Override
                 public void slider(double val) {
-		    mesh.placement.scale = Math.exp(2*(val - .5));
-		    txChanged = true;
+		    mesh.placement.scale.setSlider(val);
                 }
             });
         ctrl.registerHandler("jog-scale", new InputControl.InputHandler() {
 		@Override
                 public void jog(boolean pressed) {
-                    boolean forward = pressed;
-		    mesh.placement.scale *= 1. + (forward ? 1 : -1) * .01;
-		    txChanged = true;
+		    mesh.placement.scale.step(pressed);
                 }
             });
         ctrl.registerHandler("scale", new InputControl.InputHandler() {
 		@Override
                 public void set(double d) {
-		    mesh.placement.scale = d;
-		    txChanged = true;
+		    mesh.placement.scale.set(d);
                 }
             });	
     }
