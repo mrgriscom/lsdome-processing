@@ -33,12 +33,16 @@ public abstract class DiscreteValuesParameter<T> extends Parameter<T> {
     public T enumByName(String name) {
 	name = name.toLowerCase();
 	for (T val : values()) {
-	    String valName = enumName(val).toLowerCase();
+	    String valName = normalizedEnumName(val);
 	    if (name.equals(valName)) {
 		return val;
 	    }
 	}
 	throw new IllegalArgumentException("invalid enum value for " + this.name + ": " + name);
+    }
+
+    public String normalizedEnumName(T val) {
+	return enumName(val).toLowerCase();
     }
     
     public abstract String enumName(T val);
@@ -49,8 +53,8 @@ public abstract class DiscreteValuesParameter<T> extends Parameter<T> {
 	public String caption;
 
 	public EnumDisplay(String name, String caption) {
-	    this.name = name.toLowerCase();
-	    this.caption = (caption != null ? caption : this.name);
+	    this.name = name;
+	    this.caption = (caption != null ? caption : name);
 	}
     }
     
@@ -59,7 +63,7 @@ public abstract class DiscreteValuesParameter<T> extends Parameter<T> {
 	EnumDisplay[] disp = new EnumDisplay[vals.length];
 	for (int i = 0; i < vals.length; i++) {
 	    T e = vals[i];
-	    disp[i] = new EnumDisplay(enumName(e), enumCaption(e));
+	    disp[i] = new EnumDisplay(normalizedEnumName(e), enumCaption(e));
 	}
 	return disp;
     }
@@ -91,17 +95,22 @@ public abstract class DiscreteValuesParameter<T> extends Parameter<T> {
 	}
     }
 
-    public void bindRadioButtons(InputControl ctrl, String prefix) {
-	for (T val : values()) {
-	    final String valName = enumName(val).toLowerCase();
-	    ctrl.registerHandler(prefix + "_" + valName, new InputControl.InputHandler() {
+    public void bindRadioButton(InputControl ctrl, final T val, String[] ids) {
+	for (String id : ids) {
+	    ctrl.registerHandler(id, new InputControl.InputHandler() {
 		    @Override
 		    public void button(boolean pressed) {
 			if (pressed) {
-			    setName(valName);
+			    setName(normalizedEnumName(val));
 			}
 		    }
 		});
+	}
+    }
+    public void bindRadioButtons(InputControl ctrl, String prefix) {
+	for (T val : values()) {
+	    String id = prefix + "_" + normalizedEnumName(val);
+	    bindRadioButton(ctrl, val, new String[] {id});
 	}
     }
 
