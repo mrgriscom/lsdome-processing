@@ -24,9 +24,9 @@ public class Prometheus extends PixelMesh<WingPixel> {
 	// Mirror the 1st wing to the 2nd wing exactly (reverses display on 2nd wing)
 	MIRROR,
 	// Flip the 1st wing along the horizontal axis of the screen to get the placement of the 2nd wing
-	FLIP_HORIZ,
+	FLIP,
 	// Rotate the 1st wing 180deg around the canvas origin to get the placement of the 2nd wing
-	ROTATE_180
+	OPPOSITE
     }
 
     static final double PLATFORM_WIDTH = 1.; // m
@@ -37,7 +37,7 @@ public class Prometheus extends PixelMesh<WingPixel> {
 	double[] point;
     }
 
-    public WingDisplayMode mode;
+    public EnumParameter<WingDisplayMode> mode;
     private FlapManager flapper;
     
     // left and right are from the butterfly's perspective
@@ -45,24 +45,19 @@ public class Prometheus extends PixelMesh<WingPixel> {
 	super();	
 	opcs.add(opcLeft);
 	opcs.add(opcRight);
-	mode = parseMode(Config.getSketchProperty("wing_mode", "unified"));
+
+	mode = new EnumParameter<WingDisplayMode>("wing mode", WingDisplayMode.class) {
+		@Override
+		public void onChange(WingDisplayMode prev) {
+		    txChanged = true;
+		}
+	    };
+	mode.verbose = true;
+	mode.init(mode.enumByName(Config.getSketchProperty("wing_mode", "unified")));
+
 	init();
     }
 
-    public static WingDisplayMode parseMode(String s) {
-	if (s.equals("unified")) {
-	    return WingDisplayMode.UNIFIED;
-	} else if (s.equals("mirror")) {
-	    return WingDisplayMode.MIRROR;
-	} else if (s.equals("flip")) {
-	    return WingDisplayMode.FLIP_HORIZ;
-	} else if (s.equals("opposite")) {
-	    return WingDisplayMode.ROTATE_180;
-	} else {
-	    throw new IllegalArgumentException("unrecognized wing mode '" + s + "'");
-	}
-    }
-    
     protected List<WingPixel> getCoords() {
 	String layoutPath = Config.getConfig().layoutPath;
 	if (layoutPath.isEmpty()) {
@@ -89,7 +84,7 @@ public class Prometheus extends PixelMesh<WingPixel> {
 	// fixed relative to each other (as in UNIFIED mode)
 	PixelTransform defaultTx = new PixelTransform() {
 		public PVector2 transform(LedPixel px, PVector2 p) {
-		    if (mode == WingDisplayMode.UNIFIED && ((WingPixel)px).wing == 1) {
+		    if (mode.get() == WingDisplayMode.UNIFIED && ((WingPixel)px).wing == 1) {
 			p = LayoutUtil.V(-p.x, p.y);
 		    }
 		    return LayoutUtil.Vmult(p, 2./WINGSPAN);
@@ -112,9 +107,9 @@ public class Prometheus extends PixelMesh<WingPixel> {
 	return new PixelTransform() {
 	    public PVector2 transform(LedPixel px, PVector2 p) {
 		if (((WingPixel)px).wing == 1) {
-		    if (mode == WingDisplayMode.FLIP_HORIZ) {
+		    if (mode.get() == WingDisplayMode.FLIP) {
 			p = LayoutUtil.V(-p.x, p.y);
-		    } else if (mode == WingDisplayMode.ROTATE_180) {
+		    } else if (mode.get() == WingDisplayMode.OPPOSITE) {
 			p = LayoutUtil.V(-p.x, -p.y);
 		    }
 		}
@@ -177,21 +172,11 @@ public class Prometheus extends PixelMesh<WingPixel> {
 	super.registerHandlers(ctrl);
 	flapper.registerHandlers(ctrl);
 	
-	final Prometheus mesh = this;
-	
         ctrl.registerHandler("playpause_a", new InputControl.InputHandler() {
 		@Override
                 public void button(boolean pressed) {
                     if (pressed) {
-			Prometheus.WingDisplayMode[] modes = Prometheus.WingDisplayMode.values();
-			for (int i = 0; i < modes.length; i++) {
-			    if (mesh.mode == modes[i]) {
-				mesh.mode = modes[(i + 1) % modes.length];
-				System.out.println("setting wing mode " + mesh.mode.name());
-				break;
-			    }
-			}
-			txChanged = true;
+			mode.cycleNext();
                     }
                 }
             });
@@ -199,8 +184,7 @@ public class Prometheus extends PixelMesh<WingPixel> {
 		@Override
                 public void set(String s) {
 		    try {
-			mesh.mode = Prometheus.parseMode(s);
-			txChanged = true;
+			mode.setName(s);
 		    } catch (IllegalArgumentException e) {
 			// ignore; leave mode as is
 		    }
@@ -210,36 +194,32 @@ public class Prometheus extends PixelMesh<WingPixel> {
 		@Override
                 public void set(boolean pressed) {
 		    if (pressed) {
-			mesh.mode = Prometheus.WingDisplayMode.UNIFIED;
+			mode.set(Prometheus.WingDisplayMode.UNIFIED);
 		    }
-		    txChanged = true;
 		}
             });
         ctrl.registerHandler("wingmode_mirror", new InputControl.InputHandler() {
 		@Override
                 public void set(boolean pressed) {
 		    if (pressed) {
-			mesh.mode = Prometheus.WingDisplayMode.MIRROR;
+			mode.set(Prometheus.WingDisplayMode.MIRROR);
 		    }
-		    txChanged = true;
 		}
             });
         ctrl.registerHandler("wingmode_flip", new InputControl.InputHandler() {
 		@Override
                 public void set(boolean pressed) {
 		    if (pressed) {
-			mesh.mode = Prometheus.WingDisplayMode.FLIP_HORIZ;
+			mode.set(Prometheus.WingDisplayMode.FLIP);
 		    }
-		    txChanged = true;
 		}
             });
         ctrl.registerHandler("wingmode_rotate", new InputControl.InputHandler() {
 		@Override
                 public void set(boolean pressed) {
 		    if (pressed) {
-			mesh.mode = Prometheus.WingDisplayMode.ROTATE_180;
+			mode.set(Prometheus.WingDisplayMode.OPPOSITE);
 		    }
-		    txChanged = true;
 		}
             });	
     }

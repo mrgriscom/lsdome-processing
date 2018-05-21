@@ -1,5 +1,10 @@
 package me.lsdo.processing.interactivity;
 
+// likely bindings:
+// button press to toggle
+// button instantaneous (pressed = true, released = false), + inverted
+// radio button t/f (like 2-valued enum)
+
 public class BooleanParameter extends Parameter<Boolean> {
 
     // public settings -- after initialization, do not modify directly

@@ -2,6 +2,11 @@ package me.lsdo.processing.interactivity;
 
 // TODO builder pattern?
 
+// likely bindings
+// slider
+// jog wheel (may have independent sensitivity)
+// discreet inc/dec buttons -- simulates jog, but with bigger steps
+
 public class NumericParameter extends Parameter<Double> {
 
     public enum Scale {
