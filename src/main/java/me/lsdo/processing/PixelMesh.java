@@ -54,7 +54,7 @@ public abstract class PixelMesh<T extends LedPixel> {
 	    rot.min = -180;
 	    rot.max = 180;
 	    rot.softLimits = true;
-	    rot.init(Math.toRadians(Config.getSketchProperty("place_rot", 0.)));
+	    rot.init(Config.getSketchProperty("place_rot", 0.));
 
 	    scale = new PlacementParameter("scale");
 	    scale.scale = NumericParameter.Scale.LOG;
