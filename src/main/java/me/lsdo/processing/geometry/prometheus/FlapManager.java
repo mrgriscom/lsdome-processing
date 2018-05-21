@@ -1,9 +1,9 @@
 package me.lsdo.processing.geometry.prometheus;
 
-import me.lsdo.processing.InputControl;
 import me.lsdo.processing.LedPixel;
 import me.lsdo.processing.PixelMeshAnimation;
 import me.lsdo.processing.PixelTransform;
+import me.lsdo.processing.interactivity.*;
 import me.lsdo.processing.util.*;
 
 public class FlapManager {

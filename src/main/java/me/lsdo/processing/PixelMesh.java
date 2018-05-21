@@ -3,6 +3,7 @@ package me.lsdo.processing;
 
 import java.util.*;
 import me.lsdo.processing.util.*;
+import me.lsdo.processing.interactivity.*;
 
 // Abstract base class of representation of mesh geometry
 // Maintains the xy positions of all pixels

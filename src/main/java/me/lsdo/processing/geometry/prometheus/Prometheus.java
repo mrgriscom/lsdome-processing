@@ -4,12 +4,12 @@ import java.util.*;
 import java.io.*;
 import com.google.gson.*;
 import com.google.gson.stream.*;
-import me.lsdo.processing.InputControl;
 import me.lsdo.processing.LedPixel;
 import me.lsdo.processing.PixelMesh;
 import me.lsdo.processing.PixelMeshAnimation;
 import me.lsdo.processing.PixelTransform;
 import me.lsdo.processing.OPC;
+import me.lsdo.processing.interactivity.*;
 import me.lsdo.processing.util.*;
 
 // Prometheus geometry. Reads first wing's pixel positions from simulator json config. Maps 2nd wing

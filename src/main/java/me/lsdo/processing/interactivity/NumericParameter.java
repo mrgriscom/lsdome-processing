@@ -1,7 +1,6 @@
-package me.lsdo.processing;
+package me.lsdo.processing.interactivity;
 
 // TODO builder pattern?
-// TODO definition of sensitivity
 
 public class NumericParameter {
 
@@ -9,15 +8,32 @@ public class NumericParameter {
 	LINEAR,
 	LOG,
     };
+
+    // public settings -- after initialization, do not modify directly
     
-    public double value = Double.NaN;
-    double defaultValue;
+    // optional, but required for slider control
+    // max doesn't have to be greater than min -- think more like left and right bounds of a slider
     public double min, max;
-    double logMin, logMax;
-    public double sensitivity;
+    // if true, allow setting values outside of bounded range, even if min/max set
+    public boolean softLimits = false;
     public Scale scale = Scale.LINEAR;
+    public boolean verbose = false;
+
+    // internal vars
+
+    public String name;
+    // sensitivity is the increment for one 'step', which should be thought of as ~1/60th of a jog wheel rotation
+    // use setSensitivity()
+    public double sensitivity;
+    double value = Double.NaN;
+    double defaultValue;
+    double logMin, logMax;
+
+    public NumericParameter(String name) {
+	this.name = name;
+    }
     
-    public void init(double value) {
+    public void init(double initValue) {
 	if (hasBounds() && scale == Scale.LOG) {
 	    if (min <= 0 || max <= 0) {
 		throw new IllegalStateException("log scale must have positive bounds");
@@ -26,7 +42,7 @@ public class NumericParameter {
 	    logMax = Math.log(max);
 	}
 	
-	this.defaultValue = value;
+	this.defaultValue = initValue;
 	this.reset();
     }
 
@@ -34,6 +50,9 @@ public class NumericParameter {
 	double cur = this.value;
 	value = constrainValue(value);
 	if (cur != value) {
+	    if (verbose) {
+		System.out.println(name + ": " + value);
+	    }
 	    this.value = value;
 	    onChange(Double.isNaN(cur) ? value : cur);
 	}
@@ -102,7 +121,7 @@ public class NumericParameter {
     }
 
     double constrainValue(double value) {
-	if (hasBounds()) {
+	if (hasBounds() && !softLimits) {
 	    double upperBound = Math.max(min, max);
 	    double lowerBound = Math.min(min, max);
 	    return Math.min(Math.max(value, lowerBound), upperBound);
