@@ -2,7 +2,7 @@ package me.lsdo.processing.interactivity;
 
 // TODO builder pattern?
 
-public class NumericParameter {
+public class NumericParameter extends Parameter<Double> {
 
     public enum Scale {
 	LINEAR,
@@ -17,20 +17,16 @@ public class NumericParameter {
     // if true, allow setting values outside of bounded range, even if min/max set
     public boolean softLimits = false;
     public Scale scale = Scale.LINEAR;
-    public boolean verbose = false;
 
     // internal vars
 
-    public String name;
     // sensitivity is the increment for one 'step', which should be thought of as ~1/60th of a jog wheel rotation
     // use setSensitivity()
     public double sensitivity;
-    double value = Double.NaN;
-    double defaultValue;
     double logMin, logMax;
 
     public NumericParameter(String name) {
-	this.name = name;
+	super(name);
     }
     
     public void init(double initValue) {
@@ -41,29 +37,11 @@ public class NumericParameter {
 	    logMin = Math.log(min);
 	    logMax = Math.log(max);
 	}
-	
-	this.defaultValue = initValue;
-	this.reset();
-    }
-
-    public void set(double value) {
-	double cur = this.value;
-	value = constrainValue(value);
-	if (cur != value) {
-	    if (verbose) {
-		System.out.println(name + ": " + value);
-	    }
-	    this.value = value;
-	    onChange(Double.isNaN(cur) ? value : cur);
-	}
-    }
-
-    public double get() {
-	return value;
+	super.init(initValue);
     }
 
     public double getInternal() {
-	return toInternal(value);
+	return toInternal(get());
     }
     
     public void setSlider(double frac) {
@@ -98,20 +76,14 @@ public class NumericParameter {
     }
 
     public void stepLinear(boolean incr, double sensitivity) {
-	set(value + (incr ? 1 : -1) * sensitivity);
+	set(get() + (incr ? 1 : -1) * sensitivity);
     }
 
     public void stepLog(boolean incr, double sensitivity) {
 	double mult = 1 + sensitivity;
-	set(value * (incr ? mult : 1./mult));
+	set(get() * (incr ? mult : 1./mult));
     }
     
-    public void reset() {
-	set(defaultValue);
-    }
-
-    public void onChange(double prev) { }
-
     public double toInternal(double value) {
 	return value;
     }
