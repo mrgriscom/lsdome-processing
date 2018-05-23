@@ -19,14 +19,14 @@ public abstract class PixelMeshAnimation<T extends LedPixel> {
     private double lastT = 0;
     public double frameRate = 0.;  // fps
 
-    InputControl ctrl;
+    public InputControl ctrl;
     
     public PixelMeshAnimation(PixelMesh<? extends T> mesh) {
         this.mesh = mesh;
+        ctrl = new InputControl();
     }
     
     void initControl() {
-        ctrl = new InputControl();
 	ctrl.init();
 	mesh.registerHandlers(ctrl);
 	this.registerHandlers(ctrl);

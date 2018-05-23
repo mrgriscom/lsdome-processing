@@ -11,7 +11,7 @@ public class ProcessingAnimation extends WindowAnimation {
 
     protected PApplet app;
     private static int DEFAULT_AA = 8;
-
+    
     public ProcessingAnimation(PApplet app, PixelMesh<? extends LedPixel> mesh){
         this(app, mesh, Config.getSketchProperty("subsampling", DEFAULT_AA));
     }

@@ -16,6 +16,12 @@ public class BooleanParameter extends DiscreteValuesParameter<Boolean> {
     public void toggle() {
 	set(!get());
     }
+
+    // simulate a momentary press
+    public void trigger() {
+	set(true);
+	set(false);
+    }
     
     public void onSet() {
 	if (value) {

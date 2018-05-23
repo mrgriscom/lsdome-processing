@@ -16,8 +16,8 @@ public abstract class WindowAnimation extends XYAnimation {
     public BooleanParameter stretchAspect;
     // downscale the window to squeeze more window area onto geometry with irregular edges, at the expense
     // of leaving some of the geometry blank / outside of the window area
-    double xscale;
-    double yscale;
+    public NumericParameter xscale;
+    public NumericParameter yscale;
     // sometimes the content must be squeezed to fit the window; if so, this represents the
     // true aspect ratio of the original content
     double aspectRatio;
@@ -46,6 +46,23 @@ public abstract class WindowAnimation extends XYAnimation {
 	    };
 	stretchAspect.trueCaption = "stretch to fit window";
 	stretchAspect.falseCaption = "preserve 1:1";
+
+	xscale = new NumericParameter("xscale") {
+		@Override
+		public void onChange(Double prev) {
+		    mesh.txChanged = true;
+		};
+	    };
+	xscale.min = 1.;
+	xscale.max = .3;
+	yscale = new NumericParameter("yscale") {
+		@Override
+		public void onChange(Double prev) {
+		    mesh.txChanged = true;
+		};
+	    };
+	yscale.min = 1.;
+	yscale.max = .3;
     }
 
     public double getWindowAspectRatio() {
@@ -64,8 +81,8 @@ public abstract class WindowAnimation extends XYAnimation {
 	this.width = width;
 	this.height = height;
 	this.stretchAspect.init(!preserveAspect);
-	this.xscale = xscale;
-	this.yscale = yscale;
+	this.xscale.init(xscale);
+	this.yscale.init(yscale);
 	this.aspectRatio = (realAspectRatio > 0 ? realAspectRatio : getWindowAspectRatio());
     }
 
@@ -74,13 +91,15 @@ public abstract class WindowAnimation extends XYAnimation {
 
 	stretchAspect.bindPressToToggle(ctrl, new String[] {"load_a"});
 	stretchAspect.bindEnum(ctrl, "stretch");
+	xscale.bindSlider(ctrl, new String[] {"xscale"});
+	yscale.bindSlider(ctrl, new String[] {"yscale"});
     }
     
     @Override
     public void transformChanged() {
 	if (!transformIsAnimating) {
 	    if (stretchAspect.get()) {
-		windowTransform = mesh.stretchToViewport(width, height, xscale, yscale);
+		windowTransform = mesh.stretchToViewport(width, height, xscale.get(), yscale.get());
 	    } else {
 		windowTransform = new PixelTransform() {
 			public PVector2 transform(PVector2 p) {
