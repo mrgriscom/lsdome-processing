@@ -19,7 +19,8 @@ public class InputControl {
 
     Map<String, InputHandler> handlers;
     Socket subscriber;
-
+    Socket publisher;
+    
     public static class InputHandler {
         public void button(boolean pressed) {
             throw new RuntimeException("handler did not override!");
@@ -61,8 +62,15 @@ public class InputControl {
         subscriber = context.socket(ZMQ.SUB);
         subscriber.connect("tcp://localhost:" + Config.getConfig().zmqPortIn);
         subscriber.subscribe(new byte[0]);
+
+	publisher = context.socket(ZMQ.PUB);
+        publisher.bind("tcp://*:" + Config.getConfig().zmqPortOut);
     }
 
+    public void broadcast(String msg) {
+	publisher.send(msg);
+    }
+    
     public void registerHandler(String controlName, InputHandler handler) {
         handlers.put(controlName, handler);
     }

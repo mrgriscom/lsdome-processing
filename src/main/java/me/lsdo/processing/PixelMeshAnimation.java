@@ -23,11 +23,12 @@ public abstract class PixelMeshAnimation<T extends LedPixel> {
     
     public PixelMeshAnimation(PixelMesh<? extends T> mesh) {
         this.mesh = mesh;
+
         ctrl = new InputControl();
+	ctrl.init();
     }
     
     void initControl() {
-	ctrl.init();
 	mesh.registerHandlers(ctrl);
 	this.registerHandlers(ctrl);
     }
