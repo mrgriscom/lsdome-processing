@@ -64,6 +64,8 @@ public class Config {
 	numPanels = getProperty(domeProps, "num_panels", DEFAULT_PANELS);
 	geomType = domeProps.getProperty("geometry", "");
 	layoutPath = domeProps.getProperty("layout", "");
+	zmqPortIn = getProperty(domeProps, "zmq_port_inbound", -1);
+	zmqPortOut = getProperty(domeProps, "zmq_port_outbound", -1);
 
 	boolean validGeomType = false;
 	for (String s : knownGeometries) {
@@ -124,6 +126,8 @@ public class Config {
     public String geomType;
     public int numPanels;
     public String layoutPath;
+    public int zmqPortIn;
+    public int zmqPortOut;
     
     public OPC[] makeOPCs(int n) {
 	OPC[] opcs = new OPC[n];

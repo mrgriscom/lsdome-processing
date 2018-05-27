@@ -43,6 +43,10 @@ public class NumericParameter extends Parameter<Double> {
     public double getInternal() {
 	return toInternal(get());
     }
+
+    public String getFormatted() {
+	return get().toString();
+    }
     
     public void setSlider(double frac) {
 	if (!hasBounds()) {

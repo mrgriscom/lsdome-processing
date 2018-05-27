@@ -2,6 +2,7 @@ package me.lsdo.processing.interactivity;
 
 import java.io.*;
 import java.util.*;
+import me.lsdo.processing.util.*;
 
 import org.zeromq.ZMQ;
 import org.zeromq.ZMQ.Context;
@@ -16,8 +17,6 @@ enum ControlType {
 
 public class InputControl {
 
-    public static final int PORT = 5556;
-    
     Map<String, InputHandler> handlers;
     Socket subscriber;
 
@@ -60,7 +59,7 @@ public class InputControl {
     public void init() {
 	Context context = ZMQ.context(1);
         subscriber = context.socket(ZMQ.SUB);
-        subscriber.connect("tcp://localhost:" + PORT);
+        subscriber.connect("tcp://localhost:" + Config.getConfig().zmqPortIn);
         subscriber.subscribe(new byte[0]);
     }
 
