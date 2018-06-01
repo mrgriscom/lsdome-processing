@@ -2,6 +2,7 @@ package me.lsdo.processing.interactivity;
 
 import java.io.*;
 import java.util.*;
+import com.google.gson.*;
 import me.lsdo.processing.util.*;
 
 import org.zeromq.ZMQ;
@@ -22,6 +23,10 @@ public class InputControl {
     Socket publisher;
     
     public static class InputHandler {
+	public void set(String val) {
+            throw new RuntimeException("handler did not override!");
+	}
+	
         public void button(boolean pressed) {
             throw new RuntimeException("handler did not override!");
         }
@@ -30,26 +35,12 @@ public class InputControl {
             throw new RuntimeException("handler did not override!");
         }
 
-        public void jog(boolean inc) {
+        public void jog(double jump) {
             throw new RuntimeException("handler did not override!");
         }
 
-	public void setRaw(String s) {
-	    try {
-		set(Double.parseDouble(s));
-		return;
-	    } catch (NumberFormatException nfe) {
-	    }
-
-	    set(s);
-	}
-
-	public void set(String s) {
-            throw new RuntimeException("handler did not override!");
-	}
-	
-	public void set(double d) {
-            throw new RuntimeException("handler did not override!");
+	public boolean customType(String type, String value) {
+	    return false;
 	}
     }
 
@@ -75,6 +66,38 @@ public class InputControl {
         handlers.put(controlName, handler);
     }
 
+    static class InputEvent {
+	String name;
+	String eventType;
+	String value;
+    }
+
+    static class ParametersJson {
+	ParameterJson params[];
+    }
+    
+    static class ParameterJson {
+	String name;
+	String category;
+
+	boolean isAction;
+	boolean isEnum;
+	boolean isNumeric;
+
+	String[] values;
+	String[] captions;
+
+	boolean isBounded;
+	boolean isInt;
+    }
+    
+    public void finalizeParams() {
+	for (Parameter p : Parameter.parameters) {
+	    p.bind(this);
+	    System.out.println(p.name);
+	}
+    }
+    
     public void processInput() {
 	while (true) {
 	    String msg = subscriber.recvStr(ZMQ.NOBLOCK);
@@ -85,62 +108,48 @@ public class InputControl {
         }
     }
 
-    void processInputEvent(String event) {
-        String[] parts = event.split(":");
-        if (parts.length != 4) {
-            System.err.println("can't understand " + event);
-            return;
-        }
-	String uuid = parts[0];
-	String device = parts[1];
-        String name = parts[2];
-        String evt = parts[3];
-        InputHandler handler = handlers.get(name);
+    void processInputEvent(String msg) {
+	Gson gson = new Gson();
+	InputEvent evt;
+	try {
+	    evt = gson.fromJson(msg, InputEvent.class);
+	} catch (JsonParseException e) {
+            System.err.println("can't understand " + msg);
+            return;	    
+	}
+	
+        InputHandler handler = handlers.get(evt.name);
         if (handler == null) {
             return;
         }
 
-        ControlType type;
-        boolean boolVal = false;
-        double realVal = -1;
-	String strVal = null;
-
-	if (evt.startsWith("~")) {
-	    type = ControlType.RAW;
-	    strVal = evt.substring(1);	
-        } else if (evt.equals("press")) {
-            type = ControlType.BUTTON;
-            boolVal = true;
-        } else if (evt.equals("release")) {
-            type = ControlType.BUTTON;
-            boolVal = false;
-        } else if (evt.equals("inc")) {
-            type = ControlType.JOG;
-            boolVal = true;
-        } else if (evt.equals("dec")) {
-            type = ControlType.JOG;
-            boolVal = false;
-        } else {
-            type = ControlType.SLIDER;
-            realVal = Double.parseDouble(evt);
-            if (realVal < 0. || realVal > 1.) {
-                System.err.println("slider out of range " + realVal);
-            }
-        }
-
-        switch (type) {
-	case RAW:
-	    handler.setRaw(strVal);
-	    break;
-        case BUTTON:
-            handler.button(boolVal);
-            break;
-        case SLIDER:
-            handler.slider(realVal);
-            break;
-        case JOG:
-            handler.jog(boolVal);
-            break;
-        }
+	if (evt.eventType.equals("set")) {
+	    handler.set(evt.value);
+	} else if (evt.eventType.equals("button")) {
+	    boolean pressed;
+	    if (evt.value.equals("true")) {
+		pressed = true;
+	    } else if (evt.value.equals("false")) {
+		pressed = false;
+	    } else {
+		return;
+	    }
+	    handler.button(pressed);
+	} else if (evt.eventType.equals("slider")) {
+	    try {
+		handler.slider(Double.parseDouble(evt.value));
+	    } catch (NumberFormatException nfe) {
+	    }
+	} else if (evt.eventType.equals("jog")) {
+	    try {
+		handler.jog(Double.parseDouble(evt.value));
+	    } catch (NumberFormatException nfe) {
+	    }
+	} else {
+	    boolean handled = handler.customType(evt.eventType, evt.value);
+	    if (!handled) {
+		throw new RuntimeException("handler did not handle!");
+	    }
+	}
     }
 }

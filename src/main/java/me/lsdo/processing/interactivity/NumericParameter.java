@@ -125,62 +125,26 @@ public class NumericParameter extends Parameter<Double> {
 	this.sensitivity = sensitivity;
     }
 
-    public void bindDirect(InputControl ctrl, String id) {
-	ctrl.registerHandler(id, new InputControl.InputHandler() {
-		@Override
-		public void set(double val) {
-		    NumericParameter.this.set(val);
+    public InputControl.InputHandler getHandler() {
+	return new InputControl.InputHandler() {
+	    @Override
+	    public void set(String val) {
+		try {
+		    NumericParameter.this.set(Double.parseDouble(val));
+		} catch (NumberFormatException nfe) {
 		}
-	    });
-    }
+	    }
 
-    public void bindJog(InputControl ctrl, String[] ids) {
-	bindJog(ctrl, 1., ids);
-    }
-    
-    public void bindJog(InputControl ctrl, final double sensitivityAdjust, String[] ids) {
-	for (String id : ids) {
-	    ctrl.registerHandler(id, new InputControl.InputHandler() {
-		    @Override
-		    public void jog(boolean inc) {
-			step(inc, sensitivityAdjust);
-		    }
-		});
-	}
-    }
-    
-    public void bindSlider(InputControl ctrl, String[] ids) {
-	for (String id : ids) {
-	    ctrl.registerHandler(id, new InputControl.InputHandler() {
-		    @Override
-		    public void slider(double val) {
-			setSlider(val);
-		    }
-		});
-	}
-    }
-    
-    public void bindIncDecButtons(InputControl ctrl, final double jump, String[] incIds, String[] decIds) {
-	for (String id : incIds) {
-	    ctrl.registerHandler(id, new InputControl.InputHandler() {
-		    @Override
-		    public void button(boolean pressed) {
-			if (pressed) {
-			    increment(jump);
-			}
-		    }
-		});
-	}
-	for (String id : decIds) {
-	    ctrl.registerHandler(id, new InputControl.InputHandler() {
-		    @Override
-		    public void button(boolean pressed) {
-			if (pressed) {
-			    increment(-jump);
-			}
-		    }
-		});
-	}
+	    @Override
+	    public void jog(double val) {
+		increment(val);
+	    }
+
+	    @Override
+	    public void slider(double val) {
+		setSlider(val);
+	    }
+	};
     }
     
 }

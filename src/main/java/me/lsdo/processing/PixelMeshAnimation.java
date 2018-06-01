@@ -27,17 +27,10 @@ public abstract class PixelMeshAnimation<T extends LedPixel> {
         ctrl = new InputControl();
 	ctrl.init();
     }
-    
-    void initControl() {
-	mesh.registerHandlers(ctrl);
-	this.registerHandlers(ctrl);
-    }
-
-    public void registerHandlers(InputControl ctrl) {}
-    
+        
     public void draw(double t) {
 	if (!initialized) {
-	    initControl();
+	    ctrl.finalizeParams();
 	    init();
 	    initialized = true;
 	}

@@ -46,38 +46,36 @@ public class BooleanParameter extends DiscreteValuesParameter<Boolean> {
 	return (val ? trueCaption : falseCaption);
     }
 
-    // equivalent to bindPressToCycle()
-    public void bindPressToToggle(InputControl ctrl, String[] ids) {
-	for (String id : ids) {
-	    ctrl.registerHandler(id, new InputControl.InputHandler() {
-		    @Override
-		    public void button(boolean pressed) {
-			if (pressed) {
-			    toggle();
-			}
-		    }
-		});
-	}
+    public static enum Affinity {
+	STATE,
+	ACTION,
     }
+    public Affinity affinity = Affinity.STATE;
+    public boolean invertPress = false;
 
-    public void bindAction(InputControl ctrl, String[] ids) {
-	bindTrueWhilePressed(ctrl, ids);
-    }
-    public void bindTrueWhilePressed(InputControl ctrl, String[] ids) {
-	bindMirrorPressState(ctrl, false, ids);
-    }
-    public void bindFalseWhilePressed(InputControl ctrl, String[] ids) {
-	bindMirrorPressState(ctrl, true, ids);
-    }
-    private void bindMirrorPressState(InputControl ctrl, final boolean falseWhilePressed, String[] ids) {
-	for (String id : ids) {
-	    ctrl.registerHandler(id, new InputControl.InputHandler() {
-		    @Override
-		    public void button(boolean pressed) {
-			BooleanParameter.this.set(falseWhilePressed ^ pressed);
-		    }
-		});
-	}
+    public InputControl.InputHandler getHandler() {
+	final InputControl.InputHandler enumHandler = super.getHandler();
+	return new InputControl.InputHandler() {
+	    @Override
+	    public void set(String val) {
+		enumHandler.set(val);
+	    }
+	    
+	    @Override
+	    public void button(boolean pressed) {
+		boolean falseWhilePressed = (affinity == Affinity.STATE && invertPress);
+		BooleanParameter.this.set(falseWhilePressed ^ pressed);
+	    }
+
+	    @Override
+	    public boolean customType(String type, String value) {
+		if (type.equals("toggle")) {
+		    enumHandler.button(true);
+		    return true;
+		}
+		return false;
+	    }
+	};
     }
     
 }

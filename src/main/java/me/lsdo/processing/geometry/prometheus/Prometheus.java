@@ -176,14 +176,6 @@ public class Prometheus extends PixelMesh<WingPixel> {
 	return .5 * spacing * .7; // reduce to 70% to account for denser areas of wing
     }
 
-    public void registerHandlers(InputControl ctrl) {
-	super.registerHandlers(ctrl);
-	flapper.registerHandlers(ctrl);
-
-	mode.bindPressToCycle(ctrl, new String[] {"playpause_a"});
-	mode.bindEnum(ctrl, "wingmode");
-    }
-
     public void beforeDraw(PixelMeshAnimation anim) {	
 	if (flapper.manageState(anim)) {
 	    txChanged = true;

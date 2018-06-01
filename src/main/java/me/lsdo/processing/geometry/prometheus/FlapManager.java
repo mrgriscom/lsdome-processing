@@ -80,6 +80,7 @@ public class FlapManager {
 		    stopFlapping();
 		}
 	    };
+	flapAction.affinity = BooleanParameter.Affinity.ACTION;
 	flapAction.verbose = true;
 	flapAction.init(false);
     }
@@ -135,13 +136,6 @@ public class FlapManager {
 	boolean changed = (active != isFlapping);
 	isFlapping = active;
 	return active || changed;
-    }
-
-    public void registerHandlers(InputControl ctrl) {
-	flapAction.bindAction(ctrl, new String[] {"flap", "playpause_b"});
-	flapAngle.bindSlider(ctrl, new String[] {"flap-angle", "mixer"});
-	flapDepth.bindSlider(ctrl, new String[] {"flap-depth"});
-	flapPeriod.bindSlider(ctrl, new String[] {"flap-speed"});
     }
 
 }

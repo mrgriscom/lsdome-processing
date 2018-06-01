@@ -86,15 +86,6 @@ public abstract class WindowAnimation extends XYAnimation {
 	this.aspectRatio = (realAspectRatio > 0 ? realAspectRatio : getWindowAspectRatio());
     }
 
-    public void registerHandlers(InputControl ctrl) {
-	super.registerHandlers(ctrl);
-
-	stretchAspect.bindPressToToggle(ctrl, new String[] {"load_a"});
-	stretchAspect.bindEnum(ctrl, "stretch");
-	xscale.bindSlider(ctrl, new String[] {"xscale"});
-	yscale.bindSlider(ctrl, new String[] {"yscale"});
-    }
-    
     @Override
     public void transformChanged() {
 	if (!transformIsAnimating) {

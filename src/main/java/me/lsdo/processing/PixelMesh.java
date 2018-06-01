@@ -114,21 +114,6 @@ public abstract class PixelMesh<T extends LedPixel> {
 	}
     }
     
-    public void registerHandlers(InputControl ctrl) {
-	final PixelMesh<T> mesh = this;
-
-	mesh.placement.xo.bindJog(ctrl, new String[] {"jog-xo", "jog_a"});
-	mesh.placement.xo.bindDirect(ctrl, "xo");
-	mesh.placement.yo.bindJog(ctrl, new String[] {"jog-yo", "jog_b"});
-	mesh.placement.yo.bindDirect(ctrl, "yo");
-	mesh.placement.rot.bindSlider(ctrl, new String[] {"pitch_a"});
-	mesh.placement.rot.bindJog(ctrl, new String[] {"jog-rot"});
-	mesh.placement.rot.bindDirect(ctrl, "rot");
-	mesh.placement.scale.bindSlider(ctrl, new String[] {"pitch_b"});
-	mesh.placement.scale.bindJog(ctrl, new String[] {"jog-scale"});
-	mesh.placement.scale.bindDirect(ctrl, "scale");
-    }
-    
     public Integer getColor(LedPixel dCoord){
 	return dCoord.spacerPixel ? 0 : colors.get(dCoord);
     }

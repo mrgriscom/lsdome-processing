@@ -1,7 +1,11 @@
 package me.lsdo.processing.interactivity;
 
-public class Parameter<T> {
+import java.util.*;
 
+public abstract class Parameter<T> {
+
+    static List<Parameter> parameters = new ArrayList<Parameter>();
+    
     // public settings -- after initialization, do not modify directly
     
     public boolean verbose = false;
@@ -15,6 +19,7 @@ public class Parameter<T> {
 
     public Parameter(String name) {
 	this.name = name;
+	parameters.add(this);
     }
     
     public void init(T initValue) {
@@ -59,5 +64,11 @@ public class Parameter<T> {
     public T constrainValue(T value) {
 	return value;
     }
-    
+
+    public void bind(InputControl ctrl) {
+	ctrl.registerHandler(name, getHandler());
+    }
+
+    public abstract InputControl.InputHandler getHandler();
+
 }
