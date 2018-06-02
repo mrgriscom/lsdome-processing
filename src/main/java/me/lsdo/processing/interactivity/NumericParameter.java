@@ -158,8 +158,8 @@ public class NumericParameter extends Parameter<Double> {
 	return json;
     }
 
-    public static class IntegerParameter extends NumericParameter {
-	public IntegerParameter(String name, String category) {
+    public static class Integer extends NumericParameter {
+	public Integer(String name, String category) {
 	    super(name, category);
 	    setSensitivity(1);
 	}
@@ -175,8 +175,8 @@ public class NumericParameter extends Parameter<Double> {
 	}
     }
     
-    public static class AngleParameter extends NumericParameter {
-	public AngleParameter(String name, String category) {
+    public static class Angle extends NumericParameter {
+	public Angle(String name, String category) {
 	    super(name, category);
 	    this.min = -180;
 	    this.max = 180;

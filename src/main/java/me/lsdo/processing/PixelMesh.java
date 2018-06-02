@@ -31,7 +31,7 @@ public abstract class PixelMesh<T extends LedPixel> {
 	}
     }
     
-    public class AnglePlacementParameter extends NumericParameter.AngleParameter {
+    public class AnglePlacementParameter extends NumericParameter.Angle {
 	public AnglePlacementParameter(String name) {
 	    super(name, "placement");
 	}

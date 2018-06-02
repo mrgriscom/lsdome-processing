@@ -79,12 +79,10 @@ public class BooleanParameter extends DiscreteValuesParameter<Boolean> {
     }
     
     public InputControl.ParameterJson toJson() {
+	InputControl.ParameterJson json = super.toJson();
 	if (affinity == Affinity.ACTION) {
-	    InputControl.ParameterJson json = new InputControl.ParameterJson();
 	    json.isAction = true;
-	    return json;
-	} else {
-	    return super.toJson();
 	}
+	return json;
     }
 }

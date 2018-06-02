@@ -54,7 +54,7 @@ public class InputControl {
         subscriber.connect("tcp://localhost:" + Config.getConfig().zmqPortIn);
         subscriber.subscribe(new byte[0]);
 
-	publisher = context.socket(ZMQ.PUB);
+	publisher = context.socket(ZMQ.PUSH);
         publisher.bind("tcp://*:" + Config.getConfig().zmqPortOut);
     }
 

@@ -13,7 +13,7 @@ public class FlapManager {
     // flapping parameters
     public NumericParameter flapPeriod; // seconds
     public NumericParameter flapDepth; // percentage
-    public NumericParameter.AngleParameter flapAngle; // degrees
+    public NumericParameter.Angle flapAngle; // degrees
     // generally not expected to be modified
     public double flapVanishingPointOffset = .25; // meters
 
@@ -42,7 +42,7 @@ public class FlapManager {
 	flapDepth.max = .01;
 	flapDepth.init(flapDepth.max);
 
-	flapAngle = new NumericParameter.AngleParameter("flap angle", "mesh_effects") {
+	flapAngle = new NumericParameter.Angle("flap angle", "mesh_effects") {
 		@Override
 		public void onSet() {
 		    double angle = getInternal();
