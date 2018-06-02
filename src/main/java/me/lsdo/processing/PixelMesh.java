@@ -18,22 +18,56 @@ public abstract class PixelMesh<T extends LedPixel> {
     // All pixels, in the order seen by the fadecandies.
     public ArrayList<T> coords;
     public PixelTransform transform;
-
-    public class PlacementTransform extends PixelTransform {
-	class PlacementParameter extends NumericParameter {
-	    public PlacementParameter(String name) {
-		super(name);
-	    }
-	    
-	    @Override
-	    public void onChange(Double prev) {
-		txChanged = true;
-	    }
+    public boolean txChanged = false;
+    
+    public class PlacementParameter extends NumericParameter {
+	public PlacementParameter(String name) {
+	    super(name, "placement");
 	}
-
+	    
+	@Override
+	public void onChange(Double prev) {
+	    txChanged = true;
+	}
+    }
+    
+    public class AnglePlacementParameter extends NumericParameter.AngleParameter {
+	public AnglePlacementParameter(String name) {
+	    super(name, "placement");
+	}
+	    
+	@Override
+	public void onChange(Double prev) {
+	    txChanged = true;
+	}
+    }
+    
+    public class BoolPlacementParameter extends BooleanParameter {
+	public BoolPlacementParameter(String name) {
+	    super(name, "placement");
+	}
+	    
+	@Override
+	public void onChange(Boolean prev) {
+	    txChanged = true;
+	}
+    }
+    
+    public class EnumPlacementParameter<T extends Enum<T>> extends EnumParameter<T> {
+	public EnumPlacementParameter(String name, Class<T> enumClass) {
+	    super(name, "placement", enumClass);
+	}
+	    
+	@Override
+	public void onChange(T prev) {
+	    txChanged = true;
+	}
+    }
+    
+    public class PlacementTransform extends PixelTransform {
 	PlacementParameter xo;
 	PlacementParameter yo;
-	PlacementParameter rot;
+	AnglePlacementParameter rot;
 	PlacementParameter scale;
 	
 	public PlacementTransform() {
@@ -45,15 +79,8 @@ public abstract class PixelMesh<T extends LedPixel> {
 	    yo.setSensitivity(.01);
 	    yo.init(Config.getSketchProperty("place_y", 0.));
 
-	    rot = new PlacementParameter("rot") {
-		    public double toInternal(double value) {
-			return Math.toRadians(value);
-		    }
-		};
+	    rot = new AnglePlacementParameter("rot");
 	    rot.setSensitivity(.01 * 180);
-	    rot.min = -180;
-	    rot.max = 180;
-	    rot.softLimits = true;
 	    rot.init(Config.getSketchProperty("place_rot", 0.));
 
 	    scale = new PlacementParameter("scale");
@@ -104,7 +131,6 @@ public abstract class PixelMesh<T extends LedPixel> {
 	return null;
     }
 
-    public boolean txChanged = false;
     public void beforeDraw(PixelMeshAnimation anim) {
 	if (txChanged) {
 	    if (anim instanceof PixelTransform.TransformListener) {

@@ -13,12 +13,14 @@ public abstract class Parameter<T> {
     // internal vars
 
     public String name;
+    public String category;
     T value;
     boolean isSet = false;
     T defaultValue;
 
-    public Parameter(String name) {
+    public Parameter(String name, String category) {
 	this.name = name;
+	this.category = category;
 	parameters.add(this);
     }
     
@@ -71,4 +73,11 @@ public abstract class Parameter<T> {
 
     public abstract InputControl.InputHandler getHandler();
 
+    public InputControl.ParameterJson toJson() {
+	InputControl.ParameterJson json = new InputControl.ParameterJson();
+	json.name = name;
+	json.category = category;
+	return json;
+    }
+    
 }

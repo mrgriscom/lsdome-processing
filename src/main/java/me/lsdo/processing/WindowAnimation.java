@@ -38,29 +38,14 @@ public abstract class WindowAnimation extends XYAnimation {
 		}
 	    });
 
-	stretchAspect = new BooleanParameter("stretch aspect") {
-		@Override
-		public void onChange(Boolean prev) {
-		    mesh.txChanged = true;
-		};
-	    };
+	stretchAspect = mesh.new BoolPlacementParameter("stretch aspect");
 	stretchAspect.trueCaption = "stretch to fit window";
 	stretchAspect.falseCaption = "preserve 1:1";
 
-	xscale = new NumericParameter("xscale") {
-		@Override
-		public void onChange(Double prev) {
-		    mesh.txChanged = true;
-		};
-	    };
+	xscale = mesh.new PlacementParameter("xscale");
 	xscale.min = 1.;
 	xscale.max = .3;
-	yscale = new NumericParameter("yscale") {
-		@Override
-		public void onChange(Double prev) {
-		    mesh.txChanged = true;
-		};
-	    };
+	yscale = mesh.new PlacementParameter("yscale");
 	yscale.min = 1.;
 	yscale.max = .3;
     }

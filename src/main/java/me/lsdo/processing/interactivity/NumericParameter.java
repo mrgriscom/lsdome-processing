@@ -25,8 +25,8 @@ public class NumericParameter extends Parameter<Double> {
     public double sensitivity;
     double logMin, logMax;
 
-    public NumericParameter(String name) {
-	super(name);
+    public NumericParameter(String name, String category) {
+	super(name, category);
     }
     
     public void init(double initValue) {
@@ -111,8 +111,12 @@ public class NumericParameter extends Parameter<Double> {
 	return min != max;
     }
 
+    public boolean isBounded() {
+	return hasBounds() && !softLimits;
+    }
+    
     double constrainValue(double value) {
-	if (hasBounds() && !softLimits) {
+	if (isBounded()) {
 	    double upperBound = Math.max(min, max);
 	    double lowerBound = Math.min(min, max);
 	    return Math.min(Math.max(value, lowerBound), upperBound);
@@ -147,4 +151,49 @@ public class NumericParameter extends Parameter<Double> {
 	};
     }
     
+    public InputControl.ParameterJson toJson() {
+	InputControl.ParameterJson json = super.toJson();
+	json.isNumeric = true;
+	json.isBounded = isBounded();
+	return json;
+    }
+
+    public static class IntegerParameter extends NumericParameter {
+	public IntegerParameter(String name, String category) {
+	    super(name, category);
+	    setSensitivity(1);
+	}
+    
+	public double toInternal(double value) {
+	    return Math.round(value);
+	}
+    
+	public InputControl.ParameterJson toJson() {
+	    InputControl.ParameterJson json = super.toJson();
+	    json.isInt = true;
+	    return json;
+	}
+    }
+    
+    public static class AngleParameter extends NumericParameter {
+	public AngleParameter(String name, String category) {
+	    super(name, category);
+	    this.min = -180;
+	    this.max = 180;
+	    this.softLimits = true;
+	}
+
+	public void setLimits(double min, double max) {
+	    this.min = min;
+	    this.max = max;
+	    this.softLimits = false;
+	}
+	
+	@Override
+	public double toInternal(double value) {
+	    return Math.toRadians(value);
+	}
+    }
 }
+
+// TODO set default sensitivity automatically based on min/max

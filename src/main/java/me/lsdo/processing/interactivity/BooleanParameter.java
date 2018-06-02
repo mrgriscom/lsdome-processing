@@ -8,8 +8,8 @@ public class BooleanParameter extends DiscreteValuesParameter<Boolean> {
     public String trueCaption;
     public String falseCaption;
 
-    public BooleanParameter(String name) {
-	super(name);
+    public BooleanParameter(String name, String category) {
+	super(name, category);
     }
     
     // equivalent to cycleNext()
@@ -78,4 +78,13 @@ public class BooleanParameter extends DiscreteValuesParameter<Boolean> {
 	};
     }
     
+    public InputControl.ParameterJson toJson() {
+	if (affinity == Affinity.ACTION) {
+	    InputControl.ParameterJson json = new InputControl.ParameterJson();
+	    json.isAction = true;
+	    return json;
+	} else {
+	    return super.toJson();
+	}
+    }
 }

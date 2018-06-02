@@ -2,8 +2,8 @@ package me.lsdo.processing.interactivity;
 
 public abstract class DiscreteValuesParameter<T> extends Parameter<T> {
 
-    public DiscreteValuesParameter(String name) {
-	super(name);
+    public DiscreteValuesParameter(String name, String category) {
+	super(name, category);
     }
     
     public abstract T[] values();
@@ -48,26 +48,6 @@ public abstract class DiscreteValuesParameter<T> extends Parameter<T> {
     public abstract String enumName(T val);
     public abstract String enumCaption(T val);
 
-    public static class EnumDisplay {
-	public String name;
-	public String caption;
-
-	public EnumDisplay(String name, String caption) {
-	    this.name = name;
-	    this.caption = (caption != null ? caption : name);
-	}
-    }
-    
-    public EnumParameter.EnumDisplay[] getCaptions() {
-	T[] vals = values();
-	EnumDisplay[] disp = new EnumDisplay[vals.length];
-	for (int i = 0; i < vals.length; i++) {
-	    T e = vals[i];
-	    disp[i] = new EnumDisplay(normalizedEnumName(e), enumCaption(e));
-	}
-	return disp;
-    }
-    
     public InputControl.InputHandler getHandler() {
 	return new InputControl.InputHandler() {
 	    @Override
@@ -88,4 +68,22 @@ public abstract class DiscreteValuesParameter<T> extends Parameter<T> {
 	    }
 	};
     }
+
+    public InputControl.ParameterJson toJson() {
+	InputControl.ParameterJson json = super.toJson();
+	json.isEnum = true;
+
+	T[] vals = values();
+	json.values = new String[vals.length];
+	json.captions = new String[vals.length];
+	for (int i = 0; i < vals.length; i++) {
+	    T e = vals[i];
+	    String name = normalizedEnumName(e);
+	    String caption = enumCaption(e);
+	    json.values[i] = name;
+	    json.captions[i] = (caption != null ? caption : name);
+	}
+	return json;
+    }
+
 }

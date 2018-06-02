@@ -58,6 +58,11 @@ public class InputControl {
         publisher.bind("tcp://*:" + Config.getConfig().zmqPortOut);
     }
 
+    public void broadcast(Object o) {
+	Gson gson = new Gson();
+	broadcast(gson.toJson(o));
+    }
+    
     public void broadcast(String msg) {
 	publisher.send(msg);
     }
@@ -73,7 +78,8 @@ public class InputControl {
     }
 
     static class ParametersJson {
-	ParameterJson params[];
+	String type = "parameters";
+	List<ParameterJson> params = new ArrayList<ParameterJson>();
     }
     
     static class ParameterJson {
@@ -90,12 +96,19 @@ public class InputControl {
 	boolean isBounded;
 	boolean isInt;
     }
+
+    public static class DurationControlJson {
+	String type = "duration";
+	public double duration;
+    }
     
     public void finalizeParams() {
+	ParametersJson allParams = new ParametersJson();
 	for (Parameter p : Parameter.parameters) {
 	    p.bind(this);
-	    System.out.println(p.name);
+	    allParams.params.add(p.toJson());
 	}
+	broadcast(allParams);
     }
     
     public void processInput() {
@@ -125,16 +138,10 @@ public class InputControl {
 
 	if (evt.eventType.equals("set")) {
 	    handler.set(evt.value);
-	} else if (evt.eventType.equals("button")) {
-	    boolean pressed;
-	    if (evt.value.equals("true")) {
-		pressed = true;
-	    } else if (evt.value.equals("false")) {
-		pressed = false;
-	    } else {
-		return;
-	    }
-	    handler.button(pressed);
+	} else if (evt.eventType.equals("press")) {
+	    handler.button(true);
+	} else if (evt.eventType.equals("release")) {
+	    handler.button(false);
 	} else if (evt.eventType.equals("slider")) {
 	    try {
 		handler.slider(Double.parseDouble(evt.value));

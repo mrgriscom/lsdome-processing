@@ -8,8 +8,8 @@ public class EnumParameter<T extends Enum<T>> extends DiscreteValuesParameter<T>
     
     Class<T> enumClass;
     
-    public EnumParameter(String name, Class<T> enumClass) {
-	super(name);
+    public EnumParameter(String name, String category, Class<T> enumClass) {
+	super(name, category);
 	this.enumClass = enumClass;
     }
 

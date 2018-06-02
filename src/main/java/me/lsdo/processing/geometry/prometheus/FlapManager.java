@@ -13,7 +13,7 @@ public class FlapManager {
     // flapping parameters
     public NumericParameter flapPeriod; // seconds
     public NumericParameter flapDepth; // percentage
-    public NumericParameter flapAngle; // degrees
+    public NumericParameter.AngleParameter flapAngle; // degrees
     // generally not expected to be modified
     public double flapVanishingPointOffset = .25; // meters
 
@@ -29,25 +29,20 @@ public class FlapManager {
     public FlapManager(final Prometheus mesh) {
 	this.mesh = mesh;
 
-	flapPeriod = new NumericParameter("flap period");
+	flapPeriod = new NumericParameter("flap period", "mesh_effects");
 	flapPeriod.verbose = true;
 	flapPeriod.min = 2.;
 	flapPeriod.max = .25;
 	flapPeriod.scale = NumericParameter.Scale.LOG;
 	flapPeriod.init(.5);
 
-	flapDepth = new NumericParameter("flap depth");
+	flapDepth = new NumericParameter("flap depth", "mesh_effects");
 	flapDepth.verbose = true;
 	flapDepth.min = .5;
 	flapDepth.max = .01;
 	flapDepth.init(flapDepth.max);
 
-	flapAngle = new NumericParameter("flap angle") {
-		@Override
-		public double toInternal(double value) {
-		    return Math.toRadians(value);
-		}
-
+	flapAngle = new NumericParameter.AngleParameter("flap angle", "mesh_effects") {
 		@Override
 		public void onSet() {
 		    double angle = getInternal();
@@ -65,11 +60,10 @@ public class FlapManager {
 		}
     	    };
 	flapAngle.verbose = true;
-	flapAngle.min = -10;
-	flapAngle.max = 20;
+	flapAngle.setLimits(-10, 20);
 	flapAngle.init(0);
 
-	flapAction = new BooleanParameter("flap") {
+	flapAction = new BooleanParameter("flap", "mesh_effects") {
 		@Override
 		public void onTrue() {
 		    startFlapping();
