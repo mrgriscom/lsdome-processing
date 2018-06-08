@@ -29,18 +29,31 @@ public class FlapManager {
     public FlapManager(final Prometheus mesh) {
 	this.mesh = mesh;
 
+	flapAction = new BooleanParameter("flap", "mesh_effects") {
+		@Override
+		public void onTrue() {
+		    startFlapping();
+		}
+
+		@Override
+		public void onFalse() {
+		    stopFlapping();
+		}
+	    };
+	flapAction.affinity = BooleanParameter.Affinity.ACTION;
+	flapAction.description = "FLAP";
+	flapAction.verbose = true;
+
 	flapPeriod = new NumericParameter("flap period", "mesh_effects");
 	flapPeriod.verbose = true;
 	flapPeriod.min = 2.;
 	flapPeriod.max = .25;
 	flapPeriod.scale = NumericParameter.Scale.LOG;
-	flapPeriod.init(.5);
 
 	flapDepth = new NumericParameter("flap depth", "mesh_effects");
 	flapDepth.verbose = true;
 	flapDepth.min = .5;
 	flapDepth.max = .01;
-	flapDepth.init(flapDepth.max);
 
 	flapAngle = new NumericParameter.Angle("flap angle", "mesh_effects") {
 		@Override
@@ -61,22 +74,11 @@ public class FlapManager {
     	    };
 	flapAngle.verbose = true;
 	flapAngle.setLimits(-10, 20);
+
+	flapPeriod.init(.5);
+	flapDepth.init(flapDepth.max);
 	flapAngle.init(0);
-
-	flapAction = new BooleanParameter("flap", "mesh_effects") {
-		@Override
-		public void onTrue() {
-		    startFlapping();
-		}
-
-		@Override
-		public void onFalse() {
-		    stopFlapping();
-		}
-	    };
-	flapAction.affinity = BooleanParameter.Affinity.ACTION;
-	flapAction.verbose = true;
-	flapAction.init(false);
+	flapAction.init(false);	
     }
     
     public void startFlapping() {

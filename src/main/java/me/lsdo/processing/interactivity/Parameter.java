@@ -9,6 +9,7 @@ public abstract class Parameter<T> {
     // public settings -- after initialization, do not modify directly
     
     public boolean verbose = false;
+    public String description;
     
     // internal vars
 
@@ -77,6 +78,7 @@ public abstract class Parameter<T> {
 	InputControl.ParameterJson json = new InputControl.ParameterJson();
 	json.name = name;
 	json.category = category;
+	json.description = description;
 	return json;
     }
     

@@ -78,13 +78,14 @@ public class InputControl {
     }
 
     static class ParametersJson {
-	String type = "parameters";
+	String type = "params";
 	List<ParameterJson> params = new ArrayList<ParameterJson>();
     }
     
     static class ParameterJson {
 	String name;
 	String category;
+	String description;
 
 	boolean isAction;
 	boolean isEnum;
