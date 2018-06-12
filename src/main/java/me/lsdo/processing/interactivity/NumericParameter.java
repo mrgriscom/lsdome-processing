@@ -158,6 +158,22 @@ public class NumericParameter extends Parameter<Double> {
 	return json;
     }
 
+    public InputControl.ParameterValueJson toValueJson() {
+	InputControl.ParameterValueJson json = super.toValueJson();
+	json.value = getFormatted();
+	if (hasBounds()) {
+	    double k = 0;
+	    if (scale == Scale.LINEAR) {
+		k = (get() - min) / (max - min);
+	    } else if (scale == Scale.LOG) {
+		k = (Math.log(get()) - logMin) / (logMax - logMin);
+	    }
+	    k = Math.min(Math.max(k, 0.), 1.);
+	    json.sliderPos = k;
+	}
+	return json;
+    }
+
     public static class Integer extends NumericParameter {
 	public Integer(String name, String category) {
 	    super(name, category);

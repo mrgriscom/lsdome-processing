@@ -86,4 +86,10 @@ public abstract class DiscreteValuesParameter<T> extends Parameter<T> {
 	return json;
     }
 
+    public InputControl.ParameterValueJson toValueJson() {
+	InputControl.ParameterValueJson json = super.toValueJson();
+	json.value = normalizedEnumName(get());
+	return json;
+    }
+
 }

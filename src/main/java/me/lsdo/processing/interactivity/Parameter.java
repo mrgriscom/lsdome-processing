@@ -4,6 +4,7 @@ import java.util.*;
 
 public abstract class Parameter<T> {
 
+    static InputControl ctrl;
     static List<Parameter> parameters = new ArrayList<Parameter>();
     
     // public settings -- after initialization, do not modify directly
@@ -36,6 +37,8 @@ public abstract class Parameter<T> {
 	    T prev = (isSet ? this.value : null);
 	    this.value = value;
 	    isSet = true;
+
+	    broadcastValue();
 	    
 	    if (verbose) {
 		System.out.println(name + ": " + value);
@@ -69,9 +72,17 @@ public abstract class Parameter<T> {
     }
 
     public void bind(InputControl ctrl) {
+	this.ctrl = ctrl;
 	ctrl.registerHandler(name, getHandler());
     }
 
+    public void broadcastValue() {
+	if (ctrl == null) {
+	    return;
+	}
+	ctrl.broadcast(toValueJson());
+    }
+    
     public abstract InputControl.InputHandler getHandler();
 
     public InputControl.ParameterJson toJson() {
@@ -79,6 +90,12 @@ public abstract class Parameter<T> {
 	json.name = name;
 	json.category = category;
 	json.description = description;
+	return json;
+    }
+
+    public InputControl.ParameterValueJson toValueJson() {
+	InputControl.ParameterValueJson json = new InputControl.ParameterValueJson();
+	json.name = name;
 	return json;
     }
     

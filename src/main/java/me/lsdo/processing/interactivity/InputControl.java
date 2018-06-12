@@ -46,6 +46,12 @@ public class InputControl {
 
     public InputControl() {
 	handlers = new HashMap<String, InputHandler>();
+
+	registerHandler("_paraminfo", new InputHandler() {
+		public void set(String val) {
+		    broadcastParams();
+		}
+	    });
     }
     
     public void init() {
@@ -98,18 +104,34 @@ public class InputControl {
 	boolean isInt;
     }
 
+    static class ParameterValueJson {
+	String type = "param_value";
+	String name;
+	String value;
+	double sliderPos;
+    }
+    
     public static class DurationControlJson {
 	String type = "duration";
 	public double duration;
     }
     
     public void finalizeParams() {
-	ParametersJson allParams = new ParametersJson();
 	for (Parameter p : Parameter.parameters) {
 	    p.bind(this);
+	}
+	broadcastParams();
+    }
+
+    public void broadcastParams() {
+	ParametersJson allParams = new ParametersJson();
+	for (Parameter p : Parameter.parameters) {
 	    allParams.params.add(p.toJson());
 	}
 	broadcast(allParams);
+	for (Parameter p : Parameter.parameters) {
+	    p.broadcastValue();
+	}
     }
     
     public void processInput() {
