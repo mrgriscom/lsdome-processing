@@ -54,7 +54,8 @@ public class Prometheus extends PixelMesh<WingPixel> {
 	opcs.add(opcLeft);
 	opcs.add(opcRight);
 
-	mode = new EnumPlacementParameter<WingDisplayMode>("wing mode", WingDisplayMode.class);
+	mode = new EnumPlacementParameter<WingDisplayMode>("wing_mode", WingDisplayMode.class);
+	mode.description = "wing mode";
 	mode.verbose = true;
 	mode.init(mode.enumByName(Config.getSketchProperty("wing_mode", "unified")));
 	
