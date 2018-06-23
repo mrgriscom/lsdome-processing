@@ -73,15 +73,15 @@ public abstract class PixelMesh<T extends LedPixel> {
 	public PlacementTransform() {
 	    xo = new PlacementParameter("x-offset");
 	    xo.setSensitivity(.01);
-	    xo.init(Config.getSketchProperty("place_x", 0.));
+	    xo.init(Config.getSketchProperty("placement_xo", 0.));
 	    
 	    yo = new PlacementParameter("y-offset");
 	    yo.setSensitivity(.01);
-	    yo.init(Config.getSketchProperty("place_y", 0.));
+	    yo.init(Config.getSketchProperty("placement_yo", 0.));
 
 	    rot = new AnglePlacementParameter("rotation");
 	    rot.setSensitivity(.01 * 180);
-	    rot.init(Config.getSketchProperty("place_rot", 0.));
+	    rot.init(Config.getSketchProperty("placement_rot", 0.));
 
 	    scale = new PlacementParameter("scale");
 	    scale.scale = NumericParameter.Scale.LOG;
@@ -89,7 +89,7 @@ public abstract class PixelMesh<T extends LedPixel> {
 	    scale.max = 3.;
 	    scale.min = 1./scale.max;
 	    scale.softLimits = true;
-	    scale.init(Config.getSketchProperty("place_scale", 1.));
+	    scale.init(Config.getSketchProperty("placement_scale", 1.));
 	}
 	
 	public PVector2 transform(PVector2 p) {

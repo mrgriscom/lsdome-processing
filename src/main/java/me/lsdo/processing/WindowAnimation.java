@@ -14,6 +14,7 @@ public abstract class WindowAnimation extends XYAnimation {
     int height;
     // if true, stretch the mesh geometry independently in the x- and y-axes to maximally cover the window
     public BooleanParameter stretchAspect;
+    public boolean stretchDefault() { return true; }
     // downscale the window to squeeze more window area onto geometry with irregular edges, at the expense
     // of leaving some of the geometry blank / outside of the window area
     public NumericParameter xscale;
@@ -45,45 +46,41 @@ public abstract class WindowAnimation extends XYAnimation {
 	stretchAspect = mesh.new BoolPlacementParameter("stretch aspect");
 	stretchAspect.trueCaption = "stretch to fit window";
 	stretchAspect.falseCaption = "preserve 1:1";
+	stretchAspect.init(!Config.getSketchProperty("no_stretch", !stretchDefault()));
 
 	xscale = mesh.new PlacementParameter("x-scale");
 	xscale.min = 1.;
 	xscale.max = .3;
+	xscale.init(Config.getSketchProperty("placement_xscale", 1.));
 	yscale = mesh.new PlacementParameter("y-scale");
 	yscale.min = 1.;
 	yscale.max = .3;
-
+	yscale.init(Config.getSketchProperty("placement_yscale", 1.));
+	
 	xo = mesh.new PlacementParameter("post-stretch x-offset");
 	xo.setSensitivity(.01);
+	xo.init(Config.getSketchProperty("placement_xo_poststretch", 0.));
 	yo = mesh.new PlacementParameter("post-stretch y-offset");
 	yo.setSensitivity(.01);
+	yo.init(Config.getSketchProperty("placement_yo_poststretch", 0.));
     }
 
     public double getWindowAspectRatio() {
 	return (double)width / height;
     }
     
-    public void initViewport(int width, int height, boolean preserveAspect) {
-	initViewport(width, height, preserveAspect, 0.);
+    public void initViewport(int width, int height) {
+	initViewport(width, height, 0.);
     }
     
-    public void initViewport(int width, int height, boolean preserveAspect, double realAspectRatio) {
-	initViewport(width, height, preserveAspect, realAspectRatio, 1., 1.);
-    }
-    
-    public void initViewport(int width, int height, boolean preserveAspect, double realAspectRatio, double xscale, double yscale) {
-	initViewport(width, height, preserveAspect, realAspectRatio, xscale, yscale, 0., 0.);
-    }
-
-    public void initViewport(int width, int height, boolean preserveAspect, double realAspectRatio, double xscale, double yscale, double xo, double yo) {
+    public void initViewport(int width, int height, double realAspectRatio) {
 	this.width = width;
 	this.height = height;
-	this.stretchAspect.init(!preserveAspect);
-	this.xscale.init(xscale);
-	this.yscale.init(yscale);
-	this.xo.init(xo);
-	this.yo.init(yo);
 	this.aspectRatio = (realAspectRatio > 0 ? realAspectRatio : getWindowAspectRatio());
+
+	InputControl.AspectRatioJson ar = new InputControl.AspectRatioJson();
+	ar.aspect = this.aspectRatio;
+	ctrl.broadcast(ar);
     }
 
     @Override

@@ -115,6 +115,11 @@ public class InputControl {
 	String type = "duration";
 	public double duration;
     }
+
+    public static class AspectRatioJson {
+	String type = "aspect";
+	public double aspect;
+    }
     
     public void finalizeParams() {
 	for (Parameter p : Parameter.parameters) {
