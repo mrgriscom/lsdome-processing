@@ -71,15 +71,15 @@ public abstract class PixelMesh<T extends LedPixel> {
 	PlacementParameter scale;
 	
 	public PlacementTransform() {
-	    xo = new PlacementParameter("xo");
+	    xo = new PlacementParameter("x-offset");
 	    xo.setSensitivity(.01);
 	    xo.init(Config.getSketchProperty("place_x", 0.));
 	    
-	    yo = new PlacementParameter("yo");
+	    yo = new PlacementParameter("y-offset");
 	    yo.setSensitivity(.01);
 	    yo.init(Config.getSketchProperty("place_y", 0.));
 
-	    rot = new AnglePlacementParameter("rot");
+	    rot = new AnglePlacementParameter("rotation");
 	    rot.setSensitivity(.01 * 180);
 	    rot.init(Config.getSketchProperty("place_rot", 0.));
 
@@ -182,6 +182,10 @@ public abstract class PixelMesh<T extends LedPixel> {
     }
     
     public PixelTransform stretchToViewport(final int width, final int height, final double xscale, final double yscale) {
+	return stretchToViewport(width, height, xscale, yscale, 0., 0.);
+    }
+    
+    public PixelTransform stretchToViewport(final int width, final int height, final double xscale, final double yscale, final double xo, final double yo) {
 	PVector2 viewport[] = getViewport();
 	final PVector2 p0 = viewport[0];
 	final PVector2 pDim = viewport[1];
@@ -193,8 +197,9 @@ public abstract class PixelMesh<T extends LedPixel> {
 	    }
 		    
 	    public PVector2 transform(PVector2 p) {
-		return LayoutUtil.V(reproject(p.x, p0.x, pDim.x, (double)width/height, xscale),
-				    reproject(p.y, p0.y, pDim.y, 1., yscale));
+		return LayoutUtil.Vadd(LayoutUtil.V(reproject(p.x, p0.x, pDim.x, (double)width/height, xscale),
+						    reproject(p.y, p0.y, pDim.y, 1., yscale)),
+				       LayoutUtil.V(xo, yo));
 	    }
 	};
     }

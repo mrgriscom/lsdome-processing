@@ -18,6 +18,10 @@ public abstract class WindowAnimation extends XYAnimation {
     // of leaving some of the geometry blank / outside of the window area
     public NumericParameter xscale;
     public NumericParameter yscale;
+    // allow moving the viewport within the geometry as a final adjustment after all other transforms
+    // have taken place
+    public NumericParameter xo;
+    public NumericParameter yo;
     // sometimes the content must be squeezed to fit the window; if so, this represents the
     // true aspect ratio of the original content
     double aspectRatio;
@@ -42,12 +46,17 @@ public abstract class WindowAnimation extends XYAnimation {
 	stretchAspect.trueCaption = "stretch to fit window";
 	stretchAspect.falseCaption = "preserve 1:1";
 
-	xscale = mesh.new PlacementParameter("xscale");
+	xscale = mesh.new PlacementParameter("x-scale");
 	xscale.min = 1.;
 	xscale.max = .3;
-	yscale = mesh.new PlacementParameter("yscale");
+	yscale = mesh.new PlacementParameter("y-scale");
 	yscale.min = 1.;
 	yscale.max = .3;
+
+	xo = mesh.new PlacementParameter("post-stretch x-offset");
+	xo.setSensitivity(.01);
+	yo = mesh.new PlacementParameter("post-stretch y-offset");
+	yo.setSensitivity(.01);
     }
 
     public double getWindowAspectRatio() {
@@ -63,11 +72,17 @@ public abstract class WindowAnimation extends XYAnimation {
     }
     
     public void initViewport(int width, int height, boolean preserveAspect, double realAspectRatio, double xscale, double yscale) {
+	initViewport(width, height, preserveAspect, realAspectRatio, xscale, yscale, 0., 0.);
+    }
+
+    public void initViewport(int width, int height, boolean preserveAspect, double realAspectRatio, double xscale, double yscale, double xo, double yo) {
 	this.width = width;
 	this.height = height;
 	this.stretchAspect.init(!preserveAspect);
 	this.xscale.init(xscale);
 	this.yscale.init(yscale);
+	this.xo.init(xo);
+	this.yo.init(yo);
 	this.aspectRatio = (realAspectRatio > 0 ? realAspectRatio : getWindowAspectRatio());
     }
 
@@ -75,7 +90,7 @@ public abstract class WindowAnimation extends XYAnimation {
     public void transformChanged() {
 	if (!transformIsAnimating) {
 	    if (stretchAspect.get()) {
-		windowTransform = mesh.stretchToViewport(width, height, xscale.get(), yscale.get());
+		windowTransform = mesh.stretchToViewport(width, height, xscale.get(), yscale.get(), xo.get(), yo.get());
 	    } else {
 		windowTransform = new PixelTransform() {
 			public PVector2 transform(PVector2 p) {
