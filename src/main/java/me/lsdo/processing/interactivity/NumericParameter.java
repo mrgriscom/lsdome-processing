@@ -183,7 +183,11 @@ public class NumericParameter extends Parameter<Double> {
 	public double toInternal(double value) {
 	    return Math.round(value);
 	}
-    
+
+	public String getFormatted() {
+	    return "" + (int)getInternal();
+	}
+	
 	public InputControl.ParameterJson toJson() {
 	    InputControl.ParameterJson json = super.toJson();
 	    json.isInt = true;
