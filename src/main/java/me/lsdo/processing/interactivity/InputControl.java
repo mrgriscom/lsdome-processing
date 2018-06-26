@@ -61,7 +61,7 @@ public class InputControl {
         subscriber.subscribe(new byte[0]);
 
 	publisher = context.socket(ZMQ.PUSH);
-        publisher.bind("tcp://*:" + Config.getConfig().zmqPortOut);
+        publisher.connect("tcp://localhost:" + Config.getConfig().zmqPortOut);
     }
 
     public void broadcast(Object o) {
