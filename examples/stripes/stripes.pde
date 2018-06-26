@@ -1,18 +1,25 @@
-import me.lsdo.processing.*;
+// A dome-enabled processing sketch. You should be able to run this in processing
+// with the lsdome-processing contributed library, and have the output piped to
+// the dome pixels via OPC.
 
-CanvasSketch sketch;
+// The necessary additions to dome-enable the sketch are marked with //@@@@
+
+//@@@@@@@@@@@@@@@
+import me.lsdo.processing.*;
+import me.lsdo.processing.geometry.dome.*;
+ProcessingAnimation canvas;
+//@@@@@@@@@@@@@@@
 
 int pitch = 50;
 
 void setup()
 {
     size(300, 300);
-    Dome dome = new Dome();
-    OPC opc = new OPC();
-
-    sketch = new CanvasSketch(this, dome, opc, 16);
-
     colorMode(HSB, 256);
+
+    //@@@@@@@@@@@@@@@
+    canvas = new ProcessingAnimation(this, new Dome(new OPC()));
+    //@@@@@@@@@@@@@@@
 }
 
 void draw()
@@ -32,6 +39,9 @@ void draw()
         if (thisPos > width - pitch)
             rect (thisPos - width, 0, pitch, height);
     }
-    sketch.draw();
+    
+    //@@@@@@@@@@@@@@@
+    canvas.draw();
+    //@@@@@@@@@@@@@@@
 }
 

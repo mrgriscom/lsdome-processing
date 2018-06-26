@@ -70,7 +70,9 @@ public class InputControl {
     }
     
     public void broadcast(String msg) {
-	publisher.send(msg);
+	// push sockets block if the queue is full; which will happen
+	// if no one is listening on the other end; set dontwait to avoid
+	publisher.send(msg, ZMQ.DONTWAIT);
     }
     
     public void registerHandler(String controlName, InputHandler handler) {

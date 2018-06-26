@@ -11,7 +11,8 @@ public class Config {
     public static final int DEFAULT_PORT = 7890;
     public static final int DEFAULT_PANELS = 24;
     public static final String[] knownGeometries = {"lsdome", "prometheus"};
-
+    public static final int[] DEFAULT_ZMQ_IN_OUT = {5556, 5557};
+    
     private Properties domeProps = new Properties();
     private Properties sketchProps = new Properties();
 
@@ -64,22 +65,26 @@ public class Config {
 	numPanels = getProperty(domeProps, "num_panels", DEFAULT_PANELS);
 	geomType = domeProps.getProperty("geometry", "");
 	layoutPath = domeProps.getProperty("layout", "");
-	zmqPortIn = getProperty(domeProps, "zmq_port_inbound", -1);
-	zmqPortOut = getProperty(domeProps, "zmq_port_outbound", -1);
+	zmqPortIn = getProperty(domeProps, "zmq_port_inbound", DEFAULT_ZMQ_IN_OUT[0]);
+	zmqPortOut = getProperty(domeProps, "zmq_port_outbound", DEFAULT_ZMQ_IN_OUT[1]);
 
-	boolean validGeomType = false;
-	for (String s : knownGeometries) {
-	    if (s.equals(geomType)) {
-		validGeomType = true;
-		break;
-	    }
-	}
-	if (!validGeomType) {
-	    System.out.println("valid 'geometry' property required; one of:");
+	if (geomType.isEmpty()) {
+	    geomType = null;
+	} else {
+	    boolean validGeomType = false;
 	    for (String s : knownGeometries) {
-		System.out.println(s);
+		if (s.equals(geomType)) {
+		    validGeomType = true;
+		    break;
+		}
 	    }
-	    throw new RuntimeException("invalid geometry type '" + geomType + "'");
+	    if (!validGeomType) {
+		System.out.println("valid 'geometry' property required; one of:");
+		for (String s : knownGeometries) {
+		    System.out.println(s);
+		}
+		throw new RuntimeException("invalid geometry type '" + geomType + "'");
+	    }
 	}
     }
 

@@ -10,11 +10,18 @@ repositories {
     jcenter()
 }
 
+configurations {
+  bundleLibs
+}
+
 dependencies {
     compile "org.processing:core:3.3.7"
     compile "junit:junit:3.8.2"
-    compile "com.google.code.gson:gson:2.8.2"
-    compile "org.zeromq:jeromq:0.4.3"
+
+    // these libs will be bundled into the processing library jar
+    bundleLibs "com.google.code.gson:gson:2.8.2"
+    bundleLibs "org.zeromq:jeromq:0.4.3"
+    configurations.compile.extendsFrom(configurations.bundleLibs)
 }
 
 group = 'me.lsdo.processing'
@@ -79,6 +86,9 @@ bintray {
 
 jar {
     baseName = 'lsdome-processing'
+    from {
+        configurations.bundleLibs.collect { it.isDirectory() ? it : zipTree(it) }
+    }
 }
 
 task wrapper(type: Wrapper) {
