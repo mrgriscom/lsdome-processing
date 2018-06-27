@@ -52,6 +52,11 @@ public class InputControl {
 		    broadcastParams();
 		}
 	    });
+	registerHandler("_placement", new InputHandler() {
+		public void set(String val) {
+		    broadcastPlacement();
+		}
+	    });
     }
     
     public void init() {
@@ -112,6 +117,11 @@ public class InputControl {
 	String value;
 	double sliderPos;
     }
+
+    static class PlacementJson {
+	String type = "placement";
+	List<ParameterValueJson> params = new ArrayList<ParameterValueJson>();
+    }
     
     public static class DurationControlJson {
 	String type = "duration";
@@ -139,6 +149,16 @@ public class InputControl {
 	for (Parameter p : Parameter.parameters) {
 	    p.broadcastValue();
 	}
+    }
+
+    public void broadcastPlacement() {
+	PlacementJson pl = new PlacementJson();
+	for (Parameter p : Parameter.parameters) {
+	    if (p.category.equals("placement")) {
+		pl.params.add(p.toValueJson());
+	    }
+	}
+	broadcast(pl);
     }
     
     public void processInput() {
