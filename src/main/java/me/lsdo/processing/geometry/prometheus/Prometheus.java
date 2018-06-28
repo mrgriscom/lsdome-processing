@@ -24,9 +24,7 @@ public class Prometheus extends PixelMesh<WingPixel> {
 	// Mirror the 1st wing to the 2nd wing exactly (reverses display on 2nd wing)
 	MIRROR("mirrored"),
 	// Flip the 1st wing along the horizontal axis of the screen to get the placement of the 2nd wing
-	FLIP("flipped horizontally"),
-	// Rotate the 1st wing 180deg around the canvas origin to get the placement of the 2nd wing
-	OPPOSITE("rotated 180 around center");
+        FLIP("flipped horizontally");
 
 	public final String caption;
 	WingDisplayMode(String caption) {
@@ -113,8 +111,6 @@ public class Prometheus extends PixelMesh<WingPixel> {
 		if (((WingPixel)px).wing == 1) {
 		    if (mode.get() == WingDisplayMode.FLIP) {
 			p = LayoutUtil.V(-p.x, p.y);
-		    } else if (mode.get() == WingDisplayMode.OPPOSITE) {
-			p = LayoutUtil.V(-p.x, -p.y);
 		    }
 		}
 		return p;
