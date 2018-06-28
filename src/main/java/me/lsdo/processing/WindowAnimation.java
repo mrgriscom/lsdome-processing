@@ -77,7 +77,8 @@ public abstract class WindowAnimation extends XYAnimation {
 	this.width = width;
 	this.height = height;
 	this.aspectRatio = (realAspectRatio > 0 ? realAspectRatio : getWindowAspectRatio());
-
+	mesh.txChanged = true;
+	
 	InputControl.AspectRatioJson ar = new InputControl.AspectRatioJson();
 	ar.aspect = this.aspectRatio;
 	ctrl.broadcast(ar);
