@@ -59,14 +59,14 @@ If you are using Gradle:
     }
 
     dependencies {
-        compile 'me.lsdo.processing:lsdome-processing:0.9.2'
+        compile 'me.lsdo.processing:lsdome-processing:0.9.4'
     }
 
 in the right place in your `gradle.build`. If you are using Leiningen:
 
     :repositories [["jcenter" {:url "http://jcenter.bintray.com"}]]
     :dependencies [
-        [me.lsdo.processing/lsdome-processing "0.9.2"]]
+        [me.lsdo.processing/lsdome-processing "0.9.4"]]
 
 in your `project.clj` should do the trick.
 
