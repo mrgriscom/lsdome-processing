@@ -17,3 +17,4 @@ build*
 blocal.sh
 .idea*
 *.properties
+/.DS_Store

@@ -7,6 +7,8 @@ import me.lsdo.processing.util.*;
 enum PanelLayout {
     _2,
     _6,
+    _8,
+    _10,
     _13,
     _24
 }
@@ -172,6 +174,32 @@ public class DomeLayoutUtil {
             }
         };
 
+    public static PanelConfig _8 = new PanelConfig(8,
+                                            1.5,
+                                            new int[] {4, 4},
+                                            V(0, 0.5)) {
+            ArrayList<DomePixel> fill(int n) {
+                ArrayList<DomePixel> points = new ArrayList<DomePixel>();
+                points.addAll(fillFan(1, 4, n, V(1, 0)));
+                points.addAll(fillFan(1, 4, n, V(1, -1)));
+                return points;
+            }
+        };
+    
+    public static PanelConfig _10 = new PanelConfig(10,
+                                            1.5,
+                                            new int[] {4, 4, 2},
+                                            V(0, 0.5)) {
+            ArrayList<DomePixel> fill(int n) {
+                ArrayList<DomePixel> points = new ArrayList<DomePixel>();
+                points.addAll(fillFan(1, 4, n, V(1, 0)));
+                points.addAll(fillFan(2, 4, n, V(1, 0)));
+                points.addAll(fillFan(3, 2, n, V(1, 0)));
+
+                return points;
+            }
+        };
+    
     public static PanelConfig _13 = new PanelConfig(13,
                                              Math.sqrt(7/3.),  // just trust me
                                              new int[] {4, 4, 4, 1},
@@ -186,6 +214,7 @@ public class DomeLayoutUtil {
                 return points;
             }
         };
+    
     public static PanelConfig _24 = new PanelConfig(24,
                                              2.,
                                              new int[] {4, 4, 4, 4, 4, 4},
@@ -205,21 +234,29 @@ public class DomeLayoutUtil {
             return PanelLayout._2;
         case 6:
             return PanelLayout._6;
+        case 8:
+            return PanelLayout._8;
+        case 10:
+            return PanelLayout._10;
         case 13:
             return PanelLayout._13;
         case 24:
             return PanelLayout._24;
         default:
             throw new RuntimeException(String.format("no defined layout for %d panels", numPanels));
-        }
+	}
     }
-    
+
     public static PanelConfig getPanelConfig(PanelLayout config) {
         switch (config) {
         case _2:
             return _2;
         case _6:
             return _6;
+        case _8:
+            return _8;
+        case _10:
+            return _10;
         case _13:
             return _13;
         case _24:

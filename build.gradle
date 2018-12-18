@@ -25,7 +25,7 @@ dependencies {
 }
 
 group = 'me.lsdo.processing'
-version = '0.9.2'
+version = '0.9.4'
 sourceCompatibility = 1.6
 targetCompatibility = 1.6
 
@@ -75,9 +75,9 @@ bintray {
         vcsUrl = 'https://github.com/shen-tian/lsdome-processing.git'
 
         version {
-            name = '0.9.2'
+            name = '0.9.4'
             desc = 'LSDome Processing lib'
-            vcsTag = '0.9.2'
+            vcsTag = '0.9.4'
             attributes = ['gradle-plugin': 'com.use.less:com.use.less.gradle:gradle-useless-plugin']
             publish = true
         }
