@@ -12,7 +12,7 @@ import me.lsdo.processing.util.*;
 
 public abstract class XYAnimation extends PixelMeshAnimation<LedPixel> implements PixelTransform.TransformListener {
 
-    static final int DEFAULT_BASE_SUBSAMPLING = 1;
+    public static final int DEFAULT_BASE_SUBSAMPLING = 1;
     static final int MAX_SUBSAMPLING = 64;
 
     // number of subsamples per pixel (minimum -- may be increased by subsamplingBoost())
@@ -30,7 +30,7 @@ public abstract class XYAnimation extends PixelMeshAnimation<LedPixel> implement
     protected HashMap<LedPixel, ArrayList<PVector2>> points_ir;
 
     public XYAnimation(PixelMesh<? extends LedPixel> mesh) {
-        this(mesh, Config.getSketchProperty("subsampling", DEFAULT_BASE_SUBSAMPLING));
+        this(mesh, DEFAULT_BASE_SUBSAMPLING);
     }
 
     // Assign each display pixel to N random samples based on the required amount of subsampling.
@@ -38,7 +38,7 @@ public abstract class XYAnimation extends PixelMeshAnimation<LedPixel> implement
     // re-computing it every frame.
     public XYAnimation(PixelMesh<? extends LedPixel> mesh, int baseSubsampling) {
         super(mesh);
-	this.baseSubsampling = baseSubsampling;
+	this.baseSubsampling = Config.getSketchProperty("subsampling", baseSubsampling);
 	this.dynamicSubsampling = Config.getSketchProperty("dynamic_subsampling", (int)Math.ceil(.3 * baseSubsampling));
     }
 

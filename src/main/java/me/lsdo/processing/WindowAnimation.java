@@ -31,6 +31,12 @@ public abstract class WindowAnimation extends XYAnimation {
     PixelTransform transform;
 
     public double outsideViewportProportion;
+
+    public static final int DEFAULT_AA = 8;
+
+    public WindowAnimation(final PixelMesh<? extends LedPixel> mesh) {
+	this(mesh, DEFAULT_AA);
+    }
     
     public WindowAnimation(final PixelMesh<? extends LedPixel> mesh, int antiAliasingSamples) {
         super(mesh, antiAliasingSamples);
