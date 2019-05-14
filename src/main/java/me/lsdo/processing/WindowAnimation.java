@@ -55,12 +55,12 @@ public abstract class WindowAnimation extends XYAnimation {
 	stretchAspect.init(!Config.getSketchProperty("no_stretch", !stretchDefault()));
 
 	xscale = mesh.new PlacementParameter("x-scale");
-	xscale.min = 1.;
-	xscale.max = .3;
+	xscale.min = .5;
+	xscale.max = 3.;
 	xscale.init(Config.getSketchProperty("placement_xscale", 1.));
 	yscale = mesh.new PlacementParameter("y-scale");
-	yscale.min = 1.;
-	yscale.max = .3;
+	yscale.min = .5;
+	yscale.max = 3.;
 	yscale.init(Config.getSketchProperty("placement_yscale", 1.));
 	
 	xo = mesh.new PlacementParameter("post-stretch x-offset");
@@ -94,7 +94,7 @@ public abstract class WindowAnimation extends XYAnimation {
     public void transformChanged() {
 	if (!transformIsAnimating) {
 	    if (stretchAspect.get()) {
-		windowTransform = mesh.stretchToViewport(width, height, xscale.get(), yscale.get(), xo.get(), yo.get());
+		windowTransform = mesh.stretchToViewport(width, height, 1./xscale.get(), 1./yscale.get(), xo.get(), yo.get());
 	    } else {
 		windowTransform = new PixelTransform() {
 			public PVector2 transform(PVector2 p) {
