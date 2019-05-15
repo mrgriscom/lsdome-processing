@@ -63,7 +63,7 @@ public abstract class XYAnimation extends PixelMeshAnimation<LedPixel> implement
     public void applyTransform(PixelTransform tx) {
         points_ir = new HashMap<LedPixel, ArrayList<PVector2>>();
         int total_subsamples = 0;
-        for (LedPixel c : mesh.coords) {
+        for (LedPixel c : mesh.coords()) {
             ArrayList<PVector2> samples = new ArrayList<PVector2>();
             points_ir.put(c, samples);
 

@@ -109,7 +109,6 @@ public abstract class WindowAnimation extends XYAnimation {
 	if (outsideViewportProportion > 0) {
 	    System.out.println(String.format("%.2f%% outsize window area!", 100. * outsideViewportProportion));
 	}
-
     }
 
     public abstract void captureFrame();

@@ -61,11 +61,7 @@ public class FlapManager {
 		    double angle = getInternal();
 		    
 		    double min = Double.POSITIVE_INFINITY;
-		    for (LedPixel px : mesh.coords) {
-			if (px.spacerPixel) {
-			    continue;
-			}
-	    
+		    for (LedPixel px : mesh.coords()) {
 			double x = LayoutUtil.Vrot(px.toXY(), angle).x;
 			min = Math.min(min, x);
 		    }

@@ -15,10 +15,24 @@ public abstract class PixelMesh<T extends LedPixel> {
     public List<OPC> opcs;
     private int[][] opcBuffers;
 
-    // All pixels, in the order seen by the fadecandies.
-    public ArrayList<T> coords;
+    // All pixels, in the order seen by the fadecandies (including spacer pixels).
+    private ArrayList<T> _coords;
+    // Just visible pixels (spacer pixels filtered out)
+    private ArrayList<T> visibleCoords;
+    // Mapping of pixels to current color (just visible pixels)
+    private HashMap<LedPixel, Integer> colors;
+    // For consumers to iterate over just real pixels (not spacer pixels)
+    public List<T> coords() {
+	return visibleCoords;
+    }
+    // Return all pixels (including spacer pixels) for diagnostic sketches (DON'T NORMALLY USE THIS)
+    public List<T> _allPixels() {
+	return _coords;
+    }
+
     public PixelTransform transform;
     public boolean txChanged = false;
+
     
     public class PlacementParameter extends NumericParameter {
 	public PlacementParameter(String name) {
@@ -98,20 +112,21 @@ public abstract class PixelMesh<T extends LedPixel> {
     }
     public PlacementTransform placement = new PlacementTransform();
     
-    // Color
-    protected HashMap<LedPixel, Integer> colors;
-
     public PixelMesh() {
 	opcs = new ArrayList<OPC>();
-	coords = new ArrayList<T>();
+	_coords = new ArrayList<T>();
+	visibleCoords = new ArrayList<T>();
 	colors = new HashMap<LedPixel, Integer>();
     }
 
     // child implementations must call this at the end of their constructor
     public void init() {
-	coords.addAll(getCoords());
-        for (LedPixel c : coords) {
+	_coords.addAll(getCoords());
+        for (T c : _coords) {
             setColor(c, 0);
+	    if (!c.spacerPixel) {
+		visibleCoords.add(c);
+	    }
 	}	
 	initOpcBuffers();
 
@@ -145,11 +160,14 @@ public abstract class PixelMesh<T extends LedPixel> {
     }
 
     public void setColor(LedPixel dCoord, Integer color){
-      colors.put(dCoord, color);
+	if (dCoord.spacerPixel) {
+	    return;
+	}
+	colors.put(dCoord, color);
     }
 
     public int getNumPoints(){
-        return coords.size();
+        return coords().size();
     }
 
     // Returns the bounding rectangular viewport for the dome pixel area
@@ -159,14 +177,14 @@ public abstract class PixelMesh<T extends LedPixel> {
         double xmax = Double.NEGATIVE_INFINITY;
         double ymin = Double.POSITIVE_INFINITY;
         double ymax = Double.NEGATIVE_INFINITY;
-        for (LedPixel c : coords) {
+        for (LedPixel c : coords()) {
 	    PVector2 p = transform.transform(c);
             xmin = Math.min(xmin, p.x);
             xmax = Math.max(xmax, p.x);
             ymin = Math.min(ymin, p.y);
             ymax = Math.max(ymax, p.y);
         }
-	PVector2 margin = LayoutUtil.Vmult(transform.getMargins(coords.get(0)), getPixelBufferRadius());
+	PVector2 margin = LayoutUtil.Vmult(transform.getMargins(coords().get(0)), getPixelBufferRadius());
         xmin -= margin.x;
         xmax += margin.x;
         ymin -= margin.y;
@@ -211,7 +229,7 @@ public abstract class PixelMesh<T extends LedPixel> {
 
     private void initOpcBuffers() {
 	int[] pixelCounts = new int[opcs.size()];
-	for (T c : coords) {
+	for (T c : _coords) {
 	    pixelCounts[getOpcChannel(c)] += 1;
 	}
 	opcBuffers = new int[opcs.size()][];
@@ -222,7 +240,7 @@ public abstract class PixelMesh<T extends LedPixel> {
 
     public void dispatch() {
 	int[] pixelCounts = new int[opcs.size()];
-	for (T c : coords) {
+	for (T c : _coords) {
 	    int channel = getOpcChannel(c);
 	    int i = pixelCounts[channel];
             opcBuffers[channel][i] = getColor(c);

@@ -12,6 +12,10 @@ public class ProcessingAnimation extends WindowAnimation {
     protected PApplet app;
 
     public boolean stretchDefault() { return false; }
+
+    // locations of mesh points to mark on processing canvas
+    // use set to avoid duplicates, since we use xor to mark
+    private Set<Integer> pixelPositions;
     
     public ProcessingAnimation(PApplet app, PixelMesh<? extends LedPixel> mesh){
         super(mesh);
@@ -31,31 +35,7 @@ public class ProcessingAnimation extends WindowAnimation {
 
     @Override
     protected void postFrame(double t){
-
-	// the screen positions of the pixels could be computed once per transform change for
-	// increased efficiency, but we seem to be doing ok as-is
-	
-        // draw pixel locations onto the processing canvas for clarity
-	int[] ixs = new int[mesh.coords.size()];
-	for (int i = 0; i < ixs.length; i++) {
-	    LedPixel c = mesh.coords.get(i);
-	    if (c.spacerPixel) {
-		ixs[i] = -1;
-	    } else {
-		PVector2 screenP = LayoutUtil.xyToScreen(transform.transform(c), app.width, app.height);
-		int[] xy = boundsCheck(screenP);
-		ixs[i] = xy != null ? linearOffset(xy[0], xy[1]) : -1;
-	    }
-        }
-	Arrays.sort(ixs); // do this to catch duplicates -- since we use xor, if two points occupy the same pixel it will not be marked
-	for (int i = 0; i < ixs.length; i++) {
-	    int ix = ixs[i];
-	    if (ix < 0) {
-		continue;
-	    }
-	    if (i > 0 && ix == ixs[i - 1]) {
-		continue;
-	    }
+	for (int ix : pixelPositions) {
 	    app.pixels[ix] = 0xFFFFFF ^ app.pixels[ix];
         }
 
@@ -65,12 +45,28 @@ public class ProcessingAnimation extends WindowAnimation {
         app.fill(127f, 256f);
         app.text("opc @" + mesh.getOpcHosts(), 100, app.height - 10);
         app.text(String.format("%.1ffps", app.frameRate), 10, app.height - 10);
-
     }
 
     public void draw()
     {
         draw(app.millis() / 1000.);
+    }
+
+    @Override
+    public void transformChanged() {
+	super.transformChanged();
+	initPixelPositions();
+    }
+
+    private void initPixelPositions() {
+	pixelPositions = new HashSet<Integer>();
+	for (LedPixel c : mesh.coords()) {
+	    PVector2 screenP = LayoutUtil.xyToScreen(transform.transform(c), app.width, app.height);
+	    int[] xy = boundsCheck(screenP);
+	    if (xy != null) {
+		pixelPositions.add(linearOffset(xy[0], xy[1]));
+	    }
+        }
     }
 
 }

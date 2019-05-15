@@ -43,11 +43,7 @@ public abstract class PixelMeshAnimation<T extends LedPixel> {
 	mesh.beforeDraw(this);
 	
         preFrame(t, deltaT);
-        for (T c : mesh.coords){
-	    if (c.spacerPixel) {
-		continue;
-	    }
-	    
+        for (T c : mesh.coords()){
             mesh.setColor(c, drawPixel(c, t));
         }
         postFrame(t);

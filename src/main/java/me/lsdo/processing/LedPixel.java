@@ -7,8 +7,12 @@ import me.lsdo.processing.util.*;
 public abstract class LedPixel {
 
     public boolean spacerPixel = false;
+
+    public PVector2 toXY() {
+	return spacerPixel ? null : _toXY();
+    }
     
     // Return the XY position of this pixel, in meters
-    public abstract PVector2 toXY();
+    protected abstract PVector2 _toXY();
     
 }

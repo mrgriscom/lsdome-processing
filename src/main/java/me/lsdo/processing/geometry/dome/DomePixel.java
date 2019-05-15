@@ -37,7 +37,7 @@ public class DomePixel extends LedPixel {
         }
     }
 
-    public PVector2 toXY() {
+    protected PVector2 _toXY() {
 	return DomeLayoutUtil.coordToXy(this);
     }
 

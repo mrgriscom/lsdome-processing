@@ -17,12 +17,11 @@ public class WingPixel extends LedPixel {
 	if (xy != null) {
 	    this.xy = xy;
 	} else {
-	    this.xy = LayoutUtil.V(0, 0);
 	    this.spacerPixel = true;
 	}
     }
 
-    public PVector2 toXY() {
+    protected PVector2 _toXY() {
 	return xy;
     }
     
