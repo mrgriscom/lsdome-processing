@@ -8,7 +8,7 @@ import me.lsdo.processing.util.*;
 // Utility class to dump the various panel layouts to json format readable by the OPC simulator.
 
 // To run:
-// java -cp library/lsdome.jar:$HOME/processing-2.2.1/core/library/core.jar me.lsdo.processing.geometry.dome.LayoutExport
+// java -cp library/lsdome.jar:$HOME/processing-3.3.7/core/library/core.jar me.lsdo.processing.geometry.dome.LayoutExport
 
 public class LayoutExport {
 
@@ -29,7 +29,7 @@ public class LayoutExport {
 		point.setJSONArray("point", new JSONArray(new FloatList(coordinates)));
 		values.setJSONObject(i, point);
 	    }
-	    values.save(new File(String.format("opcsimulator_layout_%s.json", layoutName)), null);
+	    values.save(new File(String.format("lsdome_%spanel.json", layoutName)), null);
 	}
     }
     
