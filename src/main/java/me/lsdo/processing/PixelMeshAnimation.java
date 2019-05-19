@@ -30,8 +30,8 @@ public abstract class PixelMeshAnimation<T extends LedPixel> {
         
     public void draw(double t) {
 	if (!initialized) {
-	    ctrl.finalizeParams();
 	    init();
+	    ctrl.finalizeParams();
 	    initialized = true;
 	}
 

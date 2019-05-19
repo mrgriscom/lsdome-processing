@@ -48,7 +48,7 @@ public abstract class XYAnimation extends PixelMeshAnimation<LedPixel> implement
     }
 
     public void transformChanged() {
-	applyTransform(mesh.transform);
+	applyTransform(mesh.transform());
     }
 
     public void transformAnimating(boolean enabled) {

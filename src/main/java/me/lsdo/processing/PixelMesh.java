@@ -30,7 +30,7 @@ public abstract class PixelMesh<T extends LedPixel> {
 	return _coords;
     }
 
-    public PixelTransform transform;
+    public PixelTransform _transform;
     public boolean txChanged = false;
 
     
@@ -110,7 +110,7 @@ public abstract class PixelMesh<T extends LedPixel> {
 	    return LayoutUtil.Vadd(LayoutUtil.Vmult(LayoutUtil.Vrot(p, rot.getInternal()), scale.get()), LayoutUtil.V(xo.get(), yo.get()));
 	}
     }
-    public PlacementTransform placement = new PlacementTransform();
+    public PlacementTransform placement;
     
     public PixelMesh() {
 	opcs = new ArrayList<OPC>();
@@ -130,16 +130,23 @@ public abstract class PixelMesh<T extends LedPixel> {
 	}	
 	initOpcBuffers();
 
-	transform = getDefaultTransform();
-	transform = transform.compoundTransform(placement);
-	PixelTransform postPlacementTx = getPostPlacementTransform();
-	if (postPlacementTx != null) {
-	    transform = transform.compoundTransform(postPlacementTx);
-	}
     }
 
     protected abstract List<T> getCoords();
 
+    public PixelTransform transform() {
+	if (_transform == null) {
+	    placement = new PlacementTransform();
+	    _transform = getDefaultTransform();
+	    _transform = _transform.compoundTransform(placement);
+	    PixelTransform postPlacementTx = getPostPlacementTransform();
+	    if (postPlacementTx != null) {
+		_transform = _transform.compoundTransform(postPlacementTx);
+	    }
+	}
+	return _transform;
+    }
+    
     protected abstract PixelTransform getDefaultTransform();
 
     protected PixelTransform getPostPlacementTransform() {
@@ -178,13 +185,13 @@ public abstract class PixelMesh<T extends LedPixel> {
         double ymin = Double.POSITIVE_INFINITY;
         double ymax = Double.NEGATIVE_INFINITY;
         for (LedPixel c : coords()) {
-	    PVector2 p = transform.transform(c);
+	    PVector2 p = transform().transform(c);
             xmin = Math.min(xmin, p.x);
             xmax = Math.max(xmax, p.x);
             ymin = Math.min(ymin, p.y);
             ymax = Math.max(ymax, p.y);
         }
-	PVector2 margin = LayoutUtil.Vmult(transform.getMargins(coords().get(0)), getPixelBufferRadius());
+	PVector2 margin = LayoutUtil.Vmult(transform().getMargins(coords().get(0)), getPixelBufferRadius());
         xmin -= margin.x;
         xmax += margin.x;
         ymin -= margin.y;

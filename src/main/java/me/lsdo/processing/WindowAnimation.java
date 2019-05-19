@@ -41,7 +41,7 @@ public abstract class WindowAnimation extends XYAnimation {
     public WindowAnimation(final PixelMesh<? extends LedPixel> mesh, int antiAliasingSamples) {
         super(mesh, antiAliasingSamples);
 
-	transform = mesh.transform.compoundTransform(
+	transform = mesh.transform().compoundTransform(
             // need a closure as windowTransform is a new object every time it's changed
 	    new PixelTransform() {
 		public PVector2 transform(PVector2 p) {
