@@ -69,6 +69,17 @@ public class OpcColor {
         return getRgbColor(calcRi, calcGi, calcBi);
     }
 
+	public static int scaleBrightness(int color, double maxBrightness) {
+		if (maxBrightness > 0.999) {
+			return color;
+		}		
+		return getRgbColor(
+				   (int)(getRed(color)*maxBrightness),
+				   (int)(getGreen(color)*maxBrightness),
+				   (int)(getBlue(color)*maxBrightness)
+			   );
+	}
+	
     // This uses 0-255 inputs
     public static int getRgbColor(int red, int green, int blue) {
         int alpha = 255;

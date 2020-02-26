@@ -20,12 +20,18 @@ public abstract class PixelMeshAnimation<T extends LedPixel> {
     public double frameRate = 0.;  // fps
 
     public InputControl ctrl;
-    
+	public NumericParameter globalBrightness;
+	
     public PixelMeshAnimation(PixelMesh<? extends T> mesh) {
         this.mesh = mesh;
 
         ctrl = new InputControl();
-	ctrl.init();
+		ctrl.init();
+
+		globalBrightness = new NumericParameter("brightness", "display");
+		globalBrightness.min = 0.;
+		globalBrightness.max = 1.;
+		globalBrightness.init(Config.getSketchProperty("max_brightness", 1.));
     }
         
     public void draw(double t) {
@@ -44,7 +50,7 @@ public abstract class PixelMeshAnimation<T extends LedPixel> {
 	
         preFrame(t, deltaT);
         for (T c : mesh.coords()){
-            mesh.setColor(c, drawPixel(c, t));
+            mesh.setColor(c, OpcColor.scaleBrightness(drawPixel(c, t), globalBrightness.get()));
         }
         postFrame(t);
 	// TODO: frame post-processing (global contrast adjustment, etc.?)
