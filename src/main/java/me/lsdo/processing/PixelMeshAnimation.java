@@ -12,28 +12,40 @@ import me.lsdo.processing.util.*;
 public abstract class PixelMeshAnimation<T extends LedPixel> {
 
     public static final double FRAMERATE_SMOOTHING_FACTOR = .9;  // [0, 1) -- higher == smoother
-    
+
     public PixelMesh<? extends T> mesh;
-    
+
     private boolean initialized = false;
     private double lastT = 0;
     public double frameRate = 0.;  // fps
 
     public InputControl ctrl;
-	public NumericParameter globalBrightness;
-	
+    public NumericParameter globalBrightness;
+    public NumericParameter brightness;
+    public NumericParameter contrast;
+
     public PixelMeshAnimation(PixelMesh<? extends T> mesh) {
         this.mesh = mesh;
 
         ctrl = new InputControl();
-		ctrl.init();
+        ctrl.init();
 
-		globalBrightness = new NumericParameter("brightness", "display");
-		globalBrightness.min = 0.;
-		globalBrightness.max = 1.;
-		globalBrightness.init(Config.getSketchProperty("max_brightness", 1.));
+        globalBrightness = new NumericParameter("luminance", "display");
+        globalBrightness.min = 0.;
+        globalBrightness.max = 1.;
+        globalBrightness.init(Config.getSketchProperty("max_brightness", 1.));
+
+        contrast = new NumericParameter("contrast", "display");
+        contrast.min = 0.;
+        contrast.max = 1.;
+        contrast.init(Config.getSketchProperty("contrast", .5));
+
+        brightness = new NumericParameter("contrast ref", "display");
+        brightness.min = 0.;
+        brightness.max = 1.;
+        brightness.init(Config.getSketchProperty("brightness", .5));
     }
-        
+
     public void draw(double t) {
 	if (!initialized) {
 	    init();
@@ -44,19 +56,19 @@ public abstract class PixelMeshAnimation<T extends LedPixel> {
 	double deltaT = t - lastT;
 	lastT = t;
 	updateFramerate(deltaT);
-		
+
 	ctrl.processInput();
 	mesh.beforeDraw(this);
-	
+
         preFrame(t, deltaT);
         for (T c : mesh.coords()){
-            mesh.setColor(c, OpcColor.scaleBrightness(drawPixel(c, t), globalBrightness.get()));
+            mesh.setColor(c, OpcColor.scaleBrightness(OpcColor.brightnessContrast(drawPixel(c, t), brightness.get(), contrast.get()), globalBrightness.get()));
         }
         postFrame(t);
 	// TODO: frame post-processing (global contrast adjustment, etc.?)
 	mesh.dispatch();
     }
-    
+
     // Main method that need to be implemented.
     protected abstract int drawPixel(T c, double t);
 
@@ -74,7 +86,7 @@ public abstract class PixelMeshAnimation<T extends LedPixel> {
      */
     protected void postFrame(double t){
     }
-    
+
     // Override: optional
     // Perform one-time initialization that for whatever reason can't be performed in the constructor
     protected void init() {}

@@ -72,14 +72,35 @@ public class OpcColor {
 	public static int scaleBrightness(int color, double maxBrightness) {
 		if (maxBrightness > 0.999) {
 			return color;
-		}		
+		}
 		return getRgbColor(
 				   (int)(getRed(color)*maxBrightness),
 				   (int)(getGreen(color)*maxBrightness),
 				   (int)(getBlue(color)*maxBrightness)
 			   );
 	}
-	
+
+    // this implementation needs some work
+    private static int bc (int channel, double brightness, double contrast) {
+        double val = channel / 256.;
+        val = (val - brightness) * contrast + brightness;
+        int ival = Math.min(Math.max((int)(256 * val), 0), 255);
+        return ival;
+    }
+
+    public static int brightnessContrast(int color, double brightness, double contrast) {
+        if (Math.abs(brightness - .5) < .01 && Math.abs(contrast - .5) < .01) {
+            return color;
+        }
+        // TODO -- should this be done in a different colorspace?
+        contrast = Math.min(Math.tan(Math.PI / 2. * contrast), 100.);
+        return getRgbColor(
+                           bc(getRed(color), brightness, contrast),
+                           bc(getGreen(color), brightness, contrast),
+                           bc(getBlue(color), brightness, contrast)
+			   );
+}
+
     // This uses 0-255 inputs
     public static int getRgbColor(int red, int green, int blue) {
         int alpha = 255;
