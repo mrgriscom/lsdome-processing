@@ -45,10 +45,10 @@ public class Prometheus extends PixelMesh<WingPixel> {
 
     public EnumParameter<WingDisplayMode> mode;
     private FlapManager flapper;
-    
+
     // left and right are from the butterfly's perspective
     public Prometheus(OPC opcLeft, OPC opcRight) {
-	super();	
+	super();
 	opcs.add(opcLeft);
 	opcs.add(opcRight);
 
@@ -56,7 +56,7 @@ public class Prometheus extends PixelMesh<WingPixel> {
 	mode.description = "wing mode";
 	mode.verbose = true;
 	mode.init(mode.enumByName(Config.getSketchProperty("wing_mode", "unified")));
-	
+
 	init();
     }
 
@@ -65,7 +65,7 @@ public class Prometheus extends PixelMesh<WingPixel> {
 	if (layoutPath.isEmpty()) {
 	    throw new RuntimeException("json layout not specified in config 'layout' property");
 	}
-	
+
 	List<PVector2> coords;
 	try {
 	    coords = loadPixels(layoutPath);
@@ -103,7 +103,7 @@ public class Prometheus extends PixelMesh<WingPixel> {
 
 	return flapTx.compoundTransform(defaultTx);
     }
-    
+
     protected PixelTransform getPostPlacementTransform() {
 	// for the applicable mode, this transform mirrors the 2nd wing from the 1st in various ways
 	return new PixelTransform() {
@@ -117,7 +117,7 @@ public class Prometheus extends PixelMesh<WingPixel> {
 	    }
 	};
     }
-    
+
     private List<PVector2> loadPixels(String path) throws IOException {
 	Gson gson = new Gson();
 	InputStream is = new BufferedInputStream(new FileInputStream(new File(path)));
@@ -158,21 +158,21 @@ public class Prometheus extends PixelMesh<WingPixel> {
 	}
         return realignedPoints;
     }
-    
+
     public int getOpcChannel(WingPixel pixel) {
 	return pixel.wing;
     }
-    
+
     public double getPixelBufferRadius() {
 	double spacing = .15; // m
 	return .5 * spacing * .7; // reduce to 70% to account for denser areas of wing
     }
 
-    public void beforeDraw(PixelMeshAnimation anim) {	
-	if (flapper.manageState(anim)) {
+    public void beforeDraw(PixelMeshAnimation anim) {
+	if (flapper != null && flapper.manageState(anim)) {
 	    txChanged = true;
 	}
 	super.beforeDraw(anim);
     }
-    
+
 }
