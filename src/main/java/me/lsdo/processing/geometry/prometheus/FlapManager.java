@@ -9,7 +9,7 @@ import me.lsdo.processing.util.*;
 public class FlapManager {
 
     Prometheus mesh;
-    
+
     // flapping parameters
     public NumericParameter flapPeriod; // seconds
     public NumericParameter flapDepth; // percentage
@@ -25,7 +25,7 @@ public class FlapManager {
     boolean isFlapping = false;
 
     BooleanParameter flapAction;
-    
+
     public FlapManager(final Prometheus mesh) {
 	this.mesh = mesh;
 
@@ -40,7 +40,7 @@ public class FlapManager {
 		    stopFlapping();
 		}
 	    };
-	flapAction.affinity = BooleanParameter.Affinity.ACTION;
+	flapAction.affinity = BooleanParameter.Affinity.MOMENTARY;
 	flapAction.description = "FLAP";
 	flapAction.verbose = true;
 
@@ -59,7 +59,7 @@ public class FlapManager {
 		@Override
 		public void onSet() {
 		    double angle = getInternal();
-		    
+
 		    double min = Double.POSITIVE_INFINITY;
 		    for (LedPixel px : mesh.coords()) {
 			double x = LayoutUtil.Vrot(px.toXY(), angle).x;
@@ -74,9 +74,9 @@ public class FlapManager {
 	flapPeriod.init(.5);
 	flapDepth.init(flapDepth.max);
 	flapAngle.init(0);
-	flapAction.init(false);	
+	flapAction.init(false);
     }
-    
+
     public void startFlapping() {
 	if (!flappingActive()) {
 	    flappingStart = Config.clock();

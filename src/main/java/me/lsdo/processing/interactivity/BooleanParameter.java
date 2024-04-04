@@ -3,7 +3,7 @@ package me.lsdo.processing.interactivity;
 public class BooleanParameter extends DiscreteValuesParameter<Boolean> {
 
     // public settings -- after initialization, do not modify directly
-    
+
     // optional, but use when treating like a 2-value enum
     public String trueCaption;
     public String falseCaption;
@@ -11,7 +11,7 @@ public class BooleanParameter extends DiscreteValuesParameter<Boolean> {
     public BooleanParameter(String name, String category) {
 	super(name, category);
     }
-    
+
     // equivalent to cycleNext()
     public void toggle() {
 	set(!get());
@@ -22,7 +22,7 @@ public class BooleanParameter extends DiscreteValuesParameter<Boolean> {
 	set(true);
 	set(false);
     }
-    
+
     public void onSet() {
 	if (value) {
 	    onTrue();
@@ -37,7 +37,7 @@ public class BooleanParameter extends DiscreteValuesParameter<Boolean> {
     public Boolean[] values() {
 	return new Boolean[] {true, false};
     }
-        
+
     public String enumName(Boolean val) {
 	return (val ? "yes" : "no");
     }
@@ -47,8 +47,9 @@ public class BooleanParameter extends DiscreteValuesParameter<Boolean> {
     }
 
     public static enum Affinity {
-	STATE,
-	ACTION,
+	STATE,     // a persistent toggle
+        MOMENTARY, // a momentary toggle (revert once button no longer pressed)
+	ACTION,    // a 'do this' button
     }
     public Affinity affinity = Affinity.STATE;
     public boolean invertPress = false;
@@ -60,7 +61,7 @@ public class BooleanParameter extends DiscreteValuesParameter<Boolean> {
 	    public void set(String val) {
 		enumHandler.set(val);
 	    }
-	    
+
 	    @Override
 	    public void button(boolean pressed) {
 		boolean falseWhilePressed = (affinity == Affinity.STATE && invertPress);
@@ -77,10 +78,14 @@ public class BooleanParameter extends DiscreteValuesParameter<Boolean> {
 	    }
 	};
     }
-    
+
     public InputControl.ParameterJson toJson() {
 	InputControl.ParameterJson json = super.toJson();
-	if (affinity == Affinity.ACTION) {
+        if (affinity == Affinity.MOMENTARY) {
+            json.isMomentary = true;
+        } else if (affinity == Affinity.ACTION) {
+            // an ACTION should not have any logic in its onFalse method
+            // should probably make actions a subclass of bool param in order to enforce this via making onFalse() final
 	    json.isAction = true;
 	}
 	return json;
