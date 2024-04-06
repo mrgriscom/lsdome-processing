@@ -9,6 +9,7 @@ package me.lsdo.processing;
 
 import java.util.*;
 import me.lsdo.processing.util.*;
+import me.lsdo.processing.interactivity.*;
 
 public abstract class XYAnimation extends PixelMeshAnimation<LedPixel> implements PixelTransform.TransformListener {
 
@@ -22,7 +23,7 @@ public abstract class XYAnimation extends PixelMeshAnimation<LedPixel> implement
     // true when the transform is expected to be changing a lot (like, per frame); we'll likely want to reduce
     // amount of anti-aliasing to preserve CPU and framerate
     protected boolean transformIsAnimating = false;
-    
+
     // Mapping of display pixels to 1 or more actual samples that will be combined to yield that
     // display pixel's color. Most simply the samples will be xy-coordinates near the mesh pixels,
     // though they may also be transformed into some intermediate vector space (screen pixels, a
@@ -59,7 +60,7 @@ public abstract class XYAnimation extends PixelMeshAnimation<LedPixel> implement
 	double samples = (transformIsAnimating ? dynamicSubsampling : baseSubsampling) * subsamplingBoost(p);
 	return Math.min((int)Math.ceil(samples), MAX_SUBSAMPLING);
     }
-    
+
     public void applyTransform(PixelTransform tx) {
         points_ir = new HashMap<LedPixel, ArrayList<PVector2>>();
         int total_subsamples = 0;
@@ -70,7 +71,7 @@ public abstract class XYAnimation extends PixelMeshAnimation<LedPixel> implement
             PVector2 p = tx.transform(c);
             int num_subsamples = numSubsamples(p);
             boolean jitter = (num_subsamples > 1);
-	    
+
             for (int i = 0; i < num_subsamples; i++) {
                 PVector2 offset = (jitter ?
 				   LayoutUtil.polarToXy(LayoutUtil.V(
@@ -87,8 +88,24 @@ public abstract class XYAnimation extends PixelMeshAnimation<LedPixel> implement
 
         System.out.println(String.format("%d subsamples for %d pixels (%.1f samples/pixel)",
 					 total_subsamples, mesh.getNumPoints(), (double)total_subsamples / mesh.getNumPoints()));
+
+        broadcastTransform(tx);
     }
-    
+
+    public void broadcastTransform(PixelTransform tx) {
+        InputControl.TransformJson txinfo = new InputControl.TransformJson();
+        for (LedPixel reprPx : mesh.representativePixelsForTransform()) {
+            PVector2 origin = tx.transform(reprPx, new PVector2(0, 0));
+            PVector2 U = tx.transform(reprPx, new PVector2(1, 0));
+            PVector2 V = tx.transform(reprPx, new PVector2(0, 1));
+            U.sub(origin);
+            V.sub(origin);
+
+            txinfo.txs.add(new InputControl.LinearTransformJson(origin, U, V));
+        }
+        ctrl.broadcastTransform(txinfo);
+    }
+
     @Override
     protected int drawPixel(LedPixel c, double t) {
         ArrayList<PVector2> sub = points_ir.get(c);
@@ -128,5 +145,5 @@ public abstract class XYAnimation extends PixelMeshAnimation<LedPixel> implement
     protected PVector2 toIntermediateRepresentation(PVector2 p) {
         return p;
     }
-    
+
 }

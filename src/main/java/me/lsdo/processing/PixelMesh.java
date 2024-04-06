@@ -33,62 +33,62 @@ public abstract class PixelMesh<T extends LedPixel> {
     public PixelTransform _transform;
     public boolean txChanged = false;
 
-    
+
     public class PlacementParameter extends NumericParameter {
 	public PlacementParameter(String name) {
 	    super(name, "placement");
 	}
-	    
+
 	@Override
 	public void onChange(Double prev) {
 	    txChanged = true;
 	}
     }
-    
+
     public class AnglePlacementParameter extends NumericParameter.Angle {
 	public AnglePlacementParameter(String name) {
 	    super(name, "placement");
 	}
-	    
+
 	@Override
 	public void onChange(Double prev) {
 	    txChanged = true;
 	}
     }
-    
+
     public class BoolPlacementParameter extends BooleanParameter {
 	public BoolPlacementParameter(String name) {
 	    super(name, "placement");
 	}
-	    
+
 	@Override
 	public void onChange(Boolean prev) {
 	    txChanged = true;
 	}
     }
-    
+
     public class EnumPlacementParameter<T extends Enum<T>> extends EnumParameter<T> {
 	public EnumPlacementParameter(String name, Class<T> enumClass) {
 	    super(name, "placement", enumClass);
 	}
-	    
+
 	@Override
 	public void onChange(T prev) {
 	    txChanged = true;
 	}
     }
-    
+
     public class PlacementTransform extends PixelTransform {
 	PlacementParameter xo;
 	PlacementParameter yo;
 	AnglePlacementParameter rot;
 	PlacementParameter scale;
-	
+
 	public PlacementTransform() {
 	    xo = new PlacementParameter("x-offset");
 	    xo.setSensitivity(.01);
 	    xo.init(Config.getSketchProperty("placement_xo", 0.));
-	    
+
 	    yo = new PlacementParameter("y-offset");
 	    yo.setSensitivity(.01);
 	    yo.init(Config.getSketchProperty("placement_yo", 0.));
@@ -105,13 +105,13 @@ public abstract class PixelMesh<T extends LedPixel> {
 	    scale.softLimits = true;
 	    scale.init(Config.getSketchProperty("placement_scale", 1.));
 	}
-	
+
 	public PVector2 transform(PVector2 p) {
 	    return LayoutUtil.Vadd(LayoutUtil.Vmult(LayoutUtil.Vrot(p, rot.getInternal()), scale.get()), LayoutUtil.V(xo.get(), yo.get()));
 	}
     }
     public PlacementTransform placement;
-    
+
     public PixelMesh() {
 	opcs = new ArrayList<OPC>();
 	_coords = new ArrayList<T>();
@@ -127,7 +127,7 @@ public abstract class PixelMesh<T extends LedPixel> {
 	    if (!c.spacerPixel) {
 		visibleCoords.add(c);
 	    }
-	}	
+	}
 	initOpcBuffers();
 
     }
@@ -146,7 +146,7 @@ public abstract class PixelMesh<T extends LedPixel> {
 	}
 	return _transform;
     }
-    
+
     protected abstract PixelTransform getDefaultTransform();
 
     protected PixelTransform getPostPlacementTransform() {
@@ -161,7 +161,16 @@ public abstract class PixelMesh<T extends LedPixel> {
 	    txChanged = false;
 	}
     }
-    
+
+    // return one pixel for each distinctive linear transform used in mapping the pixel geometry
+    // e.g., prometheus' wings are mapped distinctly, so return one pixel for each wing.
+    // doesn't need to be a real pixel, just enough to trigger each different behavior when passed
+    // to transform()
+    // if the pixel doesn't affect mapping (i.e., the lsdome just uses xy coord), can return a 'null' pixel
+    public LedPixel[] representativePixelsForTransform() {
+        return new LedPixel[] {null};
+    }
+
     public Integer getColor(LedPixel dCoord){
 	return dCoord.spacerPixel ? 0 : colors.get(dCoord);
     }
@@ -205,11 +214,11 @@ public abstract class PixelMesh<T extends LedPixel> {
     public PixelTransform stretchToViewport(int width, int height) {
 	return stretchToViewport(width, height, 1., 1.);
     }
-    
+
     public PixelTransform stretchToViewport(final int width, final int height, final double xscale, final double yscale) {
 	return stretchToViewport(width, height, xscale, yscale, 0., 0.);
     }
-    
+
     public PixelTransform stretchToViewport(final int width, final int height, final double xscale, final double yscale, final double xo, final double yo) {
 	PVector2 viewport[] = getViewport();
 	final PVector2 p0 = viewport[0];
@@ -220,7 +229,7 @@ public abstract class PixelMesh<T extends LedPixel> {
 		val = -extent * (1 - val) + extent * val; // normalize [-extent,extent]
 		return val / scale;
 	    }
-		    
+
 	    public PVector2 transform(PVector2 p) {
 		return LayoutUtil.Vadd(LayoutUtil.V(reproject(p.x, p0.x, pDim.x, (double)width/height, xscale),
 						    reproject(p.y, p0.y, pDim.y, 1., yscale)),
@@ -228,7 +237,7 @@ public abstract class PixelMesh<T extends LedPixel> {
 	    }
 	};
     }
-    
+
     // Return which of N OPC servers manages this pixel
     public abstract int getOpcChannel(T pixel);
     // This should be roughly one-half of the average spacing between pixels
@@ -257,7 +266,7 @@ public abstract class PixelMesh<T extends LedPixel> {
 	    opcs.get(i).dispatch(opcBuffers[i]);
 	}
     }
-    
+
     public String getOpcHosts(){
 	StringBuffer sb = new StringBuffer();
 	for (int i = 0; i < opcs.size(); i++) {

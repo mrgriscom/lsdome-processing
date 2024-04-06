@@ -175,4 +175,12 @@ public class Prometheus extends PixelMesh<WingPixel> {
 	super.beforeDraw(anim);
     }
 
+    public LedPixel[] representativePixelsForTransform() {
+        return new LedPixel[] {
+            new WingPixel(0, 0, new PVector2()),
+            new WingPixel(1, 0, new PVector2())
+        };
+    }
+
+
 }

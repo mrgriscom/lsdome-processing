@@ -57,6 +57,11 @@ public class InputControl {
 		    broadcastPlacement();
 		}
 	    });
+	registerHandler("_txinfo", new InputHandler() {
+		public void set(String val) {
+		    broadcastTransform(null);
+		}
+	    });
     }
 
     public void init() {
@@ -124,6 +129,32 @@ public class InputControl {
 	List<ParameterValueJson> params = new ArrayList<ParameterValueJson>();
     }
 
+    public static class TransformJson {
+        String type = "transform";
+        public List<LinearTransformJson> txs = new ArrayList<LinearTransformJson>();
+    }
+    public static class LinearTransformJson {
+        public LinearTransformJson(PVector2 origin, PVector2 U, PVector2 V) {
+            this.origin = new Vector2Json(origin);
+            this.U = new Vector2Json(U);
+            this.V = new Vector2Json(V);
+        }
+
+        public Vector2Json origin;
+        public Vector2Json U;
+        public Vector2Json V;
+    }
+    public static class Vector2Json {
+        public Vector2Json(PVector2 xy) {
+            this.x = xy.x;
+            this.y = xy.y;
+        }
+
+        public double x;
+        public double y;
+    }
+
+
     public static class DurationControlJson {
 	String type = "duration";
 	public double duration;
@@ -160,6 +191,17 @@ public class InputControl {
 	    }
 	}
 	broadcast(pl);
+    }
+
+    // cache this so we can re-broadcast as needed
+    TransformJson lastTx = null;
+    public void broadcastTransform(TransformJson tx) {
+        if (tx != null) {
+            this.lastTx = tx;
+        }
+        if (this.lastTx != null) {
+            this.broadcast(this.lastTx);
+        }
     }
 
     public void processInput() {
