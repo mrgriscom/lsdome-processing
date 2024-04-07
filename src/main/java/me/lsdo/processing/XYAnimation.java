@@ -89,7 +89,9 @@ public abstract class XYAnimation extends PixelMeshAnimation<LedPixel> implement
         System.out.println(String.format("%d subsamples for %d pixels (%.1f samples/pixel)",
 					 total_subsamples, mesh.getNumPoints(), (double)total_subsamples / mesh.getNumPoints()));
 
-        broadcastTransform(tx);
+        if (!transformIsAnimating) {
+            broadcastTransform(tx);
+        }
     }
 
     public void broadcastTransform(PixelTransform tx) {

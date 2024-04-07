@@ -278,4 +278,16 @@ public abstract class PixelMesh<T extends LedPixel> {
 	return sb.toString();
     }
 
+    public InputControl.PixelJson visiblePixelsByOPC() {
+        InputControl.PixelJson px = new InputControl.PixelJson();
+        for (int i = 0; i < opcs.size(); i++) {
+            px.planes.add(new ArrayList<InputControl.Vector2Json>());
+        }
+	for (T c : coords()) {
+	    int channel = getOpcChannel(c);
+            px.planes.get(channel).add(new InputControl.Vector2Json(c.toXY()));
+	}
+        return px;
+    }
+
 }

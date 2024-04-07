@@ -3,6 +3,7 @@ package me.lsdo.processing.interactivity;
 import java.io.*;
 import java.util.*;
 import com.google.gson.*;
+import me.lsdo.processing.*;
 import me.lsdo.processing.util.*;
 
 import org.zeromq.ZMQ;
@@ -154,6 +155,10 @@ public class InputControl {
         public double y;
     }
 
+    public static class PixelJson {
+	String type = "pixels";
+	public List<List<Vector2Json>> planes = new ArrayList<List<Vector2Json>>();
+    }
 
     public static class DurationControlJson {
 	String type = "duration";
@@ -202,6 +207,10 @@ public class InputControl {
         if (this.lastTx != null) {
             this.broadcast(this.lastTx);
         }
+    }
+
+    public void broadcastPixels(PixelMesh mesh) {
+        this.broadcast(mesh.visiblePixelsByOPC());
     }
 
     public void processInput() {

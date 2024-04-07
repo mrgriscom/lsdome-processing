@@ -29,6 +29,7 @@ public abstract class PixelMeshAnimation<T extends LedPixel> {
 
         ctrl = new InputControl();
         ctrl.init();
+        ctrl.broadcastPixels(mesh);
 
         globalBrightness = new NumericParameter("luminance", "display");
         globalBrightness.min = 0.;
