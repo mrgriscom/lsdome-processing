@@ -43,28 +43,33 @@ public class Config {
             System.err.println("could not load " + filename);
         }
     }
-    
+
+    private List<String> getMultiProperty(Properties props, String propName, String defaultValue) {
+        List<String> props = new ArrayList<String>();
+	int i = 1;
+	while (true) {
+	    String prop = (i == 1 ?
+                           props.getProperty(propName, defaultValue) :
+                           props.getProperty(propName + i, ""));
+	    if (prop.isEmpty()) {
+		break;
+	    }
+            props.add(prop);
+	    i += 1;
+	}
+        return props;
+    }
+                                     
     private Config()
     {
 	loadProperties(domeProps, "config.properties");
 	loadProperties(sketchProps, "sketch.properties");
 
-	OpcHostname = new ArrayList<String>();
-	int i = 1;
-	while (true) {
-	    String hostProp = (i == 1 ?
-			       domeProps.getProperty("opchostname", DEFAULT_HOST) :
-			       domeProps.getProperty("opchostname" + i, ""));
-	    if (hostProp.isEmpty()) {
-		break;
-	    }
-	    OpcHostname.add(hostProp);
-	    i += 1;
-	}
+	OpcHostname = getMultiProperty(domeProps, "opchostname", DEFAULT_HOST);
+        layoutPaths = getMultiProperty(domeProps, "layout", "");
 	OpcPort = getProperty(domeProps, "opcport", DEFAULT_PORT);
 	numPanels = getProperty(domeProps, "num_panels", DEFAULT_PANELS);
 	geomType = domeProps.getProperty("geometry", "");
-	layoutPath = domeProps.getProperty("layout", "");
 	zmqPortIn = getProperty(domeProps, "zmq_port_inbound", DEFAULT_ZMQ_IN_OUT[0]);
 	zmqPortOut = getProperty(domeProps, "zmq_port_outbound", DEFAULT_ZMQ_IN_OUT[1]);
 
@@ -130,7 +135,7 @@ public class Config {
     public int OpcPort;
     public String geomType;
     public int numPanels;
-    public String layoutPath;
+    public List<String> layoutPaths;
     public int zmqPortIn;
     public int zmqPortOut;
     

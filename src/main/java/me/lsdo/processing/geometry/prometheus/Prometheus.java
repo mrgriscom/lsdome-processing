@@ -61,20 +61,27 @@ public class Prometheus extends PixelMesh<WingPixel> {
     }
 
     protected List<WingPixel> getCoords() {
-	String layoutPath = Config.getConfig().layoutPath;
-	if (layoutPath.isEmpty()) {
+        int NUM_WINGS = 2;
+	List<String> layoutPaths = Config.getConfig().layoutPaths;
+	if (layoutPaths.size() == 0) {
 	    throw new RuntimeException("json layout not specified in config 'layout' property");
-	}
+	} else if (layoutPaths.size() != 1 && layoutPaths.size() != NUM_WINGS) {
+	    throw new RuntimeException(String.format("number of pixel layouts (%d) does not match number of opc servers (%d)", layoutPaths.size(), NUM_WINGS));
+        }
 
-	List<PVector2> coords;
-	try {
-	    coords = loadPixels(layoutPath);
-	} catch (IOException e) {
-	    throw new RuntimeException("can't load wing pixel layout json at " + layoutPath);
-	}
-	List<WingPixel> pixels = new ArrayList<WingPixel>();
-	for (int i = 0; i < coords.size(); i++) {
-	    for (int wing = 0; wing < 2; wing++) {
+	List<List<PVector2>> layoutCoords = new ArrayList<List<PVector2>>();
+        for (String layoutPath : layoutPaths) {
+            try {
+                layoutCoords.add(loadPixels(layoutPath));
+            } catch (IOException e) {
+                throw new RuntimeException("can't load wing pixel layout json at " + layoutPath);
+            }
+        }
+        
+ 	List<WingPixel> pixels = new ArrayList<WingPixel>();
+        for (int wing = 0; wing < NUM_WINGS; wing++) {
+            List<PVector2> coords = layoutCoords.get(layoutCoords.size() == 1 ? 0 : wing);
+            for (int i = 0; i < coords.size(); i++) {
 		pixels.add(new WingPixel(wing, i, coords.get(i)));
 	    }
 	}

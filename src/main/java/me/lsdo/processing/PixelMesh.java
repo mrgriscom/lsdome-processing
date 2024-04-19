@@ -129,7 +129,6 @@ public abstract class PixelMesh<T extends LedPixel> {
 	    }
 	}	
 	initOpcBuffers();
-
     }
 
     protected abstract List<T> getCoords();
