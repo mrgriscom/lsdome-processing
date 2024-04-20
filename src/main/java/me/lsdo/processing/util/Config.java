@@ -12,7 +12,7 @@ public class Config {
     public static final int DEFAULT_PANELS = 24;
     public static final String[] knownGeometries = {"lsdome", "prometheus"};
     public static final int[] DEFAULT_ZMQ_IN_OUT = {5556, 5557};
-    
+
     private Properties domeProps = new Properties();
     private Properties sketchProps = new Properties();
 
@@ -25,7 +25,7 @@ public class Config {
 	}
 	return (now - startMillis) / 1000.;
     }
-    
+
     private static class ConfigInstance {
         public static Config config = new Config();
     }
@@ -35,7 +35,7 @@ public class Config {
     }
 
     private void loadProperties(Properties props, String filename) {
-        try {        
+        try {
             String workingDir = System.getProperty("user.dir");
             System.out.println(String.format("Looking for %s in %s", filename, workingDir));
 	    props.load(new FileInputStream(filename));
@@ -45,7 +45,7 @@ public class Config {
     }
 
     private List<String> getMultiProperty(Properties props, String propName, String defaultValue) {
-        List<String> props = new ArrayList<String>();
+        List<String> propVals = new ArrayList<String>();
 	int i = 1;
 	while (true) {
 	    String prop = (i == 1 ?
@@ -54,12 +54,12 @@ public class Config {
 	    if (prop.isEmpty()) {
 		break;
 	    }
-            props.add(prop);
+            propVals.add(prop);
 	    i += 1;
 	}
-        return props;
+        return propVals;
     }
-                                     
+
     private Config()
     {
 	loadProperties(domeProps, "config.properties");
@@ -96,11 +96,11 @@ public class Config {
     private static int getProperty(Properties props, String key, int defaultValue) {
 	return Integer.parseInt(props.getProperty(key, "" + defaultValue));
     }
-    
+
     private static double getProperty(Properties props, String key, double defaultValue) {
 	return Double.parseDouble(props.getProperty(key, "" + defaultValue));
     }
-    
+
     private static boolean getProperty(Properties props, String key, boolean defaultValue) {
 	String val = props.getProperty(key, defaultValue ? "true" : "false");
 	if (val.equals("true")) {
@@ -111,23 +111,23 @@ public class Config {
 	    throw new RuntimeException(String.format("property value for %s must be 'true' or 'false'; is: %s", key, val));
 	}
     }
-    
+
     public static String getSketchProperty(String key, String defaultValue) {
 	return getConfig().sketchProps.getProperty(key, defaultValue);
     }
-    
+
     public static int getSketchProperty(String key, int defaultValue) {
 	return getProperty(getConfig().sketchProps, key, defaultValue);
     }
-    
+
     public static double getSketchProperty(String key, double defaultValue) {
 	return getProperty(getConfig().sketchProps, key, defaultValue);
     }
-    
+
     public static boolean getSketchProperty(String key, boolean defaultValue) {
 	return getProperty(getConfig().sketchProps, key, defaultValue);
     }
-    
+
     // Debug mode.
     static final boolean DEBUG = false;
 
@@ -138,7 +138,7 @@ public class Config {
     public List<String> layoutPaths;
     public int zmqPortIn;
     public int zmqPortOut;
-    
+
     public OPC[] makeOPCs(int n) {
 	OPC[] opcs = new OPC[n];
 	for (int i = 0; i < n; i++) {
